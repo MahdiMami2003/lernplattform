@@ -116,11 +116,12 @@
         box-sizing: inherit;
     }
 
-    /* Sidebar darf nie nach rechts hinausragen */
+    /* Sidebar darf nie nach rechts hinausragen
     .nav__cont {
         max-width: 100vw;
         overflow-x: hidden;
     }
+    */
 
     /* Footer fixen */
     footer, .footer_container {
@@ -129,14 +130,14 @@
         overflow-x: hidden;
     }
 
-    /* Header fixen */
+    /* Header fixen
     .header-root {
         width: 100%;
         max-width: 100%;
         left: 0;
         right: 0;
     }
-
+*/
     /* Hauptgrid fixen */
     .parent_grid {
         overflow-x: hidden;
