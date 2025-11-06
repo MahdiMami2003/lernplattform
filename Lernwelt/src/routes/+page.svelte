@@ -17,7 +17,7 @@
         grid-template-rows: auto 1fr auto;
         min-height: 100dvh;
 
-        background-image: url("/src/lib/assets/images/bg_f.jpeg");
+        background-image: url("/Lernwelt/srcnwelt/src/lib/assets/images/bg_f.jpeg");
         background-size: cover;
         background-repeat: no-repeat;
     }
