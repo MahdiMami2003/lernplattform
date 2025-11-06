@@ -43,7 +43,7 @@
 
         min-height: 100dvh;
 
-        background-image: url("/Lernwelt/srcnwelt/src/lib/assets/images/bg_f.jpeg");
+        background-image: url("$lib/assets/images/bg_f.jpeg");
         background-size: 100%;
         background-repeat: repeat-y;
     }
