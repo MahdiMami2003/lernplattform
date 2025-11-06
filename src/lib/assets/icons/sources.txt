@@ -1,0 +1,11 @@
+
+//search.png <a target="_blank" href="https://icons8.com/icon/64061/search">Search</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//menu.png <a target="_blank" href="https://icons8.com/icon/108634/menu">Menu</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//register.png <a target="_blank" href="https://icons8.com/icon/43136/contact-details">Contact Details</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//login.png <a target="_blank" href="https://icons8.com/icon/64753/enter">log in</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//fragzeichen.png <a target="_blank" href="https://icons8.comundefined">Question Mark</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//bücher <a target="_blank" href="https://icons8.com/icon/37814/books">Books</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//pencil <a target="_blank" href="https://icons8.com/icon/11762/pencil">Pencil</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//progress <a target="_blank" href="https://icons8.com/icon/39323/in-progress">Progress</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//class <a target="_blank" href="https://icons8.com/icon/9456/class">Class</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+//access <a target="_blank" href="https://icons8.com/icon/23620/web-accessibility">Accessibility</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
