@@ -21,7 +21,6 @@
 <svelte:window bind:innerWidth={innerW} />
 
 
-
 {#if innerW > 1000}
 
     <div class="nav__cont">
@@ -299,12 +298,14 @@
 
 
     /*============ Icons ================*/
-
+    /*
     .lernwelt{
 
         display: none;
 
     }
+
+     */
 
 
 

@@ -1,4 +1,3 @@
-
 <div class="landing_grid">
 
     <main class="main_container">
@@ -17,7 +16,7 @@
         grid-template-rows: auto 1fr auto;
         min-height: 100dvh;
 
-        background-image: url("/Lernwelt/srcnwelt/src/lib/assets/images/bg_f.jpeg");
+        background-image: url("$lib/assets/images/bg_f.jpeg");
         background-size: cover;
         background-repeat: no-repeat;
     }
@@ -50,9 +49,9 @@
         text-decoration: underline;
     }
 
-    .footer_container {
+    /*.footer_container {
         width: 100%;
-    }
+    }*/
 
     html, body {
         margin: 0;
