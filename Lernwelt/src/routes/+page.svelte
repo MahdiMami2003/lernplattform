@@ -1,10 +1,16 @@
+<!--*implement landing page here***
+    links to be included:
+
+
+********************************-->
+
 <div class="landing_grid">
 
     <main class="main_container">
         <h1>Willkommen auf der Landing Page</h1>
         <p>Dies ist eine einfache Startseite für dein SvelteKit-Projekt.</p>
         <p>
-            Hier auf die <a href="/example_page">Beispielseite</a>
+            Hier auf die <a href="/login_page_id2">Beispielseite</a>
         </p>
     </main>
 
@@ -16,7 +22,7 @@
         grid-template-rows: auto 1fr auto;
         min-height: 100dvh;
 
-        background-image: url("$lib/assets/images/bg_f.jpeg");
+        background-image: url("../lib/assets/images/bg_f.jpeg");
         background-size: cover;
         background-repeat: no-repeat;
     }
