@@ -1,0 +1,61 @@
+Folderstructures and website-paths:
+
+Legend:
+# => Folders (names you refer to in paths)
+- () => "invisible Folders" only for sorting (not included in paths)
++ => Files
+
+- routes
+--
+ |__ - (all-others)
+ |  |  
+ |  |__ - (account_level)
+ |  |  |
+ |  |  |__ - (no_login_required)
+ |  |  |  |  
+ |  |  |  |__ # material_page_id14 ("/material_page_id14")
+ |  |  |  |
+ |  |  |  |__ # no_login_page_id7 ("/no_login_page_id7")
+ |  |  |
+ |  |  |__ - (parents_account)
+ |  |  |  |
+ |  |  |  |__ # parents_landing_page ("/parents_landing_page")
+ |  |  |  |
+ |  |  |  |__ # appointments_page_id8 ("/appointments_page_id8")
+ |  |  |  |
+ |  |  |  |__ # pedagogy_page_id10 ("/pedagogy_page_id10")
+ |  |  |
+ |  |  |__ - (student_account)
+ |  |  |  |
+ |  |  |  |__ - (test + games)
+ |  |  |  |  |
+ |  |  |  |  |__ # game_page_id12 ("/game_page_id12")
+ |  |  |  |  |
+ |  |  |  |  |__ # weekly_test_page_id17 ("/weekly_test_page_id17")
+ |  |  |  |
+ |  |  |  |__ # progress_page_id11 ("/progress_page_id11")
+ |  |  |  |
+ |  |  |  |__ # student_landing_page_id5 ("/student_landing_page_id5")
+ |  |  |
+ |  |  |__ - (teacher_account)
+ |  |  |  |
+ |  |  |  |__ - (classes)
+ |  |  |  |  |
+ |  |  |  |  |__ # class_page_id9 ("/class_page_id9")
+ |  |  |  |
+ |  |  |  |__ # overview_page_id13 ("/overview_page_id13")
+ |  |  |  |
+ |  |  |  |__ # teacher_landing_page_id6 ("/teacher_landing_page_id6")
+ |  |  |
+ |  |  |__ # login_page_id2 ("/login_page_id2")
+ |  |  |
+ |  |  |__ # register_page_i3 ("/register_page_i3")
+ |  |
+ |  |__ # imprint_page_id15 ("/imprint_page_id15")
+ |  |
+ |  |__ + layout.svelte //holy Stylesheet DONT CHANGE!
+ |
+ | 
+ |__ + layout.svelte //general Stylesheet
+ |__ + page.svelte //(landing_page_id1) ("/")
+--
