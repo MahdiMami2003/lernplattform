@@ -12,10 +12,9 @@ Follow these steps:
 </dl>
 
 ---
-
 ### 👾 Use the Terminal -> local for the following commands
 #### Assumption: Your Terminal looks similar to: <br>
-<it style="font-style: italic"> C:\Users\Username\FH Aachen\SE\gruppe-5a-1> </it>
+<div style="font-style: italic"> C:\Users\Username\FH Aachen\SE\gruppe-5a-1> </div>
 
 Navigation to "Lernwelt"-folder by using:
 ```
