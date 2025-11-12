@@ -12,3 +12,11 @@
         height: 200dvh;
     }
 </style>
+
+<!--
+Mein Stand
+Termine und Aktuelles
+Starte das Spiel
+Wochentests
+Lernunterlagen
+-->
