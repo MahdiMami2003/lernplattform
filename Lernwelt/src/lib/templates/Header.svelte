@@ -1,6 +1,6 @@
 <nav class="header-root">
 
-    <div title="Zum Hauptmenü" class="signature"><img class="logo" src={logo} alt="Schul-Logo"><p>HSG-Lernwelt</p></div>
+    <div title="Zum Hauptmenü" class="signature"><img class="logo" src={logo} alt="Schul-Logo"><p>HSGG-Lernwelt</p></div>
 
     <!--<div class="lernwelt">HSG-Lernwelt</div> -->
 
