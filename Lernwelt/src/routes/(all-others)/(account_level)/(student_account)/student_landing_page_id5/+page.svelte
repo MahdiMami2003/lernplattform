@@ -8,8 +8,6 @@
     let loading = true;
 
 
-
-
 </script>
 
 <!--
@@ -35,11 +33,11 @@ Lernunterlagen
         </li>
         <li class="landing_liste">
             <a href="/weekly_test_page_id17"><h3>weekly_test_page</h3></a>
-            <div class="link_description">Falls Sie sehen wollen auf welchem Lernstand ihr Kind ist, klicken Sie hier </div>
+            <div class="link_description"></div>
         </li>
         <li class="landing_liste">
             <a href="/progress_page_id11"><h3>progress page</h3></a>
-            <div class="link_description">Wenn Sie herausfinden wollen wie Sie ihr Kind beim lernen unterstützen können, klicken Sie hier.</div>
+            <div class="link_description"></div>
         </li>
         <li class="landing_liste">
             <a href="/material_page_id14"><h3>Lernunterlagen </h3></a>
