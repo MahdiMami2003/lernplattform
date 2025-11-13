@@ -23,7 +23,7 @@ Lernunterlagen
 
 <body>
 <div id="placeholder">
-    <h1>Hallo liebe:r Schüler:in</h1><!-- mit supabase direkt usernamen o.ä. ansprechen  -->
+    <h1>tschau liebe:r Schüler:in</h1><!-- mit supabase direkt usernamen o.ä. ansprechen  -->
     <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
     <div>Bitte klicke auf das Thema das Sie interessiert.</div>
     <br>
