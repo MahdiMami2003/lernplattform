@@ -1,17 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Links</title>
+    <title>Lernwelt – Shortcuts</title>
+    <style>
+        body {
+            background-color: bisque;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        section {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            padding: 15px 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            width: 220px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin: 6px 0;
+        }
+
+        a {
+            display: inline-block;
+            text-decoration: none;
+            background-color: #ffb347;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            background-color: #ff9933;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+    </style>
 </head>
 <body>
-<h1>Shortcuts zu den seiten</h1>
-<ul id="linkliste">
-    <li><a href="http://localhost:5173/student_landing_page_id5" target="_blank">Student_Landing_Page_id5</a>
-    <li><a href="" target="_blank"></a>
-    <li><a href="" target="_blank"></a>
-    <li><a href="" target="_blank"></a>
-</ul>
+<h1>Lernwelt – Seitenübersicht</h1>
 
+<div class="container">
+
+    <section>
+        <h2>Allgemein</h2>
+        <ul>
+            <li><a href="http://localhost:5173/" target="_blank">Landing Page</a></li>
+            <li><a href="http://localhost:5173/login_page_id2" target="_blank">Login</a></li>
+            <li><a href="http://localhost:5173/register_page_i3" target="_blank">Register</a></li>
+            <li><a href="http://localhost:5173/imprint_page_id15" target="_blank">Imprint</a></li>
+            <li><a href="http://localhost:5173/no_login_page_id7" target="_blank">No Login</a></li>
+            <li><a href="http://localhost:5173/material_page_id14" target="_blank">Material</a></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Parents Account</h2>
+        <ul>
+            <li><a href="http://localhost:5173/parents_landing_page" target="_blank">Landing</a></li>
+            <li><a href="http://localhost:5173/appointments_page_id8" target="_blank">Appointments</a></li>
+            <li><a href="http://localhost:5173/pedagogy_page_id10" target="_blank">Pedagogy</a></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Student Account</h2>
+        <ul>
+            <li><a href="http://localhost:5173/student_landing_page_id5" target="_blank">Landing</a></li>
+            <li><a href="http://localhost:5173/progress_page_id11" target="_blank">Progress</a></li>
+        </ul>
+
+        <h3>Test + Games</h3>
+        <ul>
+            <li><a href="http://localhost:5173/game_page_id12" target="_blank">Game</a></li>
+            <li><a href="http://localhost:5173/weekly_test_page_id17" target="_blank">Weekly Test</a></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Teacher Account</h2>
+        <ul>
+            <li><a href="http://localhost:5173/teacher_landing_page_id6" target="_blank">Landing</a></li>
+            <li><a href="http://localhost:5173/overview_page_id13" target="_blank">Overview</a></li>
+        </ul>
+
+        <h3>Classes</h3>
+        <ul>
+            <li><a href="http://localhost:5173/class_page_id9" target="_blank">Class</a></li>
+        </ul>
+    </section>
+
+</div>
 </body>
 </html>
