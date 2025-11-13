@@ -35,20 +35,20 @@ Lernunterlagen
     <!--link to the other websites -->
     <ul>
         <li class="landing_liste">
-            <a href="/game_page_id12"><h3>game Page</h3></a>
-            <div class="link_description">Hier finden sie aktuelle Informationen die Sie nicht verpassen sollten</div>
+            <a href="/game_page_id12"><h3>Starte das Spiel</h3></a>
+            <div class="link_description">Hier geht es zum Spiel (es läd ich will nicht, dass es Läd)</div>
         </li>
         <li class="landing_liste">
-            <a href="/weekly_test_page_id17"><h3>weekly_test_page</h3></a>
-            <div class="link_description"></div>
+            <a href="/weekly_test_page_id17"><h3>Wochentests</h3></a>
+            <div class="link_description">Willst du deinen Aktuellen Wissensstand überprüfen</div>
         </li>
         <li class="landing_liste">
-            <a href="/progress_page_id11"><h3>progress page</h3></a>
-            <div class="link_description"></div>
+            <a href="/progress_page_id11"><h3>Profil</h3></a>
+            <div class="link_description">hier geht es zu deinem Fortschritt</div>
         </li>
         <li class="landing_liste">
             <a href="/material_page_id14"><h3>Lernunterlagen </h3></a>
-            <div class="link_description">Hier finden Sie die Lernunterlagen die Ihr Kind ebenfalls zur Verfügung gestellt bekommt.</div>
+            <div class="link_description">Hier findest du die Lernunterlagen die du dir Herunterladen und bearbeiten kannst.</div>
         </li>
 
     </ul>
