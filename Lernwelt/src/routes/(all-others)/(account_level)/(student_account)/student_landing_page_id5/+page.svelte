@@ -69,7 +69,8 @@ Lernunterlagen
     }
     .landing_liste{
         list-style-type: none;
-        border: solid lightgray;
+        /*border: solid lightgray;*/
+        border-color: lightgray;
         border-style: groove;
         border-width: thin;
         margin: 1dvh;
