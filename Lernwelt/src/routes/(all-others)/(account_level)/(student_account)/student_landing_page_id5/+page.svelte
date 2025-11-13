@@ -1,8 +1,8 @@
 
 
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
-    import { onMount } from 'svelte';
+    //import { supabase } from '$lib/supabaseClient.js';
+    //import { onMount } from 'svelte';
 
     let profileData = null;
     let loading = true;
