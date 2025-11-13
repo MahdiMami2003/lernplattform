@@ -1,7 +1,7 @@
 
 
 <script>
-    //import { supabase } from '$lib/supabaseClient.js';
+    import { supabase } from '$lib/supabaseClient.js';
     //import { onMount } from 'svelte';
 
     let profileData = null;
@@ -21,6 +21,13 @@ Lernunterlagen
 
 <body>
 <div id="placeholder">
+<script>
+
+    let { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+</script>
+
     <h1>Liebe liebe:r Schüler:in</h1><!-- mit supabase direkt usernamen o.ä. ansprechen  -->
     <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
     <div>Bitte klicke auf das Thema das Sie interessiert.</div>
@@ -45,6 +52,9 @@ Lernunterlagen
         </li>
 
     </ul>
+
+
+
 </div>
 
 </body>
