@@ -3,6 +3,7 @@
 
 <body>
 <div id="placeholder">
+    Termine und Aktuelles
 </div>
 </body>
 

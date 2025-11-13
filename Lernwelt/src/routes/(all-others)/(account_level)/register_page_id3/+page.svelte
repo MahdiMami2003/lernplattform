@@ -3,6 +3,7 @@
 
 <body>
 <div id="placeholder">
+    Register Page
 </div>
 </body>
 
