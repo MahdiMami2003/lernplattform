@@ -3,6 +3,7 @@
 
 <body>
     <div id="placeholder">
+        Login Page
     </div>
 </body>
 

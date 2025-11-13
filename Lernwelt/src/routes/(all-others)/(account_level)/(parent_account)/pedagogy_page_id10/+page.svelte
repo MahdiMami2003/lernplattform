@@ -3,6 +3,7 @@
 
 <body>
 <div id="placeholder">
+    Pädagogische Tipps
 </div>
 </body>
 

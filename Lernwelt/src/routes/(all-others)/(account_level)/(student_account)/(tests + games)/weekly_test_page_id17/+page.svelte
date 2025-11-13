@@ -3,6 +3,7 @@
 
 <body>
 <div id="placeholder">
+    Test Page
 </div>
 </body>
 

@@ -10,19 +10,19 @@
     <!--link to the other websites -->
     <ul>
         <li>
-            <a href="http://localhost:5173/appointments_page_id8"><h3>Termine und Aktuelles</h3></a>
+            <a href="/appointments_page_id8"><h3>Termine und Aktuelles</h3></a>
             <div class="link_description">Hier finden sie aktuelle Informationen die Sie nicht verpassen sollten</div>
         </li>
         <li>
-            <a href="http://localhost:5173/progress_page_id11"><h3>Fortschritt meines Kindes</h3></a>
+            <a href="/progress_page_id11"><h3>Fortschritt meines Kindes</h3></a>
             <div class="link_description">Falls Sie sehen wollen auf welchem Lernstand ihr Kind ist, klicken Sie hier </div>
         </li>
         <li>
-            <a href="http://localhost:5173/pedagogy_page_id10"><h3>Pädagogische Tipps</h3></a>
+            <a href="/pedagogy_page_id10"><h3>Pädagogische Tipps</h3></a>
             <div class="link_description">Wenn Sie herausfinden wollen wie Sie ihr Kind beim lernen unterstützen können, klicken Sie hier.</div>
         </li>
         <li>
-            <a href="http://localhost:5173/material_page_id14"><h3>Lernunterlagen meines Kindes</h3></a>
+            <a href="/material_page_id14"><h3>Lernunterlagen meines Kindes</h3></a>
             <div class="link_description">Hier finden Sie die Lernunterlagen die Ihr Kind ebenfalls zur Verfügung gestellt bekommt.</div>
         </li>
 
