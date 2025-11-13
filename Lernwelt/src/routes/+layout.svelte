@@ -5,7 +5,7 @@
 </script>
 <svelte:head>
     <meta charset="UTF-8">
-    <title>HSG-Lernwelt</title>
+    <title>HSGG-Lernwelt</title>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
