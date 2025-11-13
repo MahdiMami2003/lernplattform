@@ -8,12 +8,7 @@
     let loading = true;
 
 
-    async function test () {
-        let {data, error} = await supabase.auth.signUp({
-            email: 'someone@email.com',
-            password: 'LAPnFdDNYIXpbueIKdKj'
-        })
-    }
+
 
 </script>
 
