@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Pädagogische Tipps
 </div>
-</body>
+
 
 <style>
     div{

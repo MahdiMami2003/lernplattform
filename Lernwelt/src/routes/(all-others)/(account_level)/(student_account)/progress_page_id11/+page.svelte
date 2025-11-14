@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Fortschrittsanzeige
 </div>
-</body>
+
 
 <style>
     div{

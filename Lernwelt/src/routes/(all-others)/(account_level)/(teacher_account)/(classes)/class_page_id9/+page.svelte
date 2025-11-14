@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Klassen Seite
 </div>
-</body>
+
 
 <style>
     div{
