@@ -19,11 +19,35 @@
                 throw error;
             }
 
+            // Hole die Rolle des Benutzers aus der Datenbank
+            const { data: userData, error: userError } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', data.user.id)
+                .single();
+
+            if (userError) {
+                throw userError;
+            }
+
             message = 'Anmeldung erfolgreich! Leite weiter...';
-            await goto('/student_landing_page_id5');
+
+            // Leite basierend auf der Rolle weiter
+            if (userData.role === 'student') {
+                await goto('/student_landing_page_id5');
+            } else if (userData.role === 'teacher') {
+                await goto('/teacher_landing_page_id6'); // Passe den Pfad an
+            } else if (userData.role === 'parent') {
+                await goto('/parents_landing_page_id4'); // Passe den Pfad an
+            } else {
+                // Falls keine Rolle gefunden wurde
+                throw new Error('Keine gültige Rolle gefunden');
+            }
 
         } catch (error) {
             message = `Anmeldung fehlgeschlagen: ${error.message}`;
+            // Lösche nur das Passwort, behalte die E-Mail
+            password = '';
         }
     }
 </script>
