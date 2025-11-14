@@ -2,13 +2,46 @@
 
 <script>
     import { supabase } from '$lib/supabaseClient.js';
-    //import { onMount } from 'svelte';
+    import { onMount } from 'svelte'; // Wichtig!
 
-    let profileData = null;
+    let userName = ''; // Variable für den Namen
+    let userRole = ''; // Variable für die Rolle
     let loading = true;
 
+    // onMount läuft NUR im Browser, NACHDEM die Seite geladen ist
+    onMount(async () => {
+        loading = true;
 
+        // 1. Hole den aktuell eingeloggten Benutzer (aus dem Auth-System)
+        // Im Browser hat 'getUser()' Zugriff auf die Session-Cookies
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError) {
+            console.error('Client-side Fehler beim Holen des Users:', authError.message);
+            loading = false;
+            return;
+        }
+
+        if (user) {
+            // 2. Nutze die ID des Users, um eure 'profiles'-Tabelle abzufragen
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('full_name, role')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError) {
+                console.error('Client-side Fehler beim Holen des Profils:', profileError.message);
+            } else if (profileData) {
+                // 3. Setze die Variablen für die Anzeige im HTML
+                userName = profileData.full_name;
+                userRole = profileData.role;
+            }
+        }
+        loading = false;
+    });
 </script>
+
 
 <!--
 Mein Stand
@@ -21,16 +54,16 @@ Lernunterlagen
 
 <body>
 <div id="placeholder">
-<script>
 
-    let { data, error } = await supabase
-        .from('profiles')
-        .select('*');
-</script>
+    {#if loading}
+        <h1>Lade Profil...</h1>
+    {:else}
+        <h1>Hallo {userName}!</h1>
+        <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
+        <div>Bitte klicke auf das Thema das Sie interessiert.</div>
+    {/if}
 
-    <h1>Liebe liebe:r Schüler:in</h1><!-- mit supabase direkt usernamen o.ä. ansprechen  -->
-    <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
-    <div>Bitte klicke auf das Thema das Sie interessiert.</div>
+
     <br>
     <!--link to the other websites -->
     <ul>
