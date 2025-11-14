@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Game Page
 </div>
-</body>
+
 
 <style>
     div{
