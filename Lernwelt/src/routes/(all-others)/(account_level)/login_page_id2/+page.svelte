@@ -33,11 +33,11 @@
             message = 'Anmeldung erfolgreich! Leite weiter...';
 
             // Leite basierend auf der Rolle weiter
-            if (userData.role === 'Schueler.in') {
+            if (userData.role === 'student') {
                 await goto('/student_landing_page_id5');
-            } else if (userData.role === 'Lehrperson') {
+            } else if (userData.role === 'teacher') {
                 await goto('/teacher_landing_page_id6'); // Passe den Pfad an
-            } else if (userData.role === 'Elternteil') {
+            } else if (userData.role === 'parent') {
                 await goto('/parents_landing_page_id4'); // Passe den Pfad an
             } else {
                 // Falls keine Rolle gefunden wurde
