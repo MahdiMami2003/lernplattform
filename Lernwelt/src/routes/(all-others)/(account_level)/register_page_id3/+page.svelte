@@ -1,7 +1,7 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     <h1>Willkommen bei HSG-Lernwelt</h1>
     <h2>Konto erstellen</h2>
@@ -51,7 +51,7 @@
     </form>
     <a href="/login_page_id2" class="login-link">Schon registriert? Hier einloggen</a>
 </div>
-</body>
+
 
 <style>
     #placeholder {

@@ -1,7 +1,7 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     <h1>Hallo liebes Elternteil.</h1>
         <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
@@ -29,7 +29,7 @@
     </ul>
 </div>
 
-</body>
+
 <style>
     /* Korrektur: Entfernt den Standard-Padding/Margin, der die Liste verschiebt */
     ul {

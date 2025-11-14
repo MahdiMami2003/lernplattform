@@ -1,10 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
+
 </div>
-</body>
+
 
 <style>
     div{

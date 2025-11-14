@@ -52,7 +52,7 @@ Lernunterlagen
 -->
 
 
-<body>
+
 <div id="placeholder">
 
     {#if loading}
@@ -90,7 +90,7 @@ Lernunterlagen
 
 </div>
 
-</body>
+
 <style>
     /* Korrektur: Entfernt den Standard-Padding/Margin, der die Liste verschiebt */
     ul {
