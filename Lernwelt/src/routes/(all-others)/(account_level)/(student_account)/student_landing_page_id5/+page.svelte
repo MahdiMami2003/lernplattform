@@ -1,92 +1,80 @@
-
-
-<script>
-    //import { supabase } from '$lib/supabaseClient.js';
-    //import { onMount } from 'svelte';
-
-    let profileData = null;
-    let loading = true;
+<script lang="ts">
+    import { supabase } from "$lib/supabaseClient";
+    import { onMount } from "svelte";
 
 
 
 
 </script>
 
-<!--
-Mein Stand
-Termine und Aktuelles
-Starte das Spiel
-Wochentests
-Lernunterlagen
--->
-
 
 <body>
 <div id="placeholder">
-    <h1>Hallo liebe:r Schüler:in</h1><!-- mit supabase direkt usernamen o.ä. ansprechen  -->
+    <h1>Hallo liebe:r Schüler:in</h1>
     <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
-    <div>Bitte klicke auf das Thema das Sie interessiert.</div>
+    <div>Bitte klicke auf das Thema das dich interessiert.</div>
     <br>
-    <!--link to the other websites -->
+
     <ul>
         <li class="landing_liste">
-            <a href="/game_page_id12"><h3>game Page</h3></a>
-            <div class="link_description">Hier finden sie aktuelle Informationen die Sie nicht verpassen sollten</div>
-        </li>
-        <li class="landing_liste">
-            <a href="/weekly_test_page_id17"><h3>weekly_test_page</h3></a>
-            <div class="link_description">Falls Sie sehen wollen auf welchem Lernstand ihr Kind ist, klicken Sie hier </div>
-        </li>
-        <li class="landing_liste">
-            <a href="/progress_page_id11"><h3>progress page</h3></a>
-            <div class="link_description">Wenn Sie herausfinden wollen wie Sie ihr Kind beim lernen unterstützen können, klicken Sie hier.</div>
-        </li>
-        <li class="landing_liste">
-            <a href="/material_page_id14"><h3>Lernunterlagen </h3></a>
-            <div class="link_description">Hier finden Sie die Lernunterlagen die Ihr Kind ebenfalls zur Verfügung gestellt bekommt.</div>
+            <a href="/game_page_id12"><h3>Game Page</h3></a>
+            <div class="link_description">Aufgaben & Gamification!</div>
         </li>
 
+        <li class="landing_liste">
+            <a href="/weekly_test_page_id17"><h3>Weekly Tests</h3></a>
+            <div class="link_description">Wöchentliche Kompetenzchecks</div>
+        </li>
+
+        <li class="landing_liste">
+            <a href="/progress_page_id11"><h3>Fortschritt</h3></a>
+            <div class="link_description">Deine Lernstatistiken im Überblick</div>
+        </li>
+
+        <li class="landing_liste">
+            <a href="/material_page_id14"><h3>Lernunterlagen</h3></a>
+            <div class="link_description">Materialien für dein Lernen</div>
+        </li>
     </ul>
 </div>
-
 </body>
+
+
+
 <style>
-    /* Korrektur: Entfernt den Standard-Padding/Margin, der die Liste verschiebt */
     ul {
         padding: 0;
         margin: 0;
     }
 
-    a{
+    a {
         margin: 0;
         color: black;
         text-decoration: none;
     }
-    .landing_liste{
+
+    .landing_liste {
         list-style-type: none;
-        /*border: solid lightgray;*/
-        border-color: lightgray;
-        border-style: groove;
-        border-width: thin;
+        border: solid thin lightgray;
         margin: 1dvh;
         padding-left: 3dvh;
         background-color: #f5f5dc;
         border-radius: 5px;
     }
-    li:hover{
+
+    li:hover {
         background-color: #dcdcc5;
     }
 
-    a:hover, a:hover:visited{
+    a:hover {
         color: #0077cc;
         text-decoration: underline;
     }
 
-    .link_description{
+    .link_description {
         padding-bottom: 2dvh;
         padding-left: 3dvh;
     }
+
+
 </style>
-
-
-
