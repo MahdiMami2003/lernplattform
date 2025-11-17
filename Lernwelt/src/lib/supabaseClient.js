@@ -4,6 +4,7 @@
 //import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
 
 // Erstellt den Client
+<<<<<<< HEAD
 //export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY)
 
 import { createClient } from '@supabase/supabase-js';
@@ -22,3 +23,9 @@ export const supabase = createClient(
         }
     }
 );
+=======
+export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY)
+
+
+
+>>>>>>> ee5cfcaeff57eef5e353918f1a16c2d1fa12bc07

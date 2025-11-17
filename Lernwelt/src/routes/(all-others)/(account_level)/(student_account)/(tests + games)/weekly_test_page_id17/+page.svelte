@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Test Page
 </div>
-</body>
+
 
 <style>
     div{

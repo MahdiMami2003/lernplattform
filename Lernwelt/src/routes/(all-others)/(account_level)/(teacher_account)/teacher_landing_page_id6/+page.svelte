@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Lehrer Landing Page
 </div>
-</body>
+
 
 <style>
     div{

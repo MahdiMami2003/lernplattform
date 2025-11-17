@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Übersichtsseite Lehrer
 </div>
-</body>
+
 
 <style>
     div{

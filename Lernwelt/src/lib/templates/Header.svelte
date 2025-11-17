@@ -1,7 +1,7 @@
 <nav class="header-root">
 
-    <div title="Zum Hauptmenü" class="signature"><img class="logo" src={logo} alt="Schul-Logo"><p>HSGG-Lernwelt</p></div>
-
+    <a style="text-decoration: none" href="/"><div title="Zum Hauptmenü" class="signature"><img class="logo" src={logo} alt="Schul-Logo"><p>HSGG-Lernwelt</p></div>
+    </a>
     <!--<div class="lernwelt">HSG-Lernwelt</div> -->
 
     <div class="icon-container">
@@ -275,6 +275,8 @@
 
         font-weight: bold;
 
+        color: black;
+
     }
 
 
@@ -295,6 +297,9 @@
 
     }
 
+    .signature:active {
+        color: black;
+    }
 
 
     /*============ Icons ================*/

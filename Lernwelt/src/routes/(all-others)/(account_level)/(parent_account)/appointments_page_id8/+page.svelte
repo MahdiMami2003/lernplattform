@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Termine und Aktuelles
 </div>
-</body>
+
 
 <style>
     div{

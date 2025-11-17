@@ -1,11 +1,11 @@
 <script>
 </script>
 
-<body>
+
 <div id="placeholder">
     Lernunterlagen
 </div>
-</body>
+
 
 <style>
     div{

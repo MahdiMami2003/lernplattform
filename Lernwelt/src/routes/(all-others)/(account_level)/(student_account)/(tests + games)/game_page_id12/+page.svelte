@@ -5,7 +5,7 @@
 	import { supabase } from "$lib/supabaseClient";
 
 	/* ============================
-				 TYPES
+					TYPES
 	============================ */
 	type UserProfile = {
 		id: string;
@@ -16,10 +16,9 @@
 	};
 
 	/* ============================
-				 STATE
+					STATE
 	============================ */
 	let profile: UserProfile | null = null;
-
 	let userName = "Schüler";
 	let xp = 0;
 	let level = 1;
@@ -38,9 +37,8 @@
 	let levelUpVisible = false;
 
 	/* ============================
-				 HELPERS
+					HELPERS
 	============================ */
-
 	function triggerLevelUp() {
 		levelUpVisible = true;
 		setTimeout(() => (levelUpVisible = false), 2000);
@@ -48,29 +46,22 @@
 
 	function fireConfetti() {
 		if (typeof document === "undefined") return;
-
 		const c = document.createElement("div");
 		c.className = "confetti";
 		c.style.left = Math.random() * 100 + "%";
 		c.style.background = `hsl(${Math.random() * 360}, 80%, 60%)`;
-
 		document.body.appendChild(c);
 		setTimeout(() => c.remove(), 1500);
 	}
 
 	async function saveProfile(update: Partial<UserProfile>) {
 		if (!profile) return;
-
-		await supabase
-			.from("profiles")
-			.update(update)
-			.eq("id", profile.id);
+		await supabase.from("profiles").update(update).eq("id", profile.id);
 	}
 
 	/* ============================
-				 LOAD PROFILE
+					LOAD PROFILE
 	============================ */
-
 	async function loadProfile() {
 		const { data: auth } = await supabase.auth.getUser();
 		const user = auth?.user;
@@ -92,19 +83,16 @@
 			};
 
 			userName = profile.full_name || "Schüler";
-
 			xp = profile.xp;
 			level = profile.level;
 			avatar = profile.avatar_url || avatar;
-
 			targetXP = xp;
 		}
 	}
 
 	/* ============================
-				 XP SYSTEM
+					XP SYSTEM
 	============================ */
-
 	async function rewardXP(amount = 5) {
 		let newXP = xp + amount;
 		let newLevel = level;
@@ -123,13 +111,11 @@
 	}
 
 	/* ============================
-				 AVATAR
+					AVATAR
 	============================ */
-
 	async function selectAvatar(a: string) {
 		avatar = a;
 		avatarModal = false;
-
 		await saveProfile({ avatar_url: a });
 		fireConfetti();
 	}
@@ -143,15 +129,10 @@
 
 		const path = `${profile.id}/${crypto.randomUUID()}.png`;
 
-		const { error } = await supabase.storage
-			.from("avatars")
-			.upload(path, file);
-
+		const { error } = await supabase.storage.from("avatars").upload(path, file);
 		if (error) return;
 
-		const { data: url } = supabase.storage
-			.from("avatars")
-			.getPublicUrl(path);
+		const { data: url } = supabase.storage.from("avatars").getPublicUrl(path);
 
 		avatar = url.publicUrl;
 		avatarModal = false;
@@ -161,9 +142,8 @@
 	}
 
 	/* ============================
-				 LIFECYCLE
+					LIFECYCLE
 	============================ */
-
 	let cleanup: (() => void) | undefined;
 
 	onMount(() => {
@@ -174,7 +154,6 @@
 	async function initialize() {
 		await loadProfile();
 
-		// Smooth XP animation
 		let anim = setInterval(() => {
 			if (xp < targetXP) xp++;
 			else clearInterval(anim);
@@ -203,6 +182,9 @@
 		}
 	}
 </script>
+
+<!-- REST DEINES HTML UND CSS GANZ NORMAL -->
+
 <!-- ============================
      UI MARKUP
 ============================ -->
@@ -276,6 +258,12 @@
 		</div>
 	</div>
 {/if}
+=======
+<div id="placeholder">
+    Game Page
+</div>
+
+>>>>>>> ee5cfcaeff57eef5e353918f1a16c2d1fa12bc07
 
 <style>
     :global(body) {
