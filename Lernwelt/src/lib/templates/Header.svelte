@@ -226,10 +226,7 @@
         <div use:motion class="nav__cont">
 
             <ul class="nav">
-
-                {#if !testlogin}
-
-                    <li class="nav__items" id="reg">
+                <li class="nav__items" id="reg">
 
                         <a href="" on:click={going_dark}>
 
@@ -238,17 +235,13 @@
 
                         </a>
 
-                    </li>
-
-                {/if}
+                </li>
 
                 <li class="nav__items" id="sub">
 
                     <a href="">
 
-                        <img alt="Fächer" src={subject}>
-
-                        <span class="nav-text">Fächer</span>
+                        <span class="nav-text">Kontrastmodus</span>
 
                     </a>
 
@@ -258,49 +251,16 @@
 
                     <a href="">
 
-                        <img alt="Aufgaben" src={task}>
-
-                        <span class="nav-text">Aufgaben</span>
+                        <span class="nav-text">Sprache ändern</span>
 
                     </a>
 
                 </li>
 
-                {#if testlogin}
-
-                    <li class="nav__items" id="prog">
-
-                        <a href="">
-
-                            <img alt="Fortschritt" src={progress}>
-
-                            <span class="nav-text">Fortschritt</span>
-
-                        </a>
-
-                    </li>
-
-                    <li class="nav__items" id="classroom">
-
-                        <a href="">
-
-                            <img alt="Klassenzimmer" src={classroom}>
-
-                            <span class="nav-text">Klasse</span>
-
-                        </a>
-
-                    </li>
-
-                {/if}
-
                 <li class="nav__items" id="access">
 
                     <a on:click={toggle_slide_left} href="">
-
-                        <img alt="Barrierefreiheit" src={access}>
-
-                        <span class="nav-text">Barrierefrei</span>
+                        <span class="nav-text">Zurück</span>
 
                     </a>
 
