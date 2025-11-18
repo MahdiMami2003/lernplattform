@@ -7,7 +7,6 @@ private
 .netlify
 .wrangler
 /.svelte-kit
-/node_modules
 /build
 
 # OS

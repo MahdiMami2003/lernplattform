@@ -1,3 +1,105 @@
+<script>
+
+    import logo from '$lib/assets/icons/Logo.png'
+
+    import login from '$lib/assets/icons/login.png'
+
+    import q_mark from '$lib/assets/icons/fragezeichen.png'
+
+    import register from '$lib/assets/icons/register.png'
+
+    import search from '$lib/assets/icons/search.png'
+
+    import menu from '$lib/assets/icons/menu.png'
+
+    import access from '$lib/assets/icons/access.png'
+
+    import classroom from '$lib/assets/icons/class.png'
+
+    import progress from '$lib/assets/icons/prog.png'
+
+    import subject from '$lib/assets/icons/sub.png'
+
+    import task from '$lib/assets/icons/tasks.png'
+
+    import {Motion} from 'svelte-motion';
+
+    //Nav-bar
+
+    let testlogin = false;
+
+    let isMenuOpen = false;
+
+    let innerW = 0;
+
+    //
+    let animation_state = 'visible';
+    let animation_state_acc = 'hidden';
+
+    const slide = {
+        visible: {
+            opacity: 1,
+            x: 0,
+            transition: {duration: 1}
+        },
+        hidden: {
+            opacity: 0,
+            x: -200,
+            transition: {duration: 1}
+        }
+    };
+
+    function going_dark(){
+
+        let main_class = document.getElementsByClassName('main_container')[0];
+
+        if(main_class){
+            main_class.classList.toggle('darkmode');
+        }
+    }
+
+
+    function toggle_slide_left() {
+        if(animation_state === 'visible' && animation_state_acc === 'hidden') {
+            animation_state = 'hidden';
+            animation_state_acc = 'visible';
+        }
+        else if(animation_state === 'hidden' && animation_state_acc === 'visible') {
+            animation_state = 'visible';
+            animation_state_acc = 'hidden';
+        }
+    }
+
+
+    function toggleLogin(){
+
+        testlogin = !testlogin;
+
+    }
+
+    function toggleMenu() {
+
+        isMenuOpen = !isMenuOpen;
+
+    }
+
+
+
+    $: {
+
+        if (innerW > 1000) {
+
+            if (isMenuOpen) {
+
+                toggleMenu();
+
+            }
+
+        }
+
+    }
+</script>
+
 <nav class="header-root">
 
     <a style="text-decoration: none" href="/"><div title="Zum Hauptmenü" class="signature"><img class="logo" src={logo} alt="Schul-Logo"><p>HSGG-Lernwelt</p></div>
@@ -22,8 +124,13 @@
 
 
 {#if innerW > 1000}
-
-    <div class="nav__cont">
+    <Motion
+            initial="visible"
+            animate={animation_state}
+            variants={slide}
+            let:motion
+    >
+    <div use:motion class="nav__cont">
 
         <ul class="nav">
 
@@ -97,7 +204,7 @@
 
             <li class="nav__items" id="access">
 
-                <a href="">
+                <a on:click={toggle_slide_left} href="">
 
                     <img alt="Barrierefreiheit" src={access}>
 
@@ -110,13 +217,101 @@
         </ul>
 
     </div>
+    </Motion>
+    <Motion initial="hidden"
+            animate={animation_state_acc}
+            variants={slide}
+            let:motion
+    >
+        <div use:motion class="nav__cont">
 
+            <ul class="nav">
+
+                {#if !testlogin}
+
+                    <li class="nav__items" id="reg">
+
+                        <a href="" on:click={going_dark}>
+
+
+                            <span class="nav-text">Darkmode</span>
+
+                        </a>
+
+                    </li>
+
+                {/if}
+
+                <li class="nav__items" id="sub">
+
+                    <a href="">
+
+                        <img alt="Fächer" src={subject}>
+
+                        <span class="nav-text">Fächer</span>
+
+                    </a>
+
+                </li>
+
+                <li class="nav__items" id="task">
+
+                    <a href="">
+
+                        <img alt="Aufgaben" src={task}>
+
+                        <span class="nav-text">Aufgaben</span>
+
+                    </a>
+
+                </li>
+
+                {#if testlogin}
+
+                    <li class="nav__items" id="prog">
+
+                        <a href="">
+
+                            <img alt="Fortschritt" src={progress}>
+
+                            <span class="nav-text">Fortschritt</span>
+
+                        </a>
+
+                    </li>
+
+                    <li class="nav__items" id="classroom">
+
+                        <a href="">
+
+                            <img alt="Klassenzimmer" src={classroom}>
+
+                            <span class="nav-text">Klasse</span>
+
+                        </a>
+
+                    </li>
+
+                {/if}
+
+                <li class="nav__items" id="access">
+
+                    <a on:click={toggle_slide_left} href="">
+
+                        <img alt="Barrierefreiheit" src={access}>
+
+                        <span class="nav-text">Barrierefrei</span>
+
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </Motion>
 {/if}
-
-
-
-
-
 
 
 {#if isMenuOpen}
@@ -140,84 +335,17 @@
 {/if}
 
 
-
-
-
-
-
-<script>
-
-    import logo from '$lib/assets/icons/Logo.png'
-
-    import login from '$lib/assets/icons/login.png'
-
-    import q_mark from '$lib/assets/icons/fragezeichen.png'
-
-    import register from '$lib/assets/icons/register.png'
-
-    import search from '$lib/assets/icons/search.png'
-
-    import menu from '$lib/assets/icons/menu.png'
-
-    import access from '$lib/assets/icons/access.png'
-
-    import classroom from '$lib/assets/icons/class.png'
-
-    import progress from '$lib/assets/icons/prog.png'
-
-    import subject from '$lib/assets/icons/sub.png'
-
-    import task from '$lib/assets/icons/tasks.png'
-
-
-
-    //Nav-bar
-
-    let testlogin = false;
-
-    let isMenuOpen = false;
-
-    let innerW = 0;
-
-
-
-    function toggleLogin(){
-
-        testlogin = !testlogin;
-
-    }
-
-    function toggleMenu() {
-
-        isMenuOpen = !isMenuOpen;
-
-    }
-
-
-
-    $: {
-
-        if (innerW > 1000) {
-
-            if (isMenuOpen) {
-
-                toggleMenu();
-
-            }
-
-        }
-
-    }
-
-
-
-
-
-</script>
-
-
-
 <style>
+    :global(.main_container) {
+        background-color: white;
+        color: black;
+        transition: background-color 0.5s;
+    }
+    :global(.main_container.darkmode) {
+        background-color: #333333;
+        color: white;
+    }
+
 
     .header-root {
 
@@ -836,7 +964,7 @@
 
 
 
-    /* Das Icon selbst (KORRIGIERT) */
+
 
     .nav__items img {
 
