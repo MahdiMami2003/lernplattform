@@ -73,11 +73,11 @@ Lernunterlagen
         </li>
         <li class="landing_liste">
             <a href="/weekly_test_page_id17"><h3>Wochentests</h3></a>
-            <div class="link_description">Willst du deinen Aktuellen Wissensstand überprüfen</div>
+            <div class="link_description">Teste deinen Aktuellen Wissensstand!</div>
         </li>
         <li class="landing_liste">
             <a href="/progress_page_id11"><h3>Profil</h3></a>
-            <div class="link_description">hier geht es zu deinem Fortschritt</div>
+            <div class="link_description">Dein Aktueller Fortschritt</div>
         </li>
         <li class="landing_liste">
             <a href="/material_page_id14"><h3>Lernunterlagen </h3></a>

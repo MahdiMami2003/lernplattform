@@ -3,13 +3,155 @@
 
 
 <div id="placeholder">
-    Lehrer Landing Page
+    <h1 class="überschrift">Lehrpersonen-Dashboard</h1>
+    <p class="untertitel">Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten</p>
+    <section class="classes-section">
+        <h2>Ihre Klassen & Fächer</h2>
+
+        <div class="class-grid">
+
+            <!-- Klasse 5a -->
+            <article class="class-card">
+                <h3>Klasse 5a</h3>
+                <p class="class-info">Fächer:</p>
+                <ul>
+                    <li>
+                        Mathematik
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                    <li>
+                        Deutsch
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                    <li>
+                        Biologie
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                </ul>
+            </article>
+
+            <!-- Klasse 5b -->
+            <article class="class-card">
+                <h3>Klasse 5b</h3>
+                <p class="class-info">Fächer:</p>
+                <ul>
+                    <li>
+                        Mathematik
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                    <li>
+                        Deutsch
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                    <li>
+                        Biologie
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                </ul>
+            </article>
+            <!-- Klasse 5c -->
+            <article class="class-card">
+                <h3>Klasse 5c</h3>
+                <p class="class-info">Fächer:</p>
+                <ul>
+                    <li>
+                        Mathematik
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                    <li>
+                        Deutsch
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                    <li>
+                        Biologie
+                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                    </li>
+                </ul>
+            </article>
+        </div>
+    </section>
+    <!-- Das muss nur für Admin angezeigt werden -->
+    <div class="admin-panel" id="adminPanel">
+        <h2>Admin-Verwaltung</h2>
+        <p>Hier können Sie Nutzer, Klassen und Berechtigungen verwalten.</p>
+        <button class="admin-btn">Benutzer verwalten</button>
+        <button class="admin-btn">Klassen verwalten</button>
+        <button class="admin-btn">Berechtigungen bearbeiten</button>
+    </div>
+
 </div>
 
 
 <style>
+    #placeholder {
+        min-height: 100vh;
+    }
+    .überschrift {
+        display: flex;
+        justify-content: center;
+        font-size: 70px;
+    }
+    .untertitel{
+        display: flex;
+        justify-content: center;
+        margin-top: -35px;
+    }
+    .class-card {
+        background-color: #F3BE6A;
+        border-radius: 0.9rem;
+        padding: 1rem 1.2rem;
+        border: 1px solid #D5DFEC;
+        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
+        min-width: 230px;
+        max-width: 300px;
+        height: 200px;
+        flex: 1 1 230px;
+    }
+    .class-grid{
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 5rem;
+    }
+    .class-card ul {
+        margin: 0;
+        padding-left: 1rem;
+        font-size: 0.9rem;
+    }
+    .small-btn {
+        margin-left: 0.4rem;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.8rem;
+        border-radius: 0.5rem;
+        border: none;
+        background-color: beige;
+        color: black;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .admin-panel {
+        margin-top: 3rem;
+        padding: 1.5rem;
+        background-color: #F3BE6A;
+        border: 2px solid #d8b16c;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        max-width: 700px;
+    }
+
+    .admin-btn {
+        display: inline-block;
+        margin: 0.5rem 0.5rem 0 0;
+        padding: 0.6rem 1.2rem;
+        background-color: beige;
+        border: none;
+        color: black;
+        font-weight: 600;
+        border-radius: .6rem;
+        cursor: pointer;
+    }
     div{
         margin: 0;
-        height: 200dvh;
+        /*height: 200dvh;*/
     }
 </style>
