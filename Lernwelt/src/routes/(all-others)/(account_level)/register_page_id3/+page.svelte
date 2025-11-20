@@ -1,12 +1,13 @@
 <script>
-    import {supabase} from '$lib/supabaseClient.js';
-    import {goto} from '$app/navigation';
+    import { supabase } from '$lib/supabaseClient.js';
+    import { goto } from '$app/navigation';
+
     let firstName = '';
     let lastName = '';
     let email = '';
     let password = '';
     let confirmPassword = '';
-    let role = '';   // Standard-Rolle
+    let role = 'schueler'; // Standard-Wert setzen, damit immer was ausgewählt ist
     let termsAccepted = false;
     let message = '';
 
@@ -26,42 +27,23 @@
             }
 
             // 1. User registrieren
+            // WICHTIG: Wir senden 'role' und 'full_name' hier mit.
+            // Dein Datenbank-Trigger (handle_new_user) nimmt diese Daten
+            // und erstellt das Profil + Missionen AUTOMATISCH.
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
                     data: {
                         full_name: `${firstName} ${lastName}`,
-                        role
+                        role: role
                     }
                 }
             });
 
             if (authError) throw authError;
-            if (!authData.user) throw new Error('Kein User erstellt');
 
-            // 2. Kurz warten (wichtig!)
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // 3. Profil erstellen
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert({
-                    id: authData.user.id,
-                    full_name: `${firstName} ${lastName}`,
-                    role: role,
-                    xp: 0,
-                    level: 1,
-                    avatar_url: 'https://cdn-icons-png.flaticon.com/512/9187/9187604.png',
-                    streak: 0,
-                    hearts: 3
-                });
-
-            if (profileError) {
-                console.error('Profile Error:', profileError);
-                throw profileError;
-            }
-
+            // 2. Erfolg
             message = 'Registrierung erfolgreich! Du wirst weitergeleitet...';
 
             setTimeout(() => {
@@ -75,38 +57,40 @@
     }
 </script>
 
-
 <div id="placeholder">
     <h1>Willkommen bei HSG-Lernwelt</h1>
     <h2>Konto erstellen</h2>
-    <p>registriere dich, um deine Lernfortschritte zu speichern.</p>
-    <form id="register-form" on:submit|preventDefault={handleRegister}>
-        <input type="text" placeholder="Vorname" bind:value={firstName} required />
+    <p>Registriere dich, um deine Lernfortschritte zu speichern.</p>
+
+    <form on:submit|preventDefault={handleRegister}>
+
+        <input type="text" bind:value={firstName} placeholder="Vorname" required />
         <br />
-        <input type="text" placeholder="Nachname" bind:value={lastName} required />
+        <input type="text" bind:value={lastName} placeholder="Nachname" required />
         <br />
-        <input type="email" placeholder="E-Mail-Adresse" bind:value={email} required />
+        <input type="email" bind:value={email} placeholder="E-Mail-Adresse" required />
         <br />
-        <input type="password" placeholder="Passwort" bind:value={password} required />
+        <input type="password" bind:value={password} placeholder="Passwort" required />
         <br />
-        <input type="password" placeholder="Passwort bestätigen" bind:value={confirmPassword} required />
+        <input type="password" bind:value={confirmPassword} placeholder="Passwort bestätigen" required />
         <br />
+
         <div class="role">
             <p class="role-title">Du willst registrieren als:</p>
 
             <div class="role-options">
                 <label>
-                    <input type="radio" bind:group={role} value="student" required />
+                    <input type="radio" bind:group={role} value="schueler" required />
                     <span>Schüler/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" bind:group={role} value="teacher" />
+                    <input type="radio" bind:group={role} value="lehrer" />
                     <span>Lehrer/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" bind:group={role} value="parent" />
+                    <input type="radio" bind:group={role} value="eltern" />
                     <span>Elternteil</span>
                 </label>
             </div>
@@ -115,20 +99,19 @@
         <div class="terms">
             <label>
                 <input type="checkbox" bind:checked={termsAccepted} required />
-                <span
-                >Ich akzeptiere die <a href="/agb">AGB</a> und die
-						<a href="/datenschutz">Datenschutzerklärung</a>.</span
-                >
+                <span>Ich akzeptiere die <a href="/agb">AGB</a> und die <a href="/datenschutz">Datenschutzerklärung</a>.</span>
             </label>
         </div>
-        <button type="submit">registrieren</button>
+
+        <button type="submit">Registrieren</button>
     </form>
+
     {#if message}
-        <p>{message}</p>
+        <p style="color: #fff; margin-top: 1rem;">{message}</p>
     {/if}
+
     <a href="/login_page_id2" class="login-link">Schon registriert? Hier einloggen</a>
 </div>
-
 
 <style>
     #placeholder {
@@ -143,10 +126,11 @@
     p {
         font-weight: bold;
     }
-    #register-form {
+    form {
         background-color: #f3be6a;
         align-items: center;
-        height: 500px;
+        height: auto; /* Geändert von fix 500px, damit es flexibler ist */
+        min-height: 500px;
         width: 400px;
         padding: 0.7rem;
         border-radius: 10px;
@@ -174,7 +158,7 @@
 
     .role-options {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 Spalten; bricht automatisch um */
+        grid-template-columns: 1fr 1fr;
         gap: 0.75rem 1.25rem;
         justify-items: start;
     }
@@ -208,7 +192,7 @@
         accent-color: #236C93;
         width: 18px;
         height: 18px;
-        margin-top: 0.1rem; /* optisch mittig zur Textzeile */
+        margin-top: 0.1rem;
     }
 
     .terms a {
