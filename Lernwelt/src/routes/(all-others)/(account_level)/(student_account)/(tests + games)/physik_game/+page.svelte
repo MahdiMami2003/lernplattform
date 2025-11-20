@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	import { goto } from "$app/navigation";
-	import { supabase } from "$lib/supabaseClient";
+	import { onMount } from 'svelte';
+	import { supabase } from '$lib/supabaseClient';
+	import { goto } from '$app/navigation';
 
-	/* ========= TYPES ========= */
-
+	/* ========== TYPES ========== */
 	type Question = {
 		id?: number;
 		question: string;
@@ -19,218 +18,150 @@
 		level: number;
 		streak: number;
 		hearts: number;
+		last_boss?: string;
+		last_grade?: number;
 	};
 
-	/* ========= STATE ========= */
+	type ConfettiPiece = {
+		id: number;
+		left: number;
+		duration: number;
+		delay: number;
+		color: string;
+	};
 
-	let loading = true;
-	let loadError: string | null = null;
+	/* ========== STATE (MUSS MIT $state()!!!) ========== */
+	let loading = $state(true);
+	let loadError = $state<string | null>(null);
+	let profile = $state<Profile | null>(null);
 
-	let profile: Profile | null = null;
-
-	let xp = 0;
-	let level = 1;
-	let streak = 0;
+	let xp = $state(0);
+	let level = $state(1);
+	let streak = $state(0);
 	const MAX_HEARTS = 3;
-	let hearts = MAX_HEARTS;
+	let hearts = $state(MAX_HEARTS);
 
-	let questions: Question[] = [];
-	let currentIndex = 0;
-	let selectedIndex: number | null = null;
-	let locked = false;
-	let correctCount = 0;
+	let questions = $state<Question[]>([]);
+	let currentIndex = $state(0);
+	let selectedIndex = $state<number | null>(null);
+	let locked = $state(false);
+	let correctCount = $state(0);
 
-	let showSummary = false;
-	let outOfHearts = false;
-	let levelUpVisible = false;
+	let showSummary = $state(false);
+	let outOfHearts = $state(false);
+	let levelUpVisible = $state(false);
 
-	// Fortschritt in %
-	$: progress = questions.length > 0 ? (currentIndex / questions.length) * 100 : 0;
+	let sessionXp = $state(0);
+	let confettiPieces = $state<ConfettiPiece[]>([]);
 
-	// Clientseitige Abzeichen
-	$: achievements = [
-		xp >= 50 ? "Bronze-Schüler" : null,
-		xp >= 150 ? "Silber-Held" : null,
-		xp >= 300 ? "Gold-Champion" : null,
-		streak >= 3 ? "🔥 Lern-Streak 3+" : null,
-		level >= 5 ? "Level-Profi" : null
-	].filter((x): x is string => x !== null);
+	// Fortschritt & XP als derived
+	const progress = $derived(() =>
+		questions.length > 0 ? (currentIndex / questions.length) * 100 : 0
+	);
+	const xpProgress = $derived(() => (xp / 100) * 100);
 
-	/* ========= HELPERS ========= */
-
+	/* ========= HELPER ========= */
 	function shuffle<T>(array: T[]): T[] {
-		const copy = [...array];
-		for (let i = copy.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[copy[i], copy[j]] = [copy[j], copy[i]];
-		}
-		return copy;
-	}
-
-	function triggerLevelUp() {
-		levelUpVisible = true;
-		setTimeout(() => {
-			levelUpVisible = false;
-		}, 2000);
-	}
-
-	function spawnConfetti() {
-		if (typeof document === "undefined") return;
-
-		for (let i = 0; i < 20; i++) {
-			const el = document.createElement("div");
-			el.className = "confetti";
-			el.style.left = Math.random() * 100 + "vw";
-			el.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 60%)`;
-			el.style.animationDuration = 0.8 + Math.random() * 0.7 + "s";
-			document.body.appendChild(el);
-			setTimeout(() => el.remove(), 2000);
-		}
+		return [...array].sort(() => Math.random() - 0.5);
 	}
 
 	async function updateProfile(update: Partial<Profile>) {
-		if (!profile) return; // Demo-Modus -> nichts speichern
-
-		const { error } = await supabase
-			.from("profiles")
-			.update(update)
-			.eq("id", profile.id);
-
-		if (error) {
-			console.error("Profil-Update fehlgeschlagen:", error);
-		}
-	}
-
-	async function rewardXP(amount: number) {
-		let newXP = xp + amount;
-		let newLevel = level;
-
-		if (newXP >= 100) {
-			newXP -= 100;
-			newLevel += 1;
-			triggerLevelUp();
-		}
-
-		xp = newXP;
-		level = newLevel;
-
-		await updateProfile({ xp: newXP, level: newLevel });
-		spawnConfetti();
-	}
-
-	async function loseHeart() {
-		hearts = Math.max(0, hearts - 1);
-		await updateProfile({ hearts });
-
-		if (hearts === 0) {
-			outOfHearts = true;
-			showSummary = true;
-		}
+		if (!profile) return;
+		await supabase.from('profiles').update(update).eq('id', profile.id);
 	}
 
 	/* ========= LOAD DATA ========= */
-
+	/* ========= LOAD DATA ========= */
+	/* ========= LOAD DATA ========= */
 	async function loadProfileAndQuestions() {
 		try {
-			// --- User & Profil laden ---
-			const { data: authData, error: authError } = await supabase.auth.getUser();
+			loading = true;
+			loadError = null;
+
+
+			/* 1️⃣ USER OPTIONAL LADEN */
+			const { data: authData } = await supabase.auth.getUser();
 			const user = authData?.user ?? null;
 
-			if (authError) {
-				console.error("auth error:", authError);
-			}
-
 			if (user) {
-				const { data: profileData, error: profileError } = await supabase
-					.from("profiles")
-					.select("*")
-					.eq("id", user.id)
+				const { data: profileData } = await supabase
+					.from('profiles')
+					.select('*')
+					.eq('id', user.id)
 					.single();
 
-				if (!profileError && profileData) {
-					profile = {
-						id: profileData.id,
-						xp: profileData.xp ?? 0,
-						level: profileData.level ?? 1,
-						streak: profileData.streak ?? 0,
-						hearts: profileData.hearts ?? MAX_HEARTS
-					};
-
-					xp = profile.xp;
-					level = profile.level;
-					streak = profile.streak;
-					hearts = profile.hearts;
-				} else {
-					console.warn("Profil nicht gefunden – Demo-Profil wird genutzt.");
+				if (profileData) {
+					profile = profileData;
+					xp = profileData.xp ?? 0;
+					level = profileData.level ?? 1;
+					streak = profileData.streak ?? 0;
+					hearts = profileData.hearts ?? MAX_HEARTS;
 				}
 			} else {
-				console.warn("Kein User eingeloggt – Demo-Modus.");
+				console.warn("⚠ Kein Login – Gastmodus aktiviert");
+				profile = null;
 			}
 
-			// --- Fragen laden ---
-			const { data: questionRows, error: qError } = await supabase
-				.from("questions")
-				.select("*")
-				.limit(10);
+			/* 2️⃣ PHYSIK-FRAGEN LADEN  – NUR 5, ZUFÄLLIG */
+			const { data, error } = await supabase.rpc('get_random_physik_questions', { limit_count: 5 });
 
-			if (!qError && questionRows && questionRows.length > 0) {
-				questions = questionRows.map((q: any) => ({
-					id: q.id,
-					question: q.question,
-					answers: [q.a1, q.a2, q.a3, q.a4],
-					correctIndex: q.correct_index,
-					xpReward: q.xp_reward ?? 10
-				}));
-			} else {
-				// Fallback-Demo-Fragen
+			if (error) {
+				console.error(error);
+				loadError = 'Fehler beim Laden der Physik-Fragen.';
+			} else if (!data || data.length === 0) {
+				console.warn('⚠ Keine Physik-Fragen gefunden – Dummy!');
 				questions = [
 					{
-						question: "Was ist 7 × 8?",
-						answers: ["48", "54", "56", "64"],
-						correctIndex: 2,
-						xpReward: 10
-					},
-					{
-						question: "Welche Zahl ist größer?",
-						answers: ["19", "21", "18", "20"],
-						correctIndex: 1,
-						xpReward: 10
-					},
-					{
-						question: "Welche Form ist ein Dreieck?",
-						answers: ["◼️", "🔺", "⚫️", "⬛️"],
-						correctIndex: 1,
-						xpReward: 10
-					},
-					{
-						question: "Was ist 3 + 9?",
-						answers: ["10", "11", "12", "13"],
-						correctIndex: 2,
+						question: 'Was ist die Lichtgeschwindigkeit?',
+						answers: ['300.000 km/s', '500 km/s', '1.000.000 km/s', '100.000 km/s'],
+						correctIndex: 0,
 						xpReward: 10
 					}
 				];
+			} else {
+				questions = shuffle(
+					data.map((q) => ({
+						id: q.id,
+						question: q.question,
+						answers: [q.a1, q.a2, q.a3, q.a4],
+						correctIndex: q.correct_index,
+						xpReward: q.xp_reward ?? 10
+					}))
+				);
 			}
-
-			questions = shuffle(questions);
-
-			if (questions.length === 0) {
-				loadError = "Es wurden keine Fragen gefunden.";
-			}
-		} catch (e) {
-			console.error(e);
-			loadError = "Etwas ist schiefgelaufen beim Laden der Daten.";
+		} catch (err) {
+			console.error(err);
+			loadError = 'Unerwarteter Fehler beim Laden.';
 		} finally {
 			loading = false;
+			currentIndex = 0;
+			selectedIndex = null;
+			locked = false;
+			correctCount = 0;
+			showSummary = false;
+			outOfHearts = false;
 		}
 	}
 
-	/* ========= GAME LOGIC ========= */
 
+
+
+	function goNextOrFinish() {
+		if (currentIndex < questions.length - 1) {
+			currentIndex++;
+			selectedIndex = null;
+			locked = false;  // 🔓 WICHTIG – wieder freigeben!!!
+		} else {
+			showSummary = true;
+			saveBossResult();
+		}
+	}
+	/* ========= ANSWER CLICK ========== */
 	function handleAnswerClick(index: number) {
 		if (locked || showSummary || outOfHearts) return;
 
 		selectedIndex = index;
-		locked = true;
+		locked = true;  // ← MUSS sein!
 
 		const current = questions[currentIndex];
 		const isCorrect = index === current.correctIndex;
@@ -243,79 +174,96 @@
 		}
 
 		setTimeout(() => {
-			if (!outOfHearts) {
-				goNextOrFinish();
-			}
-		}, 800);
+			if (!outOfHearts) goNextOrFinish();
+		}, 1200); // 1,2 Sekunden warten → Animation sichtbar!
 	}
 
-	async function goNextOrFinish() {
-		if (currentIndex < questions.length - 1 && !outOfHearts) {
-			currentIndex++;
-			selectedIndex = null;
-			locked = false;
-		} else {
-			showSummary = true;
 
-			// Streak nur erhöhen, wenn nicht outOfHearts und mind. 1 Frage richtig
-			if (!outOfHearts && correctCount > 0) {
-				streak += 1;
-				await updateProfile({ streak });
-			}
+
+
+	async function rewardXP(amount: number) {
+		xp += amount;
+		sessionXp += amount;
+
+		if (profile) {   // Nur speichern, wenn Profil existiert!
+			await updateProfile({ xp });
 		}
 	}
 
-	function restartLesson() {
-		currentIndex = 0;
-		selectedIndex = null;
-		locked = false;
-		correctCount = 0;
-		showSummary = false;
-		outOfHearts = false;
-		hearts = MAX_HEARTS;
-		questions = shuffle(questions);
+
+	async function loseHeart() {
+		hearts = Math.max(0, hearts - 1);
+		if (hearts === 0) outOfHearts = true;
+		await updateProfile({ hearts });
 	}
 
-	onMount(() => {
-		loadProfileAndQuestions();
-	});
+	async function saveBossResult() {
+		const grade = Math.ceil(6 - (correctCount / questions.length) * 5);
+		await updateProfile({ last_boss: 'Classe10Physik', last_grade: grade });
+
+		if (correctCount > 0) {
+			streak++;
+			await updateProfile({ streak });
+		}
+	}
+
+	async function restartLesson() {
+		currentIndex = 0;
+		selectedIndex = null;
+		outOfHearts = false;
+		showSummary = false;
+		hearts = MAX_HEARTS;
+		correctCount = 0;
+
+		await loadProfileAndQuestions(); // ← lädt 5 NEUE Fragen!
+	}
+
+
+
+
+	onMount(loadProfileAndQuestions);
 </script>
 
-<!-- Dummy-Element, damit .confetti-CSS nicht als unbenutzt markiert wird -->
-<div class="confetti" aria-hidden="true" style="display:none"></div>
 
 {#if loading}
-	<div class="loading">
-		<p>Spiel wird geladen…</p>
-	</div>
+	<div class="loading"><p>Spiel wird geladen…</p></div>
+
 {:else if loadError}
 	<div class="error">
 		<p>{loadError}</p>
-		<button type="button" on:click={loadProfileAndQuestions}>Nochmal versuchen</button>
+		<button on:click={loadProfileAndQuestions}>Neu laden</button>
 	</div>
+
 {:else if questions.length === 0}
-	<div class="loading">
-		<p>Es sind derzeit keine Fragen vorhanden.</p>
+	<div class="error">
+		<p>Für Mathe sind aktuell keine Fragen vorhanden.</p>
+		<button on:click={() => goto('/student_landing_page_id5')}>Zurück zum Dashboard</button>
 	</div>
+
 {:else}
+	<!-- GAME UI -->
 	<div class="game-root">
-		<!-- ===== HUD ===== -->
+		{#if levelUpVisible}
+			<div class="levelup-popup">
+				🎉 Level {level} erreicht!
+			</div>
+		{/if}
+
+		{#each confettiPieces as piece (piece.id)}
+			<div
+				class="confetti"
+				style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
+			></div>
+		{/each}
+
 		<header class="hud">
-			<button
-				class="back-btn"
-				type="button"
-				on:click={() => goto("/student_landing_page_id5")}
-			>
-				←
-			</button>
+			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
 
 			<div class="hud-center">
 				<div class="progress-top">
 					<div class="progress-inner" style={`width: ${progress}%`}></div>
 				</div>
-				<p class="question-count">
-					Frage {Math.min(currentIndex + 1, questions.length)} / {questions.length}
-				</p>
+				<p class="question-count">Frage {currentIndex + 1} / {questions.length}</p>
 			</div>
 
 			<div class="hud-right">
@@ -324,97 +272,85 @@
 						<span class:lost={i >= hearts}>❤️</span>
 					{/each}
 				</div>
+
+				<div class="xp-display">
+					<span>Lvl {level}</span>
+					<div class="xp-bar">
+						<div class="xp-inner" style={`width: ${xpProgress}%`}></div>
+					</div>
+				</div>
+
 				<div class="streak">
-					<span>🔥</span>
-					<span>{streak}</span>
+					<span>🔥</span>{streak}
 				</div>
 			</div>
 		</header>
 
-		{#if levelUpVisible}
-			<div class="levelup-popup">
-				🎉 Level Up! Du bist jetzt Level {level}!
-			</div>
-		{/if}
-
-		<!-- ===== MAIN CONTENT ===== -->
 		{#if !showSummary && !outOfHearts}
 			<main class="card">
-				<h2 class="question">
-					{questions[currentIndex].question}
-				</h2>
-
+				<h2 class="question">{questions[currentIndex].question}</h2>
 				<div class="answers">
 					{#each questions[currentIndex].answers as ans, i}
 						{#if ans}
 							<button
-								type="button"
-								class="answer-btn
-                  {selectedIndex === i
-                    ? i === questions[currentIndex].correctIndex
-                      ? 'correct'
-                      : 'wrong'
-                    : ''}"
+								class="answer-btn {selectedIndex === i
+		? i === questions[currentIndex].correctIndex
+			? 'correct'
+			: 'wrong'
+		: ''}"
 								on:click={() => handleAnswerClick(i)}
 								disabled={locked}
 							>
 								{ans}
 							</button>
+
 						{/if}
 					{/each}
 				</div>
 			</main>
 		{:else}
-			<!-- ===== SUMMARY ===== -->
 			<section class="summary">
-				{#if outOfHearts}
-					<h1>😥 Keine Herzen mehr</h1>
-					<p>Du hast alle Leben verloren. Versuch es später noch einmal!</p>
-				{:else}
-					<h1>🎉 Super gemacht!</h1>
-					<p>Du hast {correctCount} von {questions.length} Fragen richtig beantwortet.</p>
-					<p class="xp-earned">+{correctCount * 10} XP (mindestens)</p>
-				{/if}
+				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
 
 				<div class="xp-chest">
+					<div class="chest-glow"></div>
 					<div class="chest-lid"></div>
 					<div class="chest-box"></div>
-					<div class="chest-glow"></div>
 				</div>
 
 				<div class="summary-stats">
 					<div>
-						<span>⭐ XP</span>
-						<strong>{xp}</strong>
+						<span>Richtige Antworten</span>
+						<strong>{correctCount} / {questions.length}</strong>
 					</div>
 					<div>
-						<span>🏆 Level</span>
+						<span>Level</span>
 						<strong>{level}</strong>
-					</div>
-					<div>
-						<span>🔥 Streak</span>
-						<strong>{streak}</strong>
 					</div>
 				</div>
 
-				{#if achievements.length > 0}
-					<div class="achievements">
-						<h3>Abzeichen</h3>
-						<div class="badge-row">
-							{#each achievements as a}
-								<span class="badge">{a}</span>
-							{/each}
-						</div>
-					</div>
+				{#if sessionXp > 0}
+					<p class="xp-earned">+{sessionXp} XP</p>
 				{/if}
 
+				<div class="achievements">
+					<p>Freigeschaltete Badges:</p>
+					<div class="badge-row">
+						{#if correctCount === questions.length}
+							<span class="badge">Perfekte Runde 🏅</span>
+						{/if}
+						{#if streak >= 3}
+							<span class="badge">Streak-Meister 🔥</span>
+						{/if}
+						{#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
+							<span class="badge">Mathe-Held 📘</span>
+						{/if}
+					</div>
+				</div>
+
 				<div class="summary-actions">
-					<button type="button" on:click={restartLesson}>
-						Nochmal spielen
-					</button>
-					<button type="button" on:click={() => goto("/student_landing_page_id5")}>
-						Zurück zum Dashboard
-					</button>
+					<button on:click={restartLesson}>Nochmal spielen</button>
+					<button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
 				</div>
 			</section>
 		{/if}
@@ -432,6 +368,7 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 1.5rem 1rem 3rem;
+        position: relative;
     }
 
     .loading,
@@ -500,7 +437,7 @@
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 0.2rem;
+        gap: 0.3rem;
         font-size: 0.9rem;
     }
 
@@ -511,6 +448,33 @@
 
     .hearts span.lost {
         opacity: 0.25;
+    }
+
+    .xp-display {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.15rem;
+    }
+
+    .xp-display span {
+        font-size: 0.8rem;
+        color: #1d5e84;
+        font-weight: 600;
+    }
+
+    .xp-bar {
+        width: 110px;
+        height: 6px;
+        border-radius: 999px;
+        background: #d9e5f0;
+        overflow: hidden;
+    }
+
+    .xp-inner {
+        height: 100%;
+        background: linear-gradient(90deg, #f6ad55, #f56565);
+        transition: width 0.2s;
     }
 
     .streak {
@@ -798,4 +762,14 @@
             transform: translateY(16px);
         }
     }
+    .answer-btn.correct {
+        background: #c6f6d5;       /* Hellgrün */
+        border-color: #3ba776;
+    }
+
+    .answer-btn.wrong {
+        background: #ffd1d1;       /* Hellrot */
+        border-color: #ff6b6b;
+    }
+
 </style>

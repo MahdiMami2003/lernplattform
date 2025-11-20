@@ -1,12 +1,9 @@
-
-
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { supabase } from "$lib/supabaseClient";
+	import { goto } from "$app/navigation";
 
-	/* ============================
-					TYPES
-	============================ */
+	/* ============================ TYPES ============================ */
 	type UserProfile = {
 		id: string;
 		full_name?: string;
@@ -15,207 +12,111 @@
 		avatar_url: string | null;
 	};
 
-	/* ============================
-					STATE
-	============================ */
+	/* ============================ STATE ============================ */
 	let profile: UserProfile | null = null;
 	let userName = "Schüler";
 	let xp = 0;
 	let level = 1;
-	let targetXP = 0;
+	let avatar =
+		"https://cdn-icons-png.flaticon.com/512/921/921071.png";
 
-	let avatar = "https://cdn-icons-png.flaticon.com/512/921/921071.png";
 	let avatarModal = false;
+	let levelUpVisible = false;
 
-	const avatars = [
+	const avatars: string[] = [
 		"https://cdn-icons-png.flaticon.com/512/921/921071.png",
 		"https://cdn-icons-png.flaticon.com/512/1998/1998671.png",
 		"https://cdn-icons-png.flaticon.com/512/1998/1998749.png",
 		"https://cdn-icons-png.flaticon.com/512/1998/1998728.png"
 	];
 
-	let levelUpVisible = false;
-
-	/* ============================
-					HELPERS
-	============================ */
-	function triggerLevelUp() {
-		levelUpVisible = true;
-		setTimeout(() => (levelUpVisible = false), 2000);
-	}
-
-	function fireConfetti() {
-		if (typeof document === "undefined") return;
-		const c = document.createElement("div");
-		c.className = "confetti";
-		c.style.left = Math.random() * 100 + "%";
-		c.style.background = `hsl(${Math.random() * 360}, 80%, 60%)`;
-		document.body.appendChild(c);
-		setTimeout(() => c.remove(), 1500);
-	}
-
-	async function saveProfile(update: Partial<UserProfile>) {
-		if (!profile) return;
-		await supabase.from("profiles").update(update).eq("id", profile.id);
-	}
-
-	/* ============================
-					LOAD PROFILE
-	============================ */
+	// ============================
+	// PROFIL LADEN (MIT GASTMODUS)
+	// ============================
 	async function loadProfile() {
+		console.log("🔵 loadProfile gestartet");
+
 		const { data: auth } = await supabase.auth.getUser();
-		const user = auth?.user;
-		if (!user) return;
+
+		if (!auth?.user) {
+			console.warn("⚠ Kein Login → Gastmodus aktiviert!");
+			profile = null;
+			return; // Nur Gast → keine DB-Abfrage
+		}
 
 		const { data, error } = await supabase
 			.from("profiles")
 			.select("*")
-			.eq("id", user.id)
+			.eq("id", auth.user.id)
 			.single();
 
-		if (!error && data) {
-			profile = {
-				id: data.id,
-				full_name: data.full_name,
-				xp: data.xp ?? 0,
-				level: data.level ?? 1,
-				avatar_url: data.avatar_url ?? null
-			};
-
-			userName = profile.full_name || "Schüler";
-			xp = profile.xp;
-			level = profile.level;
-			avatar = profile.avatar_url || avatar;
-			targetXP = xp;
+		if (error) {
+			console.error("Fehler beim Laden von Profil", error);
+			return;
 		}
+
+		profile = data as UserProfile;
+		userName = profile.full_name || "Schüler";
+		xp = profile.xp;
+		level = profile.level;
+		avatar = profile.avatar_url ?? avatar;
+
+		console.log("🟢 Profil gefunden:", profile);
 	}
 
-	/* ============================
-					XP SYSTEM
-	============================ */
+	// XP VERGEBEN
 	async function rewardXP(amount = 5) {
+		if (!profile) return;
 		let newXP = xp + amount;
 		let newLevel = level;
 
 		if (newXP >= 100) {
 			newXP -= 100;
 			newLevel++;
-			triggerLevelUp();
+			levelUpVisible = true;
+			setTimeout(() => (levelUpVisible = false), 2000);
 		}
 
 		xp = newXP;
 		level = newLevel;
 
-		await saveProfile({ xp: newXP, level: newLevel });
-		fireConfetti();
+		await supabase
+			.from("profiles")
+			.update({ xp: newXP, level: newLevel })
+			.eq("id", profile.id);
 	}
 
-	/* ============================
-					AVATAR
-	============================ */
+	// AVATAR SELECT
 	async function selectAvatar(a: string) {
+		if (!profile) return;
 		avatar = a;
 		avatarModal = false;
-		await saveProfile({ avatar_url: a });
-		fireConfetti();
+
+		await supabase
+			.from("profiles")
+			.update({ avatar_url: a })
+			.eq("id", profile.id);
 	}
 
-	async function uploadAvatar(event: Event) {
-		if (!profile) return;
-
-		const input = event.target as HTMLInputElement;
-		const file = input.files?.[0];
-		if (!file) return;
-
-		const path = `${profile.id}/${crypto.randomUUID()}.png`;
-
-		const { error } = await supabase.storage.from("avatars").upload(path, file);
-		if (error) return;
-
-		const { data: url } = supabase.storage.from("avatars").getPublicUrl(path);
-
-		avatar = url.publicUrl;
-		avatarModal = false;
-
-		await saveProfile({ avatar_url: avatar });
-		fireConfetti();
-	}
-
-	/* ============================
-					LIFECYCLE
-	============================ */
-	let cleanup: (() => void) | undefined;
-
-	onMount(() => {
-		initialize();
-		return () => cleanup?.();
-	});
-
-	async function initialize() {
+	// MOUNT
+	onMount(async () => {
+		console.log("🟢 onMount gestartet");
 		await loadProfile();
-
-		let anim = setInterval(() => {
-			if (xp < targetXP) xp++;
-			else clearInterval(anim);
-		}, 15);
-
-		if (profile) {
-			const channel = supabase
-				.channel("profile-" + profile.id)
-				.on(
-					"postgres_changes",
-					{
-						event: "*",
-						schema: "public",
-						table: "profiles",
-						filter: `id=eq.${profile.id}`
-					},
-					(payload) => {
-						xp = payload.new.xp ?? xp;
-						level = payload.new.level ?? level;
-						avatar = payload.new.avatar_url ?? avatar;
-					}
-				)
-				.subscribe();
-
-			cleanup = () => supabase.removeChannel(channel);
-		}
-	}
+	});
 </script>
 
-<!-- REST DEINES HTML UND CSS GANZ NORMAL -->
 
-<!-- ============================
-     UI MARKUP
-============================ -->
+<!-- ================= UI ================= -->
 <section class="hero">
 	<div class="avatar-wrapper" on:click={() => (avatarModal = true)}>
-		<input type="file" accept="image/*" on:change={uploadAvatar} />
-
-		<div class="ring-container">
-			<svg width="150" height="150" class="ring">
-				<circle cx="75" cy="75" r="65" class="ring-bg" />
-				<circle
-					cx="75"
-					cy="75"
-					r="65"
-					class="ring-progress"
-					stroke-dasharray="408"
-					stroke-dashoffset={408 - (408 * xp) / 100}
-				/>
-			</svg>
-
-			<img class="avatar-img" src={avatar} alt="avatar" />
-		</div>
+		<img class="avatar-img" src={avatar} alt="avatar" />
 	</div>
 
-	<h1 class="title">Willkommen zurück, {userName}! 👋</h1>
-	<p class="subtitle">Deine Lernreise geht weiter.</p>
+	<h1>Willkommen zurück, {userName} 👋</h1>
+	<p>Deine Lernreise geht weiter.</p>
 
 	{#if levelUpVisible}
-		<div class="level-up-popup">
-			🎉 Level Up! Jetzt bist du Level {level}!
-		</div>
+		<div class="level-up-popup">🎉 Level Up! Level {level}!</div>
 	{/if}
 
 	<div class="xp-container">
@@ -224,46 +125,16 @@
 	<p class="xp-label">Level {level} · {xp}% XP</p>
 </section>
 
-<section class="grid">
-	<div class="card big">
-		<h2>🎮 Dein nächstes Spiel</h2>
-		<p>Perfekt zum Üben!</p>
-		<button on:click={() => (window.location.href = "/example_page_1")}>
-			▶ Spiel starten
-		</button>
-	</div>
-
-	<div class="card">
-		<h2>✨ Bonus XP</h2>
-		<button class="reward-btn" on:click={() => rewardXP(5)}>
-			+5 XP
-		</button>
+<section class="subjects">
+	<h2>Wähle ein Fach</h2>
+	<div class="subject-grid">
+		<button on:click={() => goto('/mathe_game')}>➕ Mathe</button>
+		<button on:click={() => goto('/physik_game')}>⚛ Physik</button>
+		<button on:click={() => goto('/deutsch_game')}>📘 Deutsch</button>
+		<button on:click={() => goto('/englisch_game')}>🌎 Englisch</button>
 	</div>
 </section>
 
-{#if avatarModal}
-	<div class="modal">
-		<div class="modal-box">
-			<h2>Avatar wählen 🎨</h2>
-
-			<div class="avatar-grid">
-				{#each avatars as a}
-					<img class="choice" src={a} alt="avatar choice" on:click={() => selectAvatar(a)} />
-				{/each}
-			</div>
-
-			<button class="close" on:click={() => (avatarModal = false)}>
-				Schließen
-			</button>
-		</div>
-	</div>
-{/if}
-=======
-<div id="placeholder">
-    Game Page
-</div>
-
->>>>>>> ee5cfcaeff57eef5e353918f1a16c2d1fa12bc07
 
 <style>
     :global(body) {
@@ -282,14 +153,6 @@
         height: 150px;
         margin: 0 auto;
         position: relative;
-        cursor: pointer;
-    }
-
-    .avatar-wrapper input[type="file"] {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        z-index: 3;
         cursor: pointer;
     }
 
@@ -370,83 +233,36 @@
         margin-top: 0.4rem;
     }
 
-    .grid {
-        display: grid;
-        gap: 1.5rem;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        padding: 1rem;
-    }
-
-    .card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 16px;
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-    }
-
-    .card.big {
+    .subjects {
         text-align: center;
+        margin-top: 2rem;
     }
 
-    .card.big button {
-        background: linear-gradient(90deg, #236c93, #3ba776);
-        color: white;
+    .subjects h2 {
+        color: #1d5e84;
+    }
+
+    .subject-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .subject-grid button {
+        padding: 1rem;
         border: none;
-        padding: 0.9rem 1.6rem;
-        border-radius: 14px;
-        cursor: pointer;
+        border-radius: 12px;
         font-weight: bold;
-    }
-
-    .reward-btn {
+        cursor: pointer;
+        transition: 0.2s;
         background: #3ba776;
         color: white;
-        border: none;
-        padding: 0.8rem 1.4rem;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: bold;
     }
 
-    .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .modal-box {
-        background: white;
-        padding: 2rem;
-        border-radius: 18px;
-        width: 360px;
-        text-align: center;
-    }
-
-    .avatar-grid {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin: 1rem 0;
-    }
-
-    .choice {
-        width: 75px;
-        height: 75px;
-        border: 3px solid #236c93;
-        border-radius: 50%;
-        cursor: pointer;
-    }
-
-    .close {
+    .subject-grid button:hover {
+        transform: scale(1.05);
         background: #236c93;
-        color: white;
-        border: none;
-        padding: 0.7rem 1.3rem;
-        border-radius: 10px;
-        cursor: pointer;
     }
 
     .level-up-popup {
@@ -461,20 +277,5 @@
         font-size: 1.4rem;
         font-weight: bold;
         z-index: 999;
-    }
-
-    .confetti {
-        position: fixed;
-        top: -20px;
-        width: 12px;
-        height: 20px;
-        animation: fall 1.5s linear forwards;
-    }
-
-    @keyframes fall {
-        to {
-            transform: translateY(110vh) rotate(360deg);
-            opacity: 0;
-        }
     }
 </style>
