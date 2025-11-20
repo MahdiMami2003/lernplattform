@@ -7,7 +7,7 @@
     let email = '';
     let password = '';
     let confirmPassword = '';
-    let role = 'schueler'; // Standard-Wert setzen, damit immer was ausgewählt ist
+    let role = ''; // Standard-Wert setzen, damit immer was ausgewählt ist
     let termsAccepted = false;
     let message = '';
 
@@ -80,17 +80,17 @@
 
             <div class="role-options">
                 <label>
-                    <input type="radio" bind:group={role} value="schueler" required />
+                    <input type="radio" bind:group={role} value="student" required />
                     <span>Schüler/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" bind:group={role} value="lehrer" />
+                    <input type="radio" bind:group={role} value="teacher" />
                     <span>Lehrer/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" bind:group={role} value="eltern" />
+                    <input type="radio" bind:group={role} value="parent" />
                     <span>Elternteil</span>
                 </label>
             </div>
