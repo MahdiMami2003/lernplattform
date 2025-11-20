@@ -13,7 +13,10 @@ private
 .DS_Store
 Thumbs.db
 
-
+# Env
+.env
+!.env.example
+!.env.test
 
 # Vite
 vite.config.js.timestamp-*
