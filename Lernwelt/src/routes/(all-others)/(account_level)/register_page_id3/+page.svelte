@@ -1,4 +1,78 @@
 <script>
+    import {supabase} from '$lib/supabaseClient.js';
+    import {goto} from '$app/navigation';
+    let firstName = '';
+    let lastName = '';
+    let email = '';
+    let password = '';
+    let confirmPassword = '';
+    let role = '';   // Standard-Rolle
+    let termsAccepted = false;
+    let message = '';
+
+    async function handleRegister() {
+        try {
+            message = '';
+
+            // Validierung
+            if (password !== confirmPassword) {
+                message = 'Die Passwörter stimmen nicht überein.';
+                return;
+            }
+
+            if (!termsAccepted) {
+                message = 'Bitte akzeptiere die AGB und Datenschutzerklärung.';
+                return;
+            }
+
+            // 1. User registrieren
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: `${firstName} ${lastName}`,
+                        role
+                    }
+                }
+            });
+
+            if (authError) throw authError;
+            if (!authData.user) throw new Error('Kein User erstellt');
+
+            // 2. Kurz warten (wichtig!)
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // 3. Profil erstellen
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert({
+                    id: authData.user.id,
+                    full_name: `${firstName} ${lastName}`,
+                    role: role,
+                    xp: 0,
+                    level: 1,
+                    avatar_url: 'https://cdn-icons-png.flaticon.com/512/9187/9187604.png',
+                    streak: 0,
+                    hearts: 3
+                });
+
+            if (profileError) {
+                console.error('Profile Error:', profileError);
+                throw profileError;
+            }
+
+            message = 'Registrierung erfolgreich! Du wirst weitergeleitet...';
+
+            setTimeout(() => {
+                goto('/login_page_id2');
+            }, 1000);
+
+        } catch (error) {
+            console.error('Fehler:', error);
+            message = `Registrierung fehlgeschlagen: ${error.message}`;
+        }
+    }
 </script>
 
 
@@ -6,33 +80,33 @@
     <h1>Willkommen bei HSG-Lernwelt</h1>
     <h2>Konto erstellen</h2>
     <p>registriere dich, um deine Lernfortschritte zu speichern.</p>
-    <form>
-        <input type="text" placeholder="Vorname" required />
+    <form id="register-form" on:submit|preventDefault={handleRegister}>
+        <input type="text" placeholder="Vorname" bind:value={firstName} required />
         <br />
-        <input type="text" placeholder="Nachname" required />
+        <input type="text" placeholder="Nachname" bind:value={lastName} required />
         <br />
-        <input type="email" placeholder="E-Mail-Adresse" required />
+        <input type="email" placeholder="E-Mail-Adresse" bind:value={email} required />
         <br />
-        <input type="password" placeholder="Passwort" required />
+        <input type="password" placeholder="Passwort" bind:value={password} required />
         <br />
-        <input type="password" placeholder="Passwort bestätigen" required />
+        <input type="password" placeholder="Passwort bestätigen" bind:value={confirmPassword} required />
         <br />
         <div class="role">
             <p class="role-title">Du willst registrieren als:</p>
 
             <div class="role-options">
                 <label>
-                    <input type="radio" name="role" value="student" required />
+                    <input type="radio" bind:group={role} value="student" required />
                     <span>Schüler/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" name="role" value="teacher" />
+                    <input type="radio" bind:group={role} value="teacher" />
                     <span>Lehrer/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" name="role" value="parent" />
+                    <input type="radio" bind:group={role} value="parent" />
                     <span>Elternteil</span>
                 </label>
             </div>
@@ -40,7 +114,7 @@
 
         <div class="terms">
             <label>
-                <input type="checkbox" name="terms" required />
+                <input type="checkbox" bind:checked={termsAccepted} required />
                 <span
                 >Ich akzeptiere die <a href="/agb">AGB</a> und die
 						<a href="/datenschutz">Datenschutzerklärung</a>.</span
@@ -49,6 +123,9 @@
         </div>
         <button type="submit">registrieren</button>
     </form>
+    {#if message}
+        <p>{message}</p>
+    {/if}
     <a href="/login_page_id2" class="login-link">Schon registriert? Hier einloggen</a>
 </div>
 
@@ -66,7 +143,7 @@
     p {
         font-weight: bold;
     }
-    form {
+    #register-form {
         background-color: #f3be6a;
         align-items: center;
         height: 500px;
