@@ -1,6 +1,7 @@
+//materials_page_id14\+page.svelte
 <script>
     import { supabase } from '$lib/supabaseClient.js';
-
+    import { global_material_id } from '$lib/state.svelte.js';
     async function getMaterials() {
         let {data: learning_materials, error} = await supabase
             .from('learning_materials')
@@ -33,6 +34,12 @@
 
         return grouped;
     }
+
+    function set_material_id(id)
+    {
+        global_material_id.aktuelleID = id;
+    }
+
 </script>
 
 <div id="placeholder">
@@ -50,7 +57,7 @@
                     <ul>
                         {#each items as material}
                             <li>
-                                <a href="/material/{material.material_id}">
+                                <a href="/materials_content_page_id16" on:click={() => set_material_id(material.material_id)}>
                                     {material.title}
                                 </a>
                             </li>
