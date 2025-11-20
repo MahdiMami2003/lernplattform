@@ -1,92 +1,45 @@
 <script lang="ts">
-	import { supabase } from "$lib/supabaseClient";
-	import { onMount } from "svelte";
+    import { supabase } from "$lib/supabaseClient";
+    import { onMount } from "svelte";
 
-	let userName: string = "Schüler";
-	let loading = true;
 
-	onMount(async () => {
-		loading = true;
 
-		// Aktuell eingeloggten Benutzer holen
-		const {
-			data: { user },
-			error: authError
-		} = await supabase.auth.getUser();
 
-		if (authError) {
-			console.error("Fehler beim Holen des Users:", authError.message);
-			loading = false;
-			return;
-		}
-
-		if (user) {
-			// Profil aus der Datenbank holen
-			const { data: profileData, error: profileError } = await supabase
-				.from("profiles")
-				.select("full_name")
-				.eq("id", user.id)
-				.single();
-
-			if (profileError) {
-				console.error(
-					"Fehler beim Holen des Profils:",
-					profileError.message
-				);
-			} else if (profileData) {
-				userName = profileData.full_name || "Schüler";
-			}
-		}
-
-		loading = false;
-	});
 </script>
 
+
+<body>
 <div id="placeholder">
-	{#if loading}
-		<h1>Lade Profil…</h1>
-	{:else}
-		<h1>Hallo {userName}!</h1>
-		<div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
-		<div>Bitte klicke auf das Thema das dich interessiert.</div>
-	{/if}
+    <h1>Hallo liebe:r Schüler:in</h1>
+    <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
+    <div>Bitte klicke auf das Thema das dich interessiert.</div>
+    <br>
 
-	<br />
+    <ul>
+        <li class="landing_liste">
+            <a href="/game_page_id12"><h3>Game Page</h3></a>
+            <div class="link_description">Aufgaben & Gamification!</div>
+        </li>
 
-	<ul>
-		<!-- GAME PAGE -->
-		<li class="landing_liste">
-			<a href="/game_page_id12"><h3>Starte das Spiel</h3></a>
-			<div class="link_description">
-				Aufgaben & Gamification – wie Duolingo!
-			</div>
-		</li>
+        <li class="landing_liste">
+            <a href="/weekly_test_page_id17"><h3>Weekly Tests</h3></a>
+            <div class="link_description">Wöchentliche Kompetenzchecks</div>
+        </li>
 
-		<!-- WEEKLY TEST -->
-		<li class="landing_liste">
-			<a href="/weekly_test_page_id17"><h3>Wochentests</h3></a>
-			<div class="link_description">
-				Regelmäßige Kompetenzchecks
-			</div>
-		</li>
+        <li class="landing_liste">
+            <a href="/progress_page_id11"><h3>Fortschritt</h3></a>
+            <div class="link_description">Deine Lernstatistiken im Überblick</div>
+        </li>
 
-		<!-- PROGRESS -->
-		<li class="landing_liste">
-			<a href="/progress_page_id11"><h3>Fortschritt</h3></a>
-			<div class="link_description">
-				Dein Lernfortschritt übersichtlich dargestellt
-			</div>
-		</li>
-
-		<!-- MATERIAL -->
-		<li class="landing_liste">
-			<a href="/material_page_id14"><h3>Lernunterlagen</h3></a>
-			<div class="link_description">
-				Material zum Download & Bearbeiten
-			</div>
-		</li>
-	</ul>
+        <li class="landing_liste">
+            <a href="/material_page_id14"><h3>Lernunterlagen</h3></a>
+            <div class="link_description">Materialien für dein Lernen</div>
+        </li>
+    </ul>
 </div>
+</body>
+
+
 
 <style>
     ul {
@@ -122,4 +75,6 @@
         padding-bottom: 2dvh;
         padding-left: 3dvh;
     }
+
+
 </style>

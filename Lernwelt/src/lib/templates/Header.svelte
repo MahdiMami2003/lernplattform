@@ -195,9 +195,8 @@
 
 
 
-    $: {
-
-        if (innerW > 1000) {
+		$effect(() => {
+			if (innerW > 1000) {
 
             if (isMenuOpen) {
 
@@ -207,15 +206,10 @@
 
         }
 
-    }
-
-
-
+    });
 
 
 </script>
-
-
 
 <style>
 
