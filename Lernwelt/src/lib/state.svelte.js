@@ -1,0 +1,1 @@
+export const global_material_id = $state ({aktuelleID: null});
