@@ -1,34 +1,31 @@
 <script>
     import { supabase } from '$lib/supabaseClient.js';
-    import { global_material_id, global_user } from '$lib/state.svelte.js';
+    import { global_material_id } from '$lib/state.svelte.js';
     import { onMount } from 'svelte';
 
-    let userRole = $state(null);
-    let userClass = $state(null);
+    /** @type {string | null} */
+    let userRole = null;
 
-    // Lade User-Daten, falls noch nicht vorhanden
+    /** @type {string | null} */
+    let userClass = null;
+
     onMount(async () => {
-        if (!global_user.role) {
-            // Falls User neu zur Seite kommt (ohne Login), lade Daten
-            const { data: { user } } = await supabase.auth.getUser();
+        // Hole den eingeloggten User
+        const { data: { user } } = await supabase.auth.getUser();
 
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('id, role, school_class')
-                    .eq('id', user.id)
-                    .single();
+        if (user) {
+            // Hole Profil aus DB
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role, school_class')
+                .eq('id', user.id)
+                .single();
 
-                if (profile) {
-                    global_user.id = profile.id;
-                    global_user.role = profile.role;
-                    global_user.school_class = profile.school_class;
-                }
+            if (profile) {
+                userRole = profile.role;
+                userClass = profile.school_class;
             }
         }
-
-        userRole = global_user.role;
-        userClass = global_user.school_class;
     });
 
     async function getMaterials() {
@@ -41,7 +38,6 @@
         if (userClass && userRole === 'student') {
             query = query.eq('school_class', userClass);
         }
-        // Admin/Teacher/null sehen alles
 
         let {data: materials, error} = await query;
 
@@ -118,7 +114,7 @@
                     <ul>
                         {#each items as material}
                             <li class="material-item">
-                                <a href="/materials_content_page_16" on:click={() => set_material_id(material.id)} class="material-link">
+                                <a href="/materials_content_page_16/{material.id}" class="material-link">
                                     {material.title}
                                 </a>
 

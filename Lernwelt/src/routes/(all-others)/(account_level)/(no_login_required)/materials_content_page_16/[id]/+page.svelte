@@ -1,19 +1,21 @@
 <script>
     import { supabase } from '$lib/supabaseClient.js';
-    import { global_material_id } from "$lib/state.svelte.js";
+    import { page } from '$app/stores';
 
     /**
      * @returns {Promise<any>}
      */
     async function getMaterial() {
-        if (!global_material_id.aktuelleID) {
+        const materialId = $page.params.id;
+
+        if (!materialId) {
             return null;
         }
 
         const { data, error } = await supabase
             .from('materials')
             .select('*')
-            .eq('id', global_material_id.aktuelleID)
+            .eq('id', materialId)
             .single();
 
         if (error) {
@@ -22,6 +24,35 @@
         }
 
         return data;
+    }
+
+    /**
+     * @param {string} url
+     * @param {string} filename
+     */
+    async function downloadPDF(url, filename) {
+        try {
+            // Lade die PDF als Blob
+            const response = await fetch(url);
+            const blob = await response.blob();
+
+            // Erstelle einen temporären Download-Link
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+
+            // Klicke automatisch
+            document.body.appendChild(link);
+            link.click();
+
+            // Aufräumen
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error('Download fehlgeschlagen:', error);
+            alert('Download fehlgeschlagen. Bitte versuche es erneut.');
+        }
     }
 </script>
 
@@ -40,6 +71,14 @@
                                 title="PDF Viewer"
                                 class="pdf-viewer"
                         ></iframe>
+
+                        <!-- Download Button mit JavaScript -->
+                        <button
+                                class="download-btn"
+                                on:click={() => downloadPDF(material.file_url, `${material.title}.pdf`)}
+                        >
+                            PDF herunterladen
+                        </button>
                     </div>
                 {:else}
                     <p class="no-pdf">Kein PDF verfügbar</p>
@@ -79,6 +118,9 @@
 
     .pdf-section {
         margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
     .pdf-viewer {
@@ -86,6 +128,24 @@
         height: 85vh;
         border: 2px solid #ddd;
         border-radius: 8px;
+    }
+
+    .download-btn {
+        display: inline-block;
+        background: #4CAF50;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 5px;
+        border: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        transition: background 0.3s ease;
+        cursor: pointer;
+    }
+
+    .download-btn:hover {
+        background: #45a049;
     }
 
     .no-pdf {
