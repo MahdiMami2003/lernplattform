@@ -1,15 +1,45 @@
 <script>
+    import { supabase } from "$lib/supabaseClient.js";
+    import { onMount } from "svelte";
+
+
+    let role = $state(null);
+    let userId = $state(null);
+
+    onMount(async () => {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data?.user) {
+            console.error("Fehler beim Holen des Users:", error);
+            return;
+        }
+
+        userId = data.user.id;
+
+        const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("id, role")      // hier 'id', nicht 'uuid'
+            .eq("id", data.user.id)  // mit der auth-UID vergleichen
+            .single();
+
+        if (profileError) {
+            console.error("Fehler beim Holen des Profils:", profileError);
+            return;
+        }
+
+        console.log("Gefundenes Profil:", profile);
+        role = profile.role;         // z.B. "teacher" oder "admin"
+    });
 </script>
-
-
 <div id="placeholder">
     <h1 class="überschrift">Lehrpersonen-Dashboard</h1>
-    <p class="untertitel">Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten</p>
+    <p class="untertitel">
+        Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten
+    </p>
+
     <section class="classes-section">
         <h2>Ihre Klassen & Fächer</h2>
 
         <div class="class-grid">
-
             <!-- Klasse 5a -->
             <article class="class-card">
                 <h3>Klasse 5a</h3>
@@ -49,6 +79,7 @@
                     </li>
                 </ul>
             </article>
+
             <!-- Klasse 5c -->
             <article class="class-card">
                 <h3>Klasse 5c</h3>
@@ -70,17 +101,17 @@
             </article>
         </div>
     </section>
-    <!-- Das muss nur für Admin angezeigt werden -->
-    <div class="admin-panel" id="adminPanel">
-        <h2>Admin-Verwaltung</h2>
-        <p>Hier können Sie Nutzer, Klassen und Berechtigungen verwalten.</p>
-        <button class="admin-btn">Benutzer verwalten</button>
-        <button class="admin-btn">Klassen verwalten</button>
-        <button class="admin-btn">Berechtigungen bearbeiten</button>
-    </div>
 
+    {#if role === "admin"}
+        <div class="admin-panel" id="adminPanel">
+            <h2>Admin-Verwaltung</h2>
+            <p>Hier können Sie Nutzer, Klassen und Berechtigungen verwalten.</p>
+            <button class="admin-btn">Benutzer verwalten</button>
+            <button class="admin-btn">Klassen verwalten</button>
+            <button class="admin-btn">Berechtigungen bearbeiten</button>
+        </div>
+    {/if}
 </div>
-
 
 <style>
     #placeholder {
@@ -138,7 +169,6 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         max-width: 700px;
     }
-
     .admin-btn {
         display: inline-block;
         margin: 0.5rem 0.5rem 0 0;
@@ -152,6 +182,5 @@
     }
     div{
         margin: 0;
-        /*height: 200dvh;*/
     }
 </style>
