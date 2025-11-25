@@ -88,14 +88,14 @@
             <div class="error">
                 <h1>Material nicht gefunden</h1>
                 <p>Die angeforderte Material-ID existiert nicht.</p>
-                <a href="/materials_page_id14">← Zurück zur Übersicht</a>
+                <a href="/material_page_id14">← Zurück zur Übersicht</a>
             </div>
         {/if}
     {:catch error}
         <div class="error">
             <h1>Fehler beim Laden</h1>
             <p>Es gab ein Problem beim Laden des Materials.</p>
-            <a href="/materials_page_id14">← Zurück zur Übersicht</a>
+            <a href="/material_page_id14">← Zurück zur Übersicht</a>
         </div>
     {/await}
 </div>
