@@ -104,17 +104,17 @@
 
             <div class="role-options">
                 <label>
-                    <input type="radio" bind:group={role} value="student" required />
+                    <input type="radio" name="roles" bind:group={role} value="student" required />
                     <span>Schüler/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" bind:group={role} value="teacher" />
+                    <input type="radio" name="roles" bind:group={role} value="teacher" />
                     <span>Lehrer/in</span>
                 </label>
 
                 <label>
-                    <input type="radio" bind:group={role} value="parent" />
+                    <input type="radio" name="roles" bind:group={role} value="parent" />
                     <span>Elternteil</span>
                 </label>
             </div>
