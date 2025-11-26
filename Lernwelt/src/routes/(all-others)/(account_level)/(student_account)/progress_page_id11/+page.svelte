@@ -67,18 +67,20 @@
         }
     });
 
+    // Farbe berechnen
     function getBarColor(progress, isCompleted) {
         if (isCompleted) return '#4caf50'; // Grün
         if (progress >= 75) return '#66bb6a'; // Hell-Grün
         if (progress >= 50) return '#f3be6a'; // Gold/Gelb
         if (progress >= 25) return '#ff9800'; // Orange
         if (progress > 0) return '#42a5f5'; // Blau
-        return '#e0e0e0'; // Grau
+        return 'transparent'; // Bei 0% keine Farbe im Füllbalken
     }
 
+    // Text für den Status
     function getProgressLabel(progress, isCompleted) {
         if (isCompleted) return '✓ Abgeschlossen';
-        if (progress === 0) return 'Noch nicht begonnen';
+        if (!progress || progress === 0) return 'Noch nicht begonnen'; // Wichtig: Auch null/undefined abfangen
         if (progress < 25) return 'Gerade erst gestartet';
         if (progress < 50) return 'Auf dem Weg...';
         if (progress < 75) return 'Über die Hälfte!';
@@ -156,17 +158,17 @@
                             <div class="progress-container">
                                 <div class="progress-info">
                                     <span class="progress-status">{getProgressLabel(item.progress, item.completed)}</span>
-                                    <span class="progress-percent">{item.progress}%</span>
+                                    <span class="progress-percent">{item.progress || 0}%</span>
                                 </div>
 
                                 <div class="progress-bar-wrapper">
                                     <div class="progress-bar-bg">
                                         <div
                                                 class="progress-bar-fill"
-                                                style="width: {item.progress}%; background-color: {getBarColor(item.progress, item.completed)};"
+                                                style="width: {item.progress || 0}%; background-color: {getBarColor(item.progress, item.completed)};"
                                         >
                                             {#if item.progress > 10}
-                                                <span class="progress-inner-text">{item.progress}%</span>
+                                                <span class="progress-inner-text"></span>
                                             {/if}
                                         </div>
                                     </div>
@@ -314,13 +316,11 @@
         border-color: #236C93;
     }
 
-    /* In Progress State */
     .mission-card.in-progress {
         border-color: #42a5f5;
         background: linear-gradient(to bottom, #fff 0%, #f0f8ff 100%);
     }
 
-    /* Completed State */
     .mission-card.is-completed {
         background: linear-gradient(to bottom, #f1f8e9 0%, #e8f5e9 100%);
         border-color: #81c784;
@@ -360,7 +360,7 @@
         line-height: 1.5;
     }
 
-    /* Progress Container */
+    /* --- PROGRESS BAR STYLING --- */
     .progress-container {
         margin-top: auto;
     }
@@ -388,13 +388,15 @@
         position: relative;
     }
 
+    /* Hier ist der "leere" Balken (Die Rinne) */
     .progress-bar-bg {
         width: 100%;
         height: 24px;
-        background: #e9ecef;
+        background: #f1f3f5; /* Helles Grau für den Hintergrund */
+        border: 1px solid #ced4da; /* Ein feiner Rahmen, damit man die "Leere" sieht */
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
     }
 
     .progress-bar-fill {
