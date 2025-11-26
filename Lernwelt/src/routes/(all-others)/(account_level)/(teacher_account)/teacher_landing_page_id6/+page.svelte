@@ -39,7 +39,7 @@
         <h2>Pädagogische Tipps</h2>
         <div class="tipps-grid">
             <p>Lernstrategien zur Unterstützung Ihrer Schüler
-                <button class="small-btn">Tipps bearbeiten</button>
+                <a href="/pedagogy_page_id10"><button class="small-btn">Tipps bearbeiten</button></a>
             </p>
 
         </div>
@@ -55,15 +55,15 @@
                 <ul>
                     <li>
                         Mathematik
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                     <li>
                         Deutsch
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                     <li>
                         Biologie
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                 </ul>
             </article>
@@ -75,15 +75,15 @@
                 <ul>
                     <li>
                         Mathematik
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                     <li>
                         Deutsch
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                     <li>
                         Biologie
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                 </ul>
             </article>
@@ -95,15 +95,15 @@
                 <ul>
                     <li>
                         Mathematik
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                     <li>
                         Deutsch
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                     <li>
                         Biologie
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
+                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
                     </li>
                 </ul>
             </article>
