@@ -1,47 +1,36 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { supabase } from '$lib/supabaseClient.js';
+    import { goto } from '$app/navigation';
+    import AvatarSelector from '$lib/components/AvatarSelector.svelte';
 
-    let loading = true;
-    let errorMessage = '';
-    let profile = null;
-    let missionsData = [];
+    let loading = $state(true);
+    let errorMessage = $state('');
+    let profile = $state(null);
+    let missionsData = $state([]);
+    let authListener = null;
 
-    onMount(async () => {
-        console.log("🚀 Start: Lade Progress Seite...");
-
+    async function loadData(userId) {
+        console.log("📥 Lade Daten für User:", userId);
         try {
-            // 1. Check Login
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-            if (authError || !user) {
-                console.error("Auth Error:", authError);
-                throw new Error('Du bist nicht eingeloggt.');
-            }
-
-            console.log("✅ User gefunden:", user.id);
-            const targetUserId = user.id;
-
-            // 2. Profil laden
+            // 1. Profil laden
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', targetUserId)
+                .eq('id', userId)
                 .maybeSingle();
 
-            if (profileError) {
-                console.error("DB Error Profil:", profileError);
-                throw new Error('Fehler beim Laden des Profils: ' + profileError.message);
-            }
+            console.log("✅ Profil geladen:", profileData);
+            console.log("❌ Profil Fehler:", profileError);
+
+            if (profileError) throw profileError;
 
             if (!profileData) {
-                console.error("❌ Kein Profil gefunden für ID:", targetUserId);
-                throw new Error('Dein Benutzerprofil fehlt in der Datenbank.');
+                throw new Error('Benutzerkonto existiert, aber kein Profil gefunden. (DB Fehler)');
             }
-
             profile = profileData;
 
-            // 3. Missionen laden
+            // 2. Missionen laden
             const { data: progressData, error: progressError } = await supabase
                 .from('missions_progress')
                 .select(`
@@ -49,42 +38,59 @@
                     completed,
                     missions ( title, description, xp_reward )
                 `)
-                .eq('user_id', targetUserId)
+                .eq('user_id', userId)
                 .order('completed', { ascending: true });
 
+            console.log("✅ Missionen geladen:", progressData);
+            console.log("❌ Missionen Fehler:", progressError);
+
             if (progressError) throw progressError;
-
-            // Debug: Zeige geladene Daten
-            console.log("📊 Geladene Missionen:", progressData);
-
             missionsData = progressData || [];
 
         } catch (error) {
-            console.error("Gesamt-Fehler:", error);
+            console.error("❌❌ Fehler beim Laden:", error);
             errorMessage = error.message;
         } finally {
             loading = false;
+            console.log("🏁 Loading beendet. Profile:", profile, "Missions:", missionsData);
+        }
+    }
+
+    onMount(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+            await loadData(session.user.id);
+        } else {
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                console.log("Auth Event:", event);
+
+                if (session) {
+                    loadData(session.user.id);
+                } else if (event === 'SIGNED_OUT') {
+                    loading = false;
+                    errorMessage = "Bitte logge dich ein.";
+                    setTimeout(() => goto('/login_page_id2'), 2000);
+                }
+            });
+            authListener = subscription;
         }
     });
 
-    // Farbe berechnen
+    onDestroy(() => {
+        if (authListener) authListener.unsubscribe();
+    });
+
     function getBarColor(progress, isCompleted) {
-        if (isCompleted) return '#4caf50'; // Grün
-        if (progress >= 75) return '#66bb6a'; // Hell-Grün
-        if (progress >= 50) return '#f3be6a'; // Gold/Gelb
-        if (progress >= 25) return '#ff9800'; // Orange
-        if (progress > 0) return '#42a5f5'; // Blau
-        return 'transparent'; // Bei 0% keine Farbe im Füllbalken
+        if (isCompleted) return '#4caf50';
+        if (progress > 0) return '#f3be6a';
+        return '#e0e0e0'; // ✅ Graue Farbe statt transparent
     }
 
-    // Text für den Status
     function getProgressLabel(progress, isCompleted) {
         if (isCompleted) return '✓ Abgeschlossen';
-        if (!progress || progress === 0) return 'Noch nicht begonnen'; // Wichtig: Auch null/undefined abfangen
-        if (progress < 25) return 'Gerade erst gestartet';
-        if (progress < 50) return 'Auf dem Weg...';
-        if (progress < 75) return 'Über die Hälfte!';
-        if (progress < 100) return 'Fast fertig!';
+        if (!progress || progress === 0) return 'Noch nicht begonnen'; // ✅ Verbessert
+        if (progress < 100) return 'In Arbeit...';
         return 'Fertig!';
     }
 </script>
@@ -106,9 +112,10 @@
         <div class="profile-section">
             <div class="profile-card">
                 <img
-                        src={profile.avatar_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}
+                        src={profile.avatar_url}
                         alt="Profilbild"
                         class="avatar"
+                        onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile.full_name}&background=f3be6a&color=fff`}
                 />
 
                 <div class="profile-details">
@@ -144,7 +151,8 @@
             <div class="missions-grid">
                 {#each missionsData as item}
                     {#if item.missions}
-                        <div class="mission-card {item.completed ? 'is-completed' : ''} {item.progress > 0 && !item.completed ? 'in-progress' : ''}">
+                        {@const currentProgress = item.progress || 0}
+                        <div class="mission-card {item.completed ? 'is-completed' : ''} {currentProgress > 0 && !item.completed ? 'in-progress' : ''}">
 
                             <div class="mission-header">
                                 <h4>{item.missions.title}</h4>
@@ -157,18 +165,18 @@
 
                             <div class="progress-container">
                                 <div class="progress-info">
-                                    <span class="progress-status">{getProgressLabel(item.progress, item.completed)}</span>
-                                    <span class="progress-percent">{item.progress || 0}%</span>
+                                    <span class="progress-status">{getProgressLabel(currentProgress, item.completed)}</span>
+                                    <span class="progress-percent">{currentProgress}%</span>
                                 </div>
 
                                 <div class="progress-bar-wrapper">
                                     <div class="progress-bar-bg">
                                         <div
                                                 class="progress-bar-fill"
-                                                style="width: {item.progress || 0}%; background-color: {getBarColor(item.progress, item.completed)};"
+                                                style="width: {currentProgress}%; background-color: {getBarColor(currentProgress, item.completed)};"
                                         >
-                                            {#if item.progress > 10}
-                                                <span class="progress-inner-text"></span>
+                                            {#if currentProgress > 10}
+                                                <span class="progress-inner-text">{currentProgress}%</span>
                                             {/if}
                                         </div>
                                     </div>
@@ -177,7 +185,7 @@
 
                             {#if item.completed}
                                 <div class="stamp">✓ ERLEDIGT</div>
-                            {:else if item.progress > 0}
+                            {:else if currentProgress > 0}
                                 <div class="progress-icon">🔥</div>
                             {/if}
                         </div>
@@ -186,8 +194,18 @@
             </div>
         {/if}
 
+        <AvatarSelector
+                userId={profile.id}
+                userLevel={profile.level}
+                currentAvatarUrl={profile.avatar_url}
+                onAvatarUpdated={(newUrl) => {
+                profile.avatar_url = newUrl;
+            }}
+        />
     {/if}
 </div>
+
+<!-- Styles bleiben gleich -->
 
 
 <style>
