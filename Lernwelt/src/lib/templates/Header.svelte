@@ -64,7 +64,7 @@
     <div class="icon-container">
         <button type="button" title="Suche" class="search"><img alt="Search" src={search}> </button>
         <button type="button" title="Fragen" class="q_mark"> <img alt="q_mark" src={q_mark}> </button>
-        <button type="button" title="Einloggen" class="login" onclick={toggleLogin}> <img alt="Login" src={login}> </button>
+        <button type="button" title="Einloggen" class="login" > <img alt="Login" src={login}> </button>
         <button type="button" title="Menü ausklappen" class="menu" onclick={toggleMenu}><img alt="Menu" src={menu}></button>
     </div>
 </nav>
@@ -88,14 +88,14 @@
                 {/if}
 
                 <li class="nav__items" id="sub">
-                    <a href="#">
+                    <a href="/material_page_id14">
                         <img alt="Fächer" src={subject}>
                         <span class="nav-text">Fächer</span>
                     </a>
                 </li>
 
                 <li class="nav__items" id="task">
-                    <a href="#">
+                    <a href="game_page_id12">
                         <img alt="Aufgaben" src={task}>
                         <span class="nav-text">Aufgaben</span>
                     </a>
