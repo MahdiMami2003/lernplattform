@@ -57,7 +57,7 @@
     <p>Logge dich ein, um deine Lernfortschritte zu sehen.</p>
 
     <form on:submit|preventDefault={handleLogin}>
-        <input type="email" placeholder="E-Mail" bind:value={email} required>
+        <input type="email" placnpmeholder="E-Mail" bind:value={email} required>
         <br>
         <input type="password" placeholder="Passwort" bind:value={password} required>
         <br>

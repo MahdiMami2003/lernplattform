@@ -33,7 +33,7 @@
 	/* ========== STATE (MUSS MIT $state()!!!) ========== */
 	let loading = $state(true);
 	let loadError = $state<string | null>(null);
-	let profile = $state<Profile | null>(null);
+	let profiles = $state<Profile | null>(null);
 
 	let xp = $state(0);
 	let level = $state(1);
@@ -66,8 +66,8 @@
 	}
 
 	async function updateProfile(update: Partial<Profile>) {
-		if (!profile) return;
-		await supabase.from('profiles').update(update).eq('id', profile.id);
+		if (!profiles) return;
+		await supabase.from('profiles').update(update).eq('id', profiles.id);
 	}
 
 	/* ========= LOAD DATA ========= */
@@ -92,15 +92,22 @@
 					.single();
 
 				if (profileData) {
-					profile = profileData;
+					profiles = profileData;
 					xp = profileData.xp ?? 0;
 					level = profileData.level ?? 1;
 					streak = profileData.streak ?? 0;
 					hearts = profileData.hearts ?? MAX_HEARTS;
+
+					// ⭐ NEU HINZUFÜGEN:
+					if (profiles.hearts < MAX_HEARTS) {
+						hearts = MAX_HEARTS;
+						await updateProfile({ hearts: MAX_HEARTS });
+						console.log("❤️ Herzen automatisch zurückgesetzt (neues Spiel)");
+					}
 				}
 			} else {
 				console.log('⚠ Kein Login – Spiel läuft im Gastmodus');
-				profile = null; // Gast-User
+				profiles = null; // Gast-User
 			}
 
 			/* ===============================
@@ -191,10 +198,19 @@
 		xp += amount;
 		sessionXp += amount;
 
-		if (profile) {   // Nur speichern, wenn Profil existiert!
-			await updateProfile({ xp });
+		// Level Up hier prüfen 👇👇👇
+		if (xp >= 100) {
+			xp -= 100;
+			level++;
+			levelUpVisible = true;
+			setTimeout(() => (levelUpVisible = false), 2000);
+		}
+
+		if (profiles) {
+			await updateProfile({ xp, level }); // ← beide speichern
 		}
 	}
+
 
 
 	async function loseHeart() {
@@ -221,8 +237,14 @@
 		hearts = MAX_HEARTS;
 		correctCount = 0;
 
-		await loadProfileAndQuestions(); // ← lädt 5 NEUE Fragen!
+		// ❤️ WICHTIG: Datenbank aktualisieren!
+		if (profiles) {
+			await updateProfile({ hearts: MAX_HEARTS });
+		}
+
+		await loadProfileAndQuestions();  // NEUES SPIEL
 	}
+
 
 
 
@@ -243,7 +265,10 @@
 {:else if questions.length === 0}
 	<div class="error">
 		<p>Für Mathe sind aktuell keine Fragen vorhanden.</p>
-		<button on:click={() => goto('/student_landing_page_id5')}>Zurück zum Dashboard</button>
+		<button on:click={() => goto('/student_landing_page_id5', { reload: true })}>
+			Dashboard
+		</button>
+
 	</div>
 
 {:else}
