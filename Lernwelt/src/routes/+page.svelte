@@ -6,7 +6,7 @@
     function goTeacher() { goto('/teacher_landing_page_id6'); }
     function goParent() { goto('/parents_landing_page_id4'); }
     function goReg() { goto('/register_page_id3'); }
-    function goGuest() { goto('/guest_dashboard'); }
+    function goGuest() { goto('/no_login_page_id7'); }
 
     let email = '';
     let password = '';
@@ -127,7 +127,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: rgba(255, 255, 255, 0.9);
+        background-color: rgba(255, 255, 255);
         padding: clamp(1.5rem, 4vw, 3rem);
         margin: 1.5rem auto;
         width: min(95%, 600px);
