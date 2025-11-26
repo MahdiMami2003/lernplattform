@@ -7,7 +7,10 @@
     let email = '';
     let password = '';
     let confirmPassword = '';
-    let role = ''; // Standard-Wert setzen, damit immer was ausgewählt ist
+
+    // Standard-Wert setzen
+    let role = 'student';
+
     let termsAccepted = false;
     let message = '';
 
@@ -15,7 +18,7 @@
         try {
             message = '';
 
-            // Validierung
+            // 1. Validierung
             if (password !== confirmPassword) {
                 message = 'Die Passwörter stimmen nicht überein.';
                 return;
@@ -26,10 +29,7 @@
                 return;
             }
 
-            // 1. User registrieren
-            // WICHTIG: Wir senden 'role' und 'full_name' hier mit.
-            // Dein Datenbank-Trigger (handle_new_user) nimmt diese Daten
-            // und erstellt das Profil + Missionen AUTOMATISCH.
+            // 2. User registrieren
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
                 password,
@@ -43,12 +43,36 @@
 
             if (authError) throw authError;
 
-            // 2. Erfolg
-            message = 'Registrierung erfolgreich! Du wirst weitergeleitet...';
+            // 3. Prüfen & Weiterleiten
+            if (authData.session) {
+                message = 'Registrierung erfolgreich! Leite weiter...';
 
-            setTimeout(() => {
-                goto('/login_page_id2');
-            }, 1000);
+                // Kurze Pause für die UX (damit man die Nachricht liest)
+                setTimeout(async () => {
+
+                    // HIER IST DIE NEUE LOGIK:
+                    // Wir nutzen die Variable 'role', die der User oben ausgewählt hat.
+
+                    if (role === 'student') {
+                        await goto('/student_landing_page_id5');
+                    }
+                    else if (role === 'teacher') {
+                        await goto('/teacher_landing_page_id6');
+                    }
+                    else if (role === 'parent') {
+                        await goto('/parents_landing_page_id4');
+                    }
+                    else {
+                        // Fallback, falls irgendwas schief läuft
+                        await goto('/');
+                    }
+
+                }, 1000);
+
+            } else {
+                // Falls "Confirm Email" in Supabase doch noch an ist
+                message = 'Registrierung erfolgreich! Bitte bestätige deine E-Mail.';
+            }
 
         } catch (error) {
             console.error('Fehler:', error);
@@ -107,7 +131,7 @@
     </form>
 
     {#if message}
-        <p style="color: #fff; margin-top: 1rem;">{message}</p>
+        <p style="color: #fff; margin-top: 1rem; font-weight: bold;">{message}</p>
     {/if}
 
     <a href="/login_page_id2" class="login-link">Schon registriert? Hier einloggen</a>
@@ -129,7 +153,7 @@
     form {
         background-color: #f3be6a;
         align-items: center;
-        height: auto; /* Geändert von fix 500px, damit es flexibler ist */
+        height: auto;
         min-height: 500px;
         width: 400px;
         padding: 0.7rem;
