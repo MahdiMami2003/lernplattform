@@ -295,6 +295,77 @@
 {/if}
 
 
+
+
+
+
+
+<script>
+
+    import logo from '$lib/assets/icons/Logo.png'
+
+    import login from '$lib/assets/icons/login.png'
+
+    import q_mark from '$lib/assets/icons/fragezeichen.png'
+
+    import register from '$lib/assets/icons/register.png'
+
+    import search from '$lib/assets/icons/search.png'
+
+    import menu from '$lib/assets/icons/menu.png'
+
+    import access from '$lib/assets/icons/access.png'
+
+    import classroom from '$lib/assets/icons/class.png'
+
+    import progress from '$lib/assets/icons/prog.png'
+
+    import subject from '$lib/assets/icons/sub.png'
+
+    import task from '$lib/assets/icons/tasks.png'
+
+
+
+    //Nav-bar
+
+    let testlogin = false;
+
+    let isMenuOpen = false;
+
+    let innerW = 0;
+
+
+
+    function toggleLogin(){
+
+        testlogin = !testlogin;
+
+    }
+
+    function toggleMenu() {
+
+        isMenuOpen = !isMenuOpen;
+
+    }
+
+
+
+		$effect(() => {
+			if (innerW > 1000) {
+
+            if (isMenuOpen) {
+
+                toggleMenu();
+
+            }
+
+        }
+
+    });
+
+
+</script>
+
 <style>
     :global(.main_container) {
         background-color: white;

@@ -35,7 +35,7 @@
             // Leite basierend auf der Rolle weiter
             if (userData.role === 'student') {
                 await goto('/student_landing_page_id5');
-            } else if (userData.role === 'teacher') {
+            } else if (userData.role === 'teacher' || userData.role === 'admin') {
                 await goto('/teacher_landing_page_id6'); // Passe den Pfad an
             } else if (userData.role === 'parent') {
                 await goto('/parents_landing_page_id4'); // Passe den Pfad an
