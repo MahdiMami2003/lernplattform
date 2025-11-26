@@ -156,7 +156,7 @@
         height: auto;
         min-height: 500px;
         width: 400px;
-        padding: 0.7rem;
+        padding: 1rem 0.7rem 1rem 0.7rem;
         border-radius: 10px;
         display: flex;
         flex-direction: column;
