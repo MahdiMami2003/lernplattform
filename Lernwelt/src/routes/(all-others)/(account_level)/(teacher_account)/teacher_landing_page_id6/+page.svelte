@@ -35,7 +35,15 @@
     <p class="untertitel">
         Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten
     </p>
+    <div class="tipps">
+        <h2>Pädagogische Tipps</h2>
+        <div class="tipps-grid">
+            <p>Lernstrategien zur Unterstützung Ihrer Schüler
+                <button class="small-btn">Tipps bearbeiten</button>
+            </p>
 
+        </div>
+    </div>
     <section class="classes-section">
         <h2>Ihre Klassen & Fächer</h2>
 
@@ -120,23 +128,30 @@
     .überschrift {
         display: flex;
         justify-content: center;
-        font-size: 70px;
+        font-size: clamp(1.8rem, 4vw, 4rem);
+        text-align: center;
     }
     .untertitel{
         display: flex;
         justify-content: center;
-        margin-top: -35px;
+        font-size: clamp(0.9rem, 2.2vw, 1.4rem);
+        margin-top: clamp(0.5rem, 2vw, 2rem);
+        text-align: center;
+    }
+    .tipps-grid{
+        background-color: #F5F5DC;
+        border-radius: 0.9rem;
+        border: 1px solid #D5DFEC;
+        font-size: clamp(0.8rem, 1.8vw, 1rem);
+        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
     }
     .class-card {
-        background-color: #F3BE6A;
+        background-color: #F5F5DC;
         border-radius: 0.9rem;
         padding: 1rem 1.2rem;
         border: 1px solid #D5DFEC;
         box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
-        min-width: 230px;
-        max-width: 300px;
-        height: 200px;
-        flex: 1 1 230px;
+        font-size: clamp(0.8rem, 1.8vw, 1rem);
     }
     .class-grid{
         display: flex;
@@ -150,14 +165,8 @@
         font-size: 0.9rem;
     }
     .small-btn {
-        margin-left: 0.4rem;
-        padding: 0.1rem 0.4rem;
-        font-size: 0.8rem;
-        border-radius: 0.5rem;
-        border: none;
-        background-color: beige;
-        color: black;
-        font-weight: 600;
+        font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+        border-color: #4CAF50;
         cursor: pointer;
     }
     .admin-panel {
