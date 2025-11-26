@@ -95,6 +95,13 @@
 					level = profileData.level ?? 1;
 					streak = profileData.streak ?? 0;
 					hearts = profileData.hearts ?? MAX_HEARTS;
+
+					// ⭐ NEU HINZUFÜGEN:
+					if (profile.hearts < MAX_HEARTS) {
+						hearts = MAX_HEARTS;
+						await updateProfile({ hearts: MAX_HEARTS });
+						console.log("❤️ Herzen automatisch zurückgesetzt (neues Spiel)");
+					}
 				}
 			} else {
 				console.warn("⚠ Kein Login – Gastmodus");
@@ -190,8 +197,16 @@
 		xp += amount;
 		sessionXp += amount;
 
-		if (profile) {   // Nur speichern, wenn Profil existiert!
-			await updateProfile({ xp });
+		// Level Up hier prüfen
+		if (xp >= 100) {
+			xp -= 100;
+			level++;
+			levelUpVisible = true;
+			setTimeout(() => (levelUpVisible = false), 2000);
+		}
+
+		if (profile) {
+			await updateProfile({ xp, level }); // ← beide speichern
 		}
 	}
 
@@ -220,13 +235,16 @@
 		hearts = MAX_HEARTS;
 		correctCount = 0;
 
-		await loadProfileAndQuestions(); // ← lädt 5 NEUE Fragen!
-	}
+		// ️ WICHTIG: Datenbank aktualisieren!
+		if (profile) {
+			await updateProfile({ hearts: MAX_HEARTS });
+		}
 
 
 
 
 	onMount(loadProfileAndQuestions);
+
 </script>
 
 
@@ -242,7 +260,9 @@
 {:else if questions.length === 0}
 	<div class="error">
 		<p>Für Mathe sind aktuell keine Fragen vorhanden.</p>
-		<button on:click={() => goto('/student_landing_page_id5')}>Zurück zum Dashboard</button>
+		<button on:click={() => goto('/student_landing_page_id5', { reload: true })}>
+			Dashboard
+		</button>
 	</div>
 
 {:else}

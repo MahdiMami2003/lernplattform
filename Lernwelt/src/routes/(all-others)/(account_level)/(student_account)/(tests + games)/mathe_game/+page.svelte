@@ -169,7 +169,7 @@
 	}
 	/* ========= ANSWER CLICK ========== */
 	function handleAnswerClick(index: number) {
-		if (locked || showSummary || outOfHearts) return; // ⛔ Klick-Sperre
+		if (locked || showSummary || outOfHearts) return; //  Klick-Sperre
 
 		console.log("Klick funktioniert! Index =", index); // TEST
 		selectedIndex = index;   // Antwort speichern
@@ -198,7 +198,7 @@
 		xp += amount;
 		sessionXp += amount;
 
-		// Level Up hier prüfen 👇👇👇
+		// Level Up hier prüfen
 		if (xp >= 100) {
 			xp -= 100;
 			level++;
@@ -237,7 +237,7 @@
 		hearts = MAX_HEARTS;
 		correctCount = 0;
 
-		// ❤️ WICHTIG: Datenbank aktualisieren!
+		// ️ WICHTIG: Datenbank aktualisieren!
 		if (profiles) {
 			await updateProfile({ hearts: MAX_HEARTS });
 		}
@@ -324,12 +324,13 @@
 					{#each questions[currentIndex].answers as ans, i}
 						{#if ans}
 							<button
-								class="answer-btn ..."
+								class="answer-btn {locked && i === questions[currentIndex].correctIndex ? 'correct' : ''} {locked && selectedIndex === i && selectedIndex !== questions[currentIndex].correctIndex ? 'wrong' : ''}"
 								on:click={() => handleAnswerClick(i)}
 								disabled={locked}
 							>
-							{ans}
+								{ans}
 							</button>
+
 						{/if}
 					{/each}
 				</div>
@@ -787,5 +788,15 @@
             opacity: 0;
             transform: translateY(16px);
         }
+    .answer-btn.correct {
+        background: #c6f6d5;
+        border-color: #3ba776;
+    }
+
+    .answer-btn.wrong {
+        background: #ffd1d1;
+        border-color: #ff6b6b;
+    }
+
     }
 </style>
