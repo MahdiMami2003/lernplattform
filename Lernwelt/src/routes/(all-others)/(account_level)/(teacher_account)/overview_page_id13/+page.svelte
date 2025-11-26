@@ -1,9 +1,11 @@
 <script>
+    import { supabase } from '$lib/supabaseClient.js';
 </script>
 
 
 <div id="placeholder">
-    Übersichtsseite Lehrer
+    <p>Übersichtsseite Lehrer</p>
+
 </div>
 
 
