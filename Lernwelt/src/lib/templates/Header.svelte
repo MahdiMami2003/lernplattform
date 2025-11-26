@@ -11,15 +11,15 @@
     import subject from '$lib/assets/icons/sub.png';
     import task from '$lib/assets/icons/tasks.png';
 
-    // WICHTIG: Das ist der native Ersatz für svelte-motion
+
     import { fly } from 'svelte/transition';
 
-    //Nav-bar State (Svelte 5 Runes Syntax)
+
     let testlogin = $state(false);
     let isMenuOpen = $state(false);
     let innerW = $state(0);
 
-    // Steuert, welches Menü links angezeigt wird (true = Hauptmenü, false = Barrierefrei-Menü)
+
     let showMainSidebar = $state(true);
 
     function going_dark(e){
@@ -54,7 +54,7 @@
 </script>
 
 <nav class="header-root">
-    <a style="text-decoration: none" href="/">
+    <a style="text-decoration: none" href="/register_page_id3">
         <div title="Zum Hauptmenü" class="signature">
             <img class="logo" src={logo} alt="Schul-Logo">
             <p>HSGG-Lernwelt</p>
@@ -80,7 +80,7 @@
             <ul class="nav">
                 {#if !testlogin}
                     <li class="nav__items" id="reg">
-                        <a href="#">
+                        <a href="/register_page_id3">
                             <img alt="Registrieren" src={register}>
                             <span class="nav-text">Registrieren</span>
                         </a>
@@ -160,10 +160,10 @@
 {#if isMenuOpen}
     <div class="dd-menu-container">
         <ul>
-            <li><a href="#"><img alt="Search" src={search}>Suchen</a></li>
-            <li><a href="#"><img alt="q_mark" src={q_mark}>Hilfe</a></li>
-            <li><a href="#"><img alt="Login" src={login}>Login</a></li>
-            <li><a href="#"><img alt="Register" src={register}>Registrierung</a></li>
+            <li><a href="#" onclick={toggleMenu}><img alt="Search" src={search}>Suchen</a></li>
+            <li><a href="#" onclick={toggleMenu}><img alt="q_mark" src={q_mark}>Hilfe</a></li>
+            <li><a href="/login_page_id2" onclick={toggleMenu}><img alt="Login" src={login}>Login</a></li>
+            <li><a href="/register_page_id3" onclick={toggleMenu}><img alt="Register" src={register}>Registrierung</a></li>
         </ul>
     </div>
 {/if}
