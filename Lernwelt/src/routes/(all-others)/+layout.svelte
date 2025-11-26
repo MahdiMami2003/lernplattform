@@ -55,7 +55,6 @@
 
     .main_container {
         grid-area: main;
-        background-color: white;
 
         padding: var(--main-padding);
         border-radius: var(--main-radius);
