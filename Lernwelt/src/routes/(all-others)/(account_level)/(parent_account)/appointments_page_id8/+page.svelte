@@ -1,242 +1,281 @@
 <script>
-    import { onMount } from 'svelte';
     import { supabase } from '$lib/supabaseClient.js';
+    import { onMount } from 'svelte';
 
-    let appointments = [];
-    let loading = true;
-    let errorMessage = '';
-
-    // Helper: Uhrzeit formatieren
-    function formatTime(dateString) {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
-    }
-
-    // Helper: Monat (kurz)
-    function getMonth(dateString) {
-        if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString('de-DE', { month: 'short' }).toUpperCase();
-    }
-
-    // Helper: Tag
-    function getDay(dateString) {
-        if (!dateString) return '';
-        return new Date(dateString).toLocaleDateString('de-DE', { day: '2-digit' });
-    }
+    /** @type {string | null} */
+    let userRole = null;
 
     onMount(async () => {
-        try {
-            const { data, error } = await supabase
-                .from('appointments_and_Currents')
-                .select(`
-                    id,
-                    event_date,
-                    title,
-                    classid,
-                    classes ( name )
-                `)
-                .order('event_date', { ascending: true });
+        const { data: { user } } = await supabase.auth.getUser();
 
-            if (error) throw error;
-            appointments = data;
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
 
-        } catch (error) {
-            errorMessage = 'Konnte Daten nicht laden: ' + error.message;
-            console.error(error);
-        } finally {
-            loading = false;
+            if (profile) {
+                userRole = profile.role;
+            }
         }
     });
+
+    async function getAppointments() {
+        const { data, error } = await supabase
+            .from('appointments')
+            .select('*')
+            .order('event_date', { ascending: true });
+
+        if (error) {
+            console.error('Fehler:', error);
+            return [];
+        }
+
+        return data || [];
+    }
+
+    /**
+     * @param {number} id
+     */
+    async function deleteAppointment(id) {
+        if (!confirm('Wirklich löschen?')) return;
+
+        const { error } = await supabase
+            .from('appointments')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert('Fehler beim Löschen!');
+            console.error(error);
+        } else {
+            window.location.reload();
+        }
+    }
+
+    /**
+     * @param {string} dateString
+     */
+    function formatDateTime(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) + ' Uhr';
+    }
 </script>
 
-<div class="content-wrapper">
-    <div class="header-box">
-        <h1>Aktuelles & Termine</h1>
-        <p>Alle wichtigen Ereignisse der HSG-Lernwelt.</p>
+<div id="placeholder">
+    <div class="header">
+        <h1>Neuigkeiten & Termine</h1>
+        {#if userRole === 'admin' || userRole === 'teacher'}
+            <a href="/create_appointments_page" class="add-button">➕ Neuen Termin hinzufügen</a>
+        {/if}
     </div>
 
-    {#if loading}
-        <div class="status-msg">
-            <span class="spinner">⏳</span> Lade Termine...
-        </div>
-    {:else if errorMessage}
-        <div class="status-msg error">⚠️ {errorMessage}</div>
-    {:else if appointments.length === 0}
-        <div class="empty-state">
-            <p>Aktuell stehen keine neuen Termine an.</p>
-        </div>
-    {:else}
-        <div class="events-grid">
-            {#each appointments as item}
-                <div class="event-card">
-
-                    <div class="date-badge">
-                        <span class="day">{getDay(item.event_date)}</span>
-                        <span class="month">{getMonth(item.event_date)}</span>
-                    </div>
-
-                    <div class="card-content">
-                        <h3>{item.title || 'Ohne Titel'}</h3>
-
-                        <div class="meta-info">
-                            <span class="info-item time">
-                                🕒 {formatTime(item.event_date)}
-                            </span>
-
-                            {#if item.classid && item.classes}
-                                <span class="tag class-tag">
-                                    Klasse {item.classes.name}
-                                </span>
-                            {:else}
-                                <span class="tag global-tag">
-                                    Allgemein
-                                </span>
-                            {/if}
+    {#await getAppointments()}
+        <p>Lade Termine...</p>
+    {:then appointments}
+        {#if appointments && appointments.length > 0}
+            <div class="appointments-list">
+                {#each appointments as appointment}
+                    <div class="appointment-card">
+                        <div class="card-header">
+                            <div class="header-content">
+                                <h2>{appointment.title}</h2>
+                                <span class="date-badge">{formatDateTime(appointment.event_date)}</span>
+                            </div>
+                            <button class="delete-btn" on:click={() => deleteAppointment(appointment.id)}>
+                                🗑️ Löschen
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p>{appointment.content || '-'}</p>
                         </div>
                     </div>
-                </div>
-            {/each}
-        </div>
-    {/if}
+                {/each}
+            </div>
+
+            <!-- Button NACH der Liste, nicht in der Schleife -->
+            <a href="/create_appointments_page" class="bottom-btn">➕ Neuen Termin hinzufügen</a>
+
+        {:else}
+            <p class="empty-message">Aktuell stehen keine Termine an.</p>
+        {/if}
+    {:catch error}
+        <p style="color: red;">Fehler beim Laden</p>
+    {/await}
 </div>
 
 <style>
-    /* Wir brauchen hier keinen Page-Container mit Background mehr,
-       da dein Layout (.main_container) das schon macht.
-       Wir nutzen 100% Breite des verfügbaren Platzes.
-    */
-    .content-wrapper {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    /* --- Header (Gold/Gelb) --- */
-    .header-box {
-        background-color: #f3be6a;
-        color: #236C93;
-        padding: 2rem;
-        border-radius: 12px;
-        text-align: center;
-        /* Leichter Schatten passend zu deinem Layout Stil */
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .header-box h1 {
+    #placeholder {
         margin: 0;
-        font-size: 2rem; /* Passt sich gut in den Container ein */
-        color: #fff;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+        padding: 20px;
+        min-height: 100vh;
     }
 
-    .header-box p {
-        color: #fff;
-        font-weight: 600;
-        margin-top: 0.5rem;
-        font-size: 1rem;
-    }
-
-    /* --- Grid Layout --- */
-    .events-grid {
-        display: grid;
-        /* Automatisch anpassen: 1 Spalte auf Handy, 2 auf Tablets/Desktop, wenn Platz da ist */
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-
-    /* --- Karte --- */
-    .event-card {
-        background: #f9f9f9; /* Leicht abgesetzt vom weißen Main-Container Hintergrund */
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 1rem;
+    .header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 1rem;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-bottom: 30px;
     }
 
-    .event-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(35, 108, 147, 0.15);
-        border-color: #f3be6a;
-        background: #fff;
+    h1 {
+        color: #333;
+        margin: 0;
+        font-size: 2rem;
     }
 
-    /* --- Datums Badge --- */
-    .date-badge {
-        background-color: #236C93;
+    .add-button {
+        background: #548db9;
         color: white;
-        border-radius: 8px;
-        width: 60px;
-        height: 60px;
+        padding: 12px 24px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+    .add-button:hover {
+        background: #66a5e5;
+    }
+
+    .appointments-list {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0;
+        gap: 0;
     }
-    .date-badge .day { font-size: 1.4rem; font-weight: 800; line-height: 1; }
-    .date-badge .month { font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
 
-    /* --- Inhalt --- */
-    .card-content {
+    .appointment-card {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        background: rgba(201, 120, 12, 0.59);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-content {
         flex: 1;
-        min-width: 0; /* Verhindert Layout-Break bei langem Text */
-    }
-
-    h3 {
-        margin: 0 0 0.4rem 0;
-        color: #333;
-        font-size: 1.15rem;
-        line-height: 1.3;
-    }
-
-    .meta-info {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 0.8rem;
-        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .date-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 12px;
+        border-radius: 15px;
         font-size: 0.9rem;
-        color: #666;
+        font-weight: 500;
+        white-space: nowrap;
     }
 
-    .info-item {
-        display: flex;
-        align-items: center;
-        gap: 4px;
+    .delete-btn {
+        padding: 8px 14px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        margin-left: 15px;
     }
 
-    /* --- Tags --- */
-    .tag {
-        padding: 0.2rem 0.6rem;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
+    .delete-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
-    .global-tag { background-color: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
-    .class-tag { background-color: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
 
-    /* --- Messages --- */
-    .status-msg { text-align: center; color: #555; padding: 2rem; font-weight: bold;}
-    .error { color: #d32f2f; }
-    .empty-state { text-align: center; color: #888; font-style: italic; padding: 2rem; }
+    .card-body {
+        background: #F5F5DC;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-top: none;
+    }
 
-    /* Mobile Optimierung für dein Grid */
-    @media (max-width: 500px) {
-        .event-card {
+    .card-body p {
+        margin: 0;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .bottom-btn {
+        display: block;
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(52, 85, 108, 0.71);
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+    .bottom-btn:hover {
+        background: #3d7bb8;
+    }
+
+    .empty-message {
+        text-align: center;
+        color: #999;
+        font-style: italic;
+        padding: 40px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .add-button {
+            text-align: center;
+        }
+
+        .header-content {
             flex-direction: column;
             align-items: flex-start;
+            gap: 10px;
         }
-        .date-badge {
+
+        .card-header {
+            flex-direction: column;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .delete-btn {
+            margin-left: 0;
             width: 100%;
-            height: 40px;
-            flex-direction: row;
-            gap: 0.5rem;
         }
-        .date-badge .month { margin-top: 2px; }
+
+        .date-badge {
+            align-self: flex-start;
+        }
     }
 </style>
