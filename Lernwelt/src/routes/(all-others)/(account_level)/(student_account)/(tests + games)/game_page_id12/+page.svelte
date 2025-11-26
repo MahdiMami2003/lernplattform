@@ -15,20 +15,46 @@
 	/* ============================ STATE ============================ */
 	let profile: UserProfile | null = null;
 	let userName = "Schüler";
-	let xp = 0;
-	let level = 1;
-	let avatar =
-		"https://cdn-icons-png.flaticon.com/512/921/921071.png";
+	let xp = $state(0);
+	let level = $state(1);
+	let avatar = $state("https://cdn-icons-png.flaticon.com/512/921/921071.png");
 
-	let avatarModal = false;
-	let levelUpVisible = false;
+
+	let avatarModal = $state(false);
+	let levelUpVisible = $state(false);
+
 
 	const avatars: string[] = [
 		"https://cdn-icons-png.flaticon.com/512/921/921071.png",
 		"https://cdn-icons-png.flaticon.com/512/1998/1998671.png",
 		"https://cdn-icons-png.flaticon.com/512/1998/1998749.png",
-		"https://cdn-icons-png.flaticon.com/512/1998/1998728.png"
+		"https://cdn-icons-png.flaticon.com/512/1998/1998728.png",
+		"https://cdn-icons-png.flaticon.com/512/4331/4331403.png",  // neutral
+		"https://cdn-icons-png.flaticon.com/512/4331/4331396.png",  // neutral
+		"https://cdn-icons-png.flaticon.com/512/194/194938.png",   // junge männlich
+		"https://cdn-icons-png.flaticon.com/512/194/194935.png",   // junges Mädchen
+		"https://cdn-icons-png.flaticon.com/512/147/147144.png",   // Frau Cartoon
+		"https://cdn-icons-png.flaticon.com/512/147/147131.png",   // Mann Cartoon
+		"https://cdn-icons-png.flaticon.com/512/847/847969.png",   // Kind Cartoon
+		"https://cdn-icons-png.flaticon.com/512/847/847970.png"    // Kind Cartoon
 	];
+
+
+
+	// FUNKTION – Avatar speichern
+	async function selectAvatar(a: string) {
+		if (!profile) return;
+		avatar = a;
+		avatarModal = false;
+
+		await supabase
+			.from("profiles")
+			.update({ avatar_url: a })
+			.eq("id", profile.id);
+
+		console.log("✔ Avatar gespeichert:", a);
+	}
+
 
 	// ============================
 	// PROFIL LADEN (MIT GASTMODUS)
@@ -86,17 +112,7 @@
 			.eq("id", profile.id);
 	}
 
-	// AVATAR SELECT
-	async function selectAvatar(a: string) {
-		if (!profile) return;
-		avatar = a;
-		avatarModal = false;
 
-		await supabase
-			.from("profiles")
-			.update({ avatar_url: a })
-			.eq("id", profile.id);
-	}
 
 	// MOUNT
 	onMount(async () => {
@@ -108,9 +124,30 @@
 
 <!-- ================= UI ================= -->
 <section class="hero">
-	<div class="avatar-wrapper" on:click={() => (avatarModal = true)}>
-		<img class="avatar-img" src={avatar} alt="avatar" />
+
+	<!-- Avatar ANZEIGEN (fehlt bei dir!) -->
+	<div class="avatar-wrapper">
+		<img
+			class="avatar-img"
+			src={avatar}
+			alt="avatar"
+			on:click={() => (avatarModal = true)}
+		/>
+
 	</div>
+
+
+	{#if avatarModal}
+		<div class="modal-bg" on:click={() => (avatarModal = false)}></div>
+		<div class="modal">
+			<h2>Wähle deinen Avatar</h2>
+			<div class="avatar-list">
+				{#each avatars as a}
+					<img src={a} alt="avatar" on:click={() => selectAvatar(a)} />
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	<h1>Willkommen zurück, {userName} 👋</h1>
 	<p>Deine Lernreise geht weiter.</p>
@@ -278,4 +315,45 @@
         font-weight: bold;
         z-index: 999;
     }
+
+    .modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.3);
+    }
+
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+
+    .avatar-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .avatar-list img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .avatar-list img:hover {
+        transform: scale(1.1);
+        border: 3px solid #3ba776;
+    }
+
+
+
 </style>
