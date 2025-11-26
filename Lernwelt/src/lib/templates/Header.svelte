@@ -54,7 +54,7 @@
 </script>
 
 <nav class="header-root">
-    <a style="text-decoration: none" href="/register_page_id3">
+    <a style="text-decoration: none" href="/">
         <div title="Zum Hauptmenü" class="signature">
             <img class="logo" src={logo} alt="Schul-Logo">
             <p>HSGG-Lernwelt</p>
