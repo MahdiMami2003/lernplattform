@@ -332,6 +332,7 @@
         transform: translateY(-4px);
         box-shadow: 0 6px 20px rgba(35, 108, 147, 0.15);
         border-color: #236C93;
+        cursor: pointer;
     }
 
     .mission-card.in-progress {
