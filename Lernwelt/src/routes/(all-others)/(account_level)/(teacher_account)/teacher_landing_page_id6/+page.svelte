@@ -5,6 +5,7 @@
 
     let role = $state(null);
     let userId = $state(null);
+    let classes = $state([]);
 
     onMount(async () => {
         const { data, error } = await supabase.auth.getUser();
@@ -24,11 +25,22 @@
         if (profileError) {
             console.error("Fehler beim Holen des Profils:", profileError);
             return;
+        } else {
+            console.log("Gefundenes Profil:", profile);
+            role = profile.role;         // z.B. "teacher" oder "admin"
         }
+        // 3. Klassen holen (Dynamisch aus der DB)
+        const { data: classesData, error: classesError } = await supabase
+            .from("classes")
+            .select("*")
+            .order("name", { ascending: true }); // Sortiert nach Namen (5a, 5b...)
 
-        console.log("Gefundenes Profil:", profile);
-        role = profile.role;         // z.B. "teacher" oder "admin"
-    });
+        if (classesError) {
+            console.error("Fehler beim Laden der Klassen:", classesError);
+        } else {
+            classes = classesData;
+        }
+        });
 </script>
 <div id="placeholder">
     <h1 class="überschrift">Lehrpersonen-Dashboard</h1>
@@ -48,65 +60,34 @@
         <h2>Ihre Klassen & Fächer</h2>
 
         <div class="class-grid">
-            <!-- Klasse 5a -->
-            <article class="class-card">
-                <h3>Klasse 5a</h3>
-                <p class="class-info">Fächer:</p>
-                <ul>
-                    <li>
-                        Mathematik
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                    <li>
-                        Deutsch
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                    <li>
-                        Biologie
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                </ul>
-            </article>
-
-            <!-- Klasse 5b -->
-            <article class="class-card">
-                <h3>Klasse 5b</h3>
-                <p class="class-info">Fächer:</p>
-                <ul>
-                    <li>
-                        Mathematik
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                    <li>
-                        Deutsch
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                    <li>
-                        Biologie
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                </ul>
-            </article>
-
-            <!-- Klasse 5c -->
-            <article class="class-card">
-                <h3>Klasse 5c</h3>
-                <p class="class-info">Fächer:</p>
-                <ul>
-                    <li>
-                        Mathematik
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                    <li>
-                        Deutsch
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                    <li>
-                        Biologie
-                        <a href="/material_page_id14"><button class="small-btn">Lernmaterial bearbeiten</button></a>
-                    </li>
-                </ul>
-            </article>
+            {#if classes.length === 0}
+                <p>Lade Klassen oder keine Klassen vorhanden...</p>
+            {:else}
+                {#each classes as schoolClass}
+                    <article class="class-card">
+                        <h3>
+                            <a href="/class_page_id9/{schoolClass.id}" class="class-link">
+                                {schoolClass.name}
+                            </a>
+                        </h3>
+                        <p class="class-info">Fächer:</p>
+                        <ul>
+                            <li>
+                                Mathematik
+                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
+                            </li>
+                            <li>
+                                Deutsch
+                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
+                            </li>
+                            <li>
+                                Biologie
+                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
+                            </li>
+                        </ul>
+                    </article>
+                {/each}
+            {/if}
         </div>
     </section>
 
@@ -122,6 +103,16 @@
 </div>
 
 <style>
+
+    .class-link {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.2s;
+    }
+    .class-link:hover {
+        color: #d89c48; /* Ein etwas dunklerer Ton beim Hover */
+        text-decoration: underline;
+    }
     /* ---- Grundlayout ---- */
     #placeholder {
         min-height: 100vh;
