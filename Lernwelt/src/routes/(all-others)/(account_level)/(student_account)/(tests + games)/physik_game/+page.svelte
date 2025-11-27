@@ -41,6 +41,7 @@
 	const MAX_HEARTS = 3;
 	let hearts = $state(MAX_HEARTS);
 
+
 	let questions = $state<Question[]>([]);
 	let currentIndex = $state(0);
 	let selectedIndex = $state<number | null>(null);
@@ -96,6 +97,12 @@
 					level = profileData.level ?? 1;
 					streak = profileData.streak ?? 0;
 					hearts = profileData.hearts ?? MAX_HEARTS;
+					//  NEU HINZUFÜGEN:
+					if (profile.hearts < MAX_HEARTS) {
+						hearts = MAX_HEARTS;
+						await updateProfile({ hearts: MAX_HEARTS });
+						console.log("❤️ Herzen automatisch zurückgesetzt (neues Spiel)");
+					}
 				}
 			} else {
 				console.warn("⚠ Kein Login – Gastmodus aktiviert");
@@ -185,8 +192,16 @@
 		xp += amount;
 		sessionXp += amount;
 
-		if (profile) {   // Nur speichern, wenn Profil existiert!
-			await updateProfile({ xp });
+		// Level Up hier prüfen
+		if (xp >= 100) {
+			xp -= 100;
+			level++;
+			levelUpVisible = true;
+			setTimeout(() => (levelUpVisible = false), 2000);
+		}
+
+		if (profile) {
+			await updateProfile({ xp, level }); // ← beide speichern
 		}
 	}
 
@@ -207,6 +222,7 @@
 		}
 	}
 
+
 	async function restartLesson() {
 		currentIndex = 0;
 		selectedIndex = null;
@@ -215,12 +231,13 @@
 		hearts = MAX_HEARTS;
 		correctCount = 0;
 
-		await loadProfileAndQuestions(); // ← lädt 5 NEUE Fragen!
+		// ️ WICHTIG: Datenbank aktualisieren!
+		if (profile) {
+			await updateProfile({ hearts: MAX_HEARTS });
+		}
+
+		await loadProfileAndQuestions();  // NEUES SPIEL
 	}
-
-
-
-
 	onMount(loadProfileAndQuestions);
 </script>
 
@@ -350,7 +367,9 @@
 
 				<div class="summary-actions">
 					<button on:click={restartLesson}>Nochmal spielen</button>
-					<button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
+					<button on:click={() => goto('/student_landing_page_id5', { reload: true })}>
+						Dashboard
+					</button>
 				</div>
 			</section>
 		{/if}
