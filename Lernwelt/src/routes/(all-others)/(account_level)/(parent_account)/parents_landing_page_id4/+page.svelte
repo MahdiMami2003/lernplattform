@@ -37,6 +37,10 @@
         margin: 0;
     }
 
+    #placeholder {
+        height: 100vh;
+    }
+
     a{
         margin: 0;
         color: black;

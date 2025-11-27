@@ -5,6 +5,7 @@
 
     let role = $state(null);
     let userId = $state(null);
+    let classes = $state([]);
 
     onMount(async () => {
         const { data, error } = await supabase.auth.getUser();
@@ -24,11 +25,22 @@
         if (profileError) {
             console.error("Fehler beim Holen des Profils:", profileError);
             return;
+        } else {
+            console.log("Gefundenes Profil:", profile);
+            role = profile.role;         // z.B. "teacher" oder "admin"
         }
+        // 3. Klassen holen (Dynamisch aus der DB)
+        const { data: classesData, error: classesError } = await supabase
+            .from("classes")
+            .select("*")
+            .order("name", { ascending: true }); // Sortiert nach Namen (5a, 5b...)
 
-        console.log("Gefundenes Profil:", profile);
-        role = profile.role;         // z.B. "teacher" oder "admin"
-    });
+        if (classesError) {
+            console.error("Fehler beim Laden der Klassen:", classesError);
+        } else {
+            classes = classesData;
+        }
+        });
 </script>
 <div id="placeholder">
     <h1 class="überschrift">Lehrpersonen-Dashboard</h1>
@@ -39,7 +51,7 @@
         <h2>Pädagogische Tipps</h2>
         <div class="tipps-grid">
             <p>Lernstrategien zur Unterstützung Ihrer Schüler
-                <button class="small-btn">Tipps bearbeiten</button>
+                <a href="/pedagogy_page_id10"><button class="small-btn">Tipps bearbeiten</button></a>
             </p>
 
         </div>
@@ -48,65 +60,34 @@
         <h2>Ihre Klassen & Fächer</h2>
 
         <div class="class-grid">
-            <!-- Klasse 5a -->
-            <article class="class-card">
-                <h3>Klasse 5a</h3>
-                <p class="class-info">Fächer:</p>
-                <ul>
-                    <li>
-                        Mathematik
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                    <li>
-                        Deutsch
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                    <li>
-                        Biologie
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                </ul>
-            </article>
-
-            <!-- Klasse 5b -->
-            <article class="class-card">
-                <h3>Klasse 5b</h3>
-                <p class="class-info">Fächer:</p>
-                <ul>
-                    <li>
-                        Mathematik
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                    <li>
-                        Deutsch
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                    <li>
-                        Biologie
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                </ul>
-            </article>
-
-            <!-- Klasse 5c -->
-            <article class="class-card">
-                <h3>Klasse 5c</h3>
-                <p class="class-info">Fächer:</p>
-                <ul>
-                    <li>
-                        Mathematik
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                    <li>
-                        Deutsch
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                    <li>
-                        Biologie
-                        <button class="small-btn">Lernmaterial bearbeiten</button>
-                    </li>
-                </ul>
-            </article>
+            {#if classes.length === 0}
+                <p>Lade Klassen oder keine Klassen vorhanden...</p>
+            {:else}
+                {#each classes as schoolClass}
+                    <article class="class-card">
+                        <h3>
+                            <a href="/class_page_id9/{schoolClass.id}" class="class-link">
+                                {schoolClass.name}
+                            </a>
+                        </h3>
+                        <p class="class-info">Fächer:</p>
+                        <ul>
+                            <li>
+                                Mathematik
+                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
+                            </li>
+                            <li>
+                                Deutsch
+                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
+                            </li>
+                            <li>
+                                Biologie
+                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
+                            </li>
+                        </ul>
+                    </article>
+                {/each}
+            {/if}
         </div>
     </section>
 
@@ -122,74 +103,134 @@
 </div>
 
 <style>
+
+    .class-link {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.2s;
+    }
+    .class-link:hover {
+        color: #d89c48; /* Ein etwas dunklerer Ton beim Hover */
+        text-decoration: underline;
+    }
+    /* ---- Grundlayout ---- */
     #placeholder {
         min-height: 100vh;
+        font-family: "Inter", Arial, Helvetica, sans-serif;
+        padding-bottom: 2rem;
     }
+
+    /* ---- Titel ---- */
     .überschrift {
         display: flex;
         justify-content: center;
-        font-size: clamp(1.8rem, 4vw, 4rem);
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        font-weight: 700;
         text-align: center;
     }
-    .untertitel{
+
+    .untertitel {
         display: flex;
         justify-content: center;
-        font-size: clamp(0.9rem, 2.2vw, 1.4rem);
+        font-size: clamp(1rem, 2vw, 1.4rem);
         margin-top: clamp(0.5rem, 2vw, 2rem);
+        color: #444;
         text-align: center;
     }
-    .tipps-grid{
-        background-color: #F5F5DC;
-        border-radius: 0.9rem;
-        border: 1px solid #D5DFEC;
-        font-size: clamp(0.8rem, 1.8vw, 1rem);
-        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
-    }
-    .class-card {
-        background-color: #F5F5DC;
-        border-radius: 0.9rem;
+
+    /* ---- Tipps ---- */
+    .tipps-grid {
+        background-color: #fbead7;
+        border-radius: 1.2rem;
+        border: 1px solid #ffeed8;
         padding: 1rem 1.2rem;
-        border: 1px solid #D5DFEC;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
         box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
-        font-size: clamp(0.8rem, 1.8vw, 1rem);
     }
-    .class-grid{
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 5rem;
+
+    /* ---- Klassenübersicht ---- */
+    .class-grid {
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
+
+    .class-card {
+        background-color: #fbead7;
+        border-radius: 1.2rem;
+        padding: 1.2rem 1.4rem;
+        border: 1px solid #ffeed8;
+        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .class-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(15, 41, 64, 0.18);
+    }
+
     .class-card ul {
         margin: 0;
         padding-left: 1rem;
-        font-size: 0.9rem;
     }
+
+    .class-card li {
+        margin-bottom: 0.75rem; /* <-- verhindert Überlappung */
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ---- Buttons klein ---- */
     .small-btn {
-        font-size: clamp(0.7rem, 1.5vw, 0.9rem);
-        border-color: #4CAF50;
+        padding: 0.35rem 0.9rem;
+        background-color: #f4d4b3;
+        font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+        border: 1px solid #f3b06a;
+        color: #000;
+        border-radius: 999px; /* <-- deutlich runder */
         cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s, transform 0.15s;
     }
+
+    .small-btn:hover {
+        background-color: #efc48b;
+        transform: translateY(-1px);
+    }
+
+    /* ---- Admin Panel ---- */
     .admin-panel {
         margin-top: 3rem;
-        padding: 1.5rem;
-        background-color: #F3BE6A;
+        padding: 1.8rem;
+        background-color: #f3be6a;
         border: 2px solid #d8b16c;
-        border-radius: 1rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-radius: 1.2rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
         max-width: 700px;
     }
+
     .admin-btn {
-        display: inline-block;
         margin: 0.5rem 0.5rem 0 0;
-        padding: 0.6rem 1.2rem;
-        background-color: beige;
-        border: none;
-        color: black;
+        padding: 0.65rem 1.3rem;
+        background-color: #f3e7d9;
+        border: 1px solid #e2d2c0;
+        color: #000;
         font-weight: 600;
-        border-radius: .6rem;
+        border-radius: 999px; /* <-- auch hier schön rund */
         cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
     }
-    div{
+
+    .admin-btn:hover {
+        background-color: #ecdac4;
+        transform: translateY(-2px);
+    }
+
+    /* ---- Reset ---- */
+    div {
         margin: 0;
     }
+
 </style>
