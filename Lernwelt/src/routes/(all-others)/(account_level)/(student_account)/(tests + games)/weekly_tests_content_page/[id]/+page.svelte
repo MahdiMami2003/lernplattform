@@ -1,8 +1,12 @@
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
     import { page } from '$app/stores';
 
     let showAnswers = $state(false);
+
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
 
     /**
      * @returns {Promise<any>}

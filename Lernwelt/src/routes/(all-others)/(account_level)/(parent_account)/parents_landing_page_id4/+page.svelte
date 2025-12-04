@@ -1,4 +1,7 @@
 <script>
+    let { data } = $props();
+
+    let { supabase, session } = data;
 </script>
 
 

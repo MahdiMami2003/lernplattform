@@ -1,16 +1,18 @@
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
     import { goto } from '$app/navigation';
 
-    let email = '';
-    let password = '';
-    let message = '';
+    let { data } = $props();
 
-    async function handleLogin() {
+    let email = $state('');
+    let password = $state('');
+    let message = $state('');
+
+    async function handleLogin(e) {
+        e.preventDefault();
         try {
             message = 'Melde an...';
 
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data: authData, error } = await data.supabase.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -20,10 +22,10 @@
             }
 
             // Hole die Rolle des Benutzers aus der Datenbank
-            const { data: userData, error: userError } = await supabase
+            const { data: userData, error: userError } = await data.supabase
                 .from('profiles')
                 .select('role')
-                .eq('id', data.user.id)
+                .eq('id', authData.user.id)
                 .single();
 
             if (userError) {
@@ -45,6 +47,7 @@
             }
 
         } catch (error) {
+            console.error(error);
             message = `Anmeldung fehlgeschlagen: ${error.message}`;
             // Lösche nur das Passwort, behalte die E-Mail
             password = '';
@@ -56,8 +59,8 @@
     <h1>Willkommen zurück!</h1>
     <p>Logge dich ein, um deine Lernfortschritte zu sehen.</p>
 
-    <form on:submit|preventDefault={handleLogin}>
-        <input type="email" placnpmeholder="E-Mail" bind:value={email} required>
+    <form onsubmit={handleLogin}>
+        <input type="email" placeholder="E-Mail" bind:value={email} required>
         <br>
         <input type="password" placeholder="Passwort" bind:value={password} required>
         <br>

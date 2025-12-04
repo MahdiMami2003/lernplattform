@@ -4,16 +4,14 @@
     import { supabase } from '$lib/supabaseClient';
     import { invalidate } from '$app/navigation';
 
-    let { children } = $props();
+    let { data, children } = $props();
 
     onMount(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (event, session) => {
-                // Optional: Du kannst hier auch auf spezifische Events reagieren
-                // console.log('Auth event:', event, session);
-                invalidate('supabase:auth');
-            }
-        );
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
+                if (_session?.expires_at !== data.session?.expires_at) {
+                    invalidate('supabase:auth');
+                }
+            });
 
         return () => {
             subscription.unsubscribe();

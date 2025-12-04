@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { supabase } from '$lib/supabaseClient.js';
     import { goto } from '$app/navigation';
 
     function goStudent(){ goto('/student_landing_page_id5'); }
@@ -7,6 +6,12 @@
     function goParent() { goto('/parents_landing_page_id4'); }
     function goReg() { goto('/register_page_id3'); }
     function goGuest() { goto('/no_login_page_id7'); }
+
+    // ✅ HINZUFÜGEN (Svelte 5):
+    let { data } = $props();
+
+    // Optional: Damit du nicht immer 'data.supabase' schreiben musst:
+    let { supabase, session } = data;
 
     let email = '';
     let password = '';

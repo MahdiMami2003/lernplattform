@@ -1,7 +1,10 @@
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
     import { global_material_id } from '$lib/state.svelte.js';
     import { onMount } from 'svelte';
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
 
     /** @type {string | null} */
     let userRole = null;

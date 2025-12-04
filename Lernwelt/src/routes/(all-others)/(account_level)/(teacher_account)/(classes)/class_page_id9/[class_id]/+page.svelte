@@ -1,7 +1,11 @@
 <script>
     import { page } from '$app/stores';
-    import { supabase } from "$lib/supabaseClient.js";
     import { onMount } from "svelte";
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
+
 
     let classId = $page.params.class_id;
 
