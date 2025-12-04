@@ -1,4 +1,7 @@
 <script>
+    let { data } = $props();
+
+    let { supabase, session } = data;
     let title = "Hausaufgabenhilfe richtig gestalten";
     let text = `
 Hausaufgaben sind eine gute Gelegenheit, Selbstständigkeit zu üben.

@@ -1,12 +1,17 @@
 <script>
     // 1. Importiere den Client und onMount
-    import { supabase } from '$lib/supabaseClient.js';
     import { onMount } from 'svelte';
 
     // 2. Variablen für die Anzeige des Ergebnisses
     let status = "Teste Verbindung zu Supabase...";
     let testData = null;
     let testError = null;
+
+    // ✅ HINZUFÜGEN (Svelte 5):
+    let { data } = $props();
+
+    // Optional: Damit du nicht immer 'data.supabase' schreiben musst:
+    let { supabase, session } = data;
 
     // 3. Führe den Test aus, sobald die Seite geladen ist
     onMount(async () => {

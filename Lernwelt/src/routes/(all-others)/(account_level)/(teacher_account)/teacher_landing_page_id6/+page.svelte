@@ -1,7 +1,11 @@
 <script>
-    import { supabase } from "$lib/supabaseClient.js";
+
     import { onMount } from "svelte";
 
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
 
     let role = $state(null);
     let userId = $state(null);

@@ -1,5 +1,7 @@
 <script>
-    import { base } from '$app/paths';
+    let { data } = $props();
+
+    let { supabase, session } = data;
 </script>
 
 <div class="landing-wrapper">
@@ -22,7 +24,7 @@
             <div class="access-content">
                 <h2>Lerninhalte</h2>
                 <p>Entdecke unsere Fächer und Materialien.</p>
-                <span class="arrow">➔</span>
+
             </div>
         </a>
 
@@ -31,7 +33,7 @@
             <div class="access-content">
                 <h2>Termine & Aktuelles</h2>
                 <p>Verpasse keine Events und Neuigkeiten.</p>
-                <span class="arrow">➔</span>
+
             </div>
         </a>
     </div>

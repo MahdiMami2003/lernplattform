@@ -1,4 +1,3 @@
-import { supabase } from '$lib/supabaseClient.js';
 
 /**
  * Holt die Klasse(n) eines Users basierend auf seiner Rolle
@@ -6,7 +5,7 @@ import { supabase } from '$lib/supabaseClient.js';
  * @param {string} role - 'student', 'teacher', 'parent'
  * @returns {Promise<Array>}
  */
-export async function getUserClasses(userId, role) {
+export async function getUserClasses(supabase, userId, role) {
     if (role === 'student') {
         // Student: Direkt aus profiles.class_id
         const { data: profile } = await supabase
@@ -78,7 +77,7 @@ export async function getUserClasses(userId, role) {
  * @param {string} role - 'student', 'teacher', 'parent', 'admin'
  * @returns {Promise<Array>}
  */
-export async function getAccessibleStudents(userId, role) {
+export async function getAccessibleStudents(supabase, userId, role) {
     if (role === 'admin') {
         // Admin sieht alle Schüler
         const { data } = await supabase
@@ -172,7 +171,7 @@ export async function getAccessibleStudents(userId, role) {
  * @param {string} teacherId - Lehrer UUID
  * @param {number} classId - Klassen ID
  */
-export async function assignTeacherToClass(teacherId, classId) {
+export async function assignTeacherToClass(supabase, teacherId, classId) {
     const { data, error } = await supabase
         .from('teacher_classes')
         .insert({ teacher_id: teacherId, class_id: classId })
@@ -187,7 +186,7 @@ export async function assignTeacherToClass(teacherId, classId) {
  * @param {string} teacherId - Lehrer UUID
  * @param {number} classId - Klassen ID
  */
-export async function removeTeacherFromClass(teacherId, classId) {
+export async function removeTeacherFromClass(supabase, teacherId, classId) {
     const { error } = await supabase
         .from('teacher_classes')
         .delete()
@@ -202,7 +201,7 @@ export async function removeTeacherFromClass(teacherId, classId) {
  * @param {string} parentId - Eltern UUID
  * @param {string} childId - Kind UUID
  */
-export async function linkParentToChild(parentId, childId) {
+export async function linkParentToChild(supabase, parentId, childId) {
     const { data, error } = await supabase
         .from('parent_children')
         .insert({ parent_id: parentId, child_id: childId })
@@ -217,7 +216,7 @@ export async function linkParentToChild(parentId, childId) {
  * @param {string} studentId - Schüler UUID
  * @param {number} classId - Klassen ID
  */
-export async function assignStudentToClass(studentId, classId) {
+export async function assignStudentToClass(supabase, studentId, classId) {
     const { data, error } = await supabase
         .from('profiles')
         .update({ class_id: classId })

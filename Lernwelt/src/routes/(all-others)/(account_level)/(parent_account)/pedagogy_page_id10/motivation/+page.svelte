@@ -1,4 +1,8 @@
 <script>
+    let { data } = $props();
+
+    let { supabase, session } = data;
+
     let title = "Motivation beim Lernen";
     let text = `
 Motivation ist der Schlüssel zum erfolgreichen Lernen.

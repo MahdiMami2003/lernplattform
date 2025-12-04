@@ -1,8 +1,13 @@
 <script lang="ts">
-    import { supabase } from '$lib/supabaseClient';
     import { onMount } from 'svelte';
 
 
+
+    // ✅ HINZUFÜGEN (Svelte 5):
+    let { data } = $props();
+
+    // Optional: Damit du nicht immer 'data.supabase' schreiben musst:
+    let { supabase, session } = data;
     // Typen sauber definieren
     interface Klassenmitglied {
         full_name: string;
