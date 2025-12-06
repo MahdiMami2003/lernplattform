@@ -1,7 +1,12 @@
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
+
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
+
 
     let title = '';
     let selectedClassId = null;

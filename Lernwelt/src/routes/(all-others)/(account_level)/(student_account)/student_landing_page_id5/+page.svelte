@@ -1,8 +1,11 @@
 <script lang="ts">
-    import { supabase } from "$lib/supabaseClient";
+
     import { onMount } from "svelte";
 
 
+    let { data } = $props();
+
+    let { supabase, session } = data;
 
 
 </script>

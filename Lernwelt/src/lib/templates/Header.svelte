@@ -11,9 +11,10 @@
     import subject from '$lib/assets/icons/sub.png';
     import task from '$lib/assets/icons/tasks.png';
 
-
+    import { goto } from '$app/navigation';
     import { fly } from 'svelte/transition';
 
+    let { data } = $props();
 
     let testlogin = $state(false);
     let isMenuOpen = $state(false);
@@ -21,6 +22,17 @@
 
 
     let showMainSidebar = $state(true);
+
+    async function handleLogout() {
+        const { error } = await data.supabase.auth.signOut();
+
+        if (error) {
+            console.error('Logout Fehler:', error);
+        } else {
+            await goto('/no_login_page_id7');
+            isMenuOpen = false;
+        }
+    }
 
     function going_dark(e){
         e.preventDefault(); // Verhindert Neuladen bei a-Tags
@@ -61,10 +73,36 @@
         </div>
     </a>
 
+    <div class="user-info">
+        {#if data.session}
+            <p>Hallo, {data.session.user.email}</p>
+        {:else}
+            <p>Du bist nicht eingeloggt.</p>
+        {/if}
+    </div>
+
     <div class="icon-container">
         <button type="button" title="Suche" class="search"><img alt="Search" src={search}> </button>
         <button type="button" title="Fragen" class="q_mark"> <img alt="q_mark" src={q_mark}> </button>
-        <button type="button" title="Einloggen" class="login" > <img alt="Login" src={login}> </button>
+        {#if data.session}
+            <a href="/no_login_page_id7">
+            <button
+                    type="button"
+                    title="Abmelden"
+                    class="login"
+                    onclick={handleLogout}
+            >
+
+                <img alt="Logout" src={login}>
+            </button>
+            </a>
+        {:else}
+            <a href="/login_page_id2">
+                <button type="button" title="Einloggen" class="login">
+                    <img alt="Login" src={login}>
+                </button>
+            </a>
+        {/if}
         <button type="button" title="Menü ausklappen" class="menu" onclick={toggleMenu}><img alt="Menu" src={menu}></button>
     </div>
 </nav>
@@ -169,7 +207,7 @@
 {/if}
 
 <style>
-    /* DEIN CSS BLEIBT UNVERÄNDERT, HABE NUR LEERE hrefs GEFIXT */
+
     :global(.main_container) {
         background-color: white;
         color: black;
@@ -228,6 +266,16 @@
         gap: 1rem;
         justify-content: end;
         padding-right: 1rem;
+    }
+
+    .user-info {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: black;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .menu {
@@ -299,7 +347,9 @@
             transform: scale(0.95);
             filter: brightness(1.4);
         }
-
+        .user-info {
+            display: none;
+        }
         .q_mark,
         .login,
         .search {

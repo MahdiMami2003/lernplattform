@@ -1,4 +1,9 @@
 <script>
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
+
     let tips = [
         {
             title: "Motivation beim Lernen",

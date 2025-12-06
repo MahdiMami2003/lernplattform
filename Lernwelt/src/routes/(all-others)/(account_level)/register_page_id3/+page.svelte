@@ -1,6 +1,12 @@
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
+
     import { goto } from '$app/navigation';
+
+    // ✅ HINZUFÜGEN (Svelte 5):
+    let { data } = $props();
+
+    // Optional: Damit du nicht immer 'data.supabase' schreiben musst:
+    let { supabase, session } = data;
 
     let firstName = '';
     let lastName = '';

@@ -1,13 +1,13 @@
 <script lang="ts">
     import Header from "$lib/templates/Header.svelte";
     import Footer from "$lib/templates/Footer.svelte";
-    let { children } = $props();
+    let { children, data } = $props();
 </script>
 
 <div class="parent_grid">
 
     <div class="head_container">
-        <Header />
+        <Header data={data} />
     </div>
 
     <div class="left_container"></div>

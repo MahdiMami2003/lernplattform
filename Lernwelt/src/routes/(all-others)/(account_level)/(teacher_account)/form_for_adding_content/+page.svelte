@@ -1,5 +1,4 @@
 <script>
-    import { supabase } from '$lib/supabaseClient.js';
     import { goto } from '$app/navigation';
 
     // Mapping: Deutsche Namen → Englische Bucket-Ordner
@@ -10,6 +9,11 @@
         'Geschichte': 'History',
         'Biologie': 'Biology'
     };
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
+
 
     let title = '';
     let description = '';

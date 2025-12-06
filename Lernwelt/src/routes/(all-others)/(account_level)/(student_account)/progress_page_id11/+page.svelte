@@ -1,8 +1,12 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
-    import { supabase } from '$lib/supabaseClient.js';
     import { goto } from '$app/navigation';
     import AvatarSelector from '$lib/components/AvatarSelector.svelte';
+
+    let { data } = $props();
+
+    let { supabase, session } = data;
+
 
     let loading = $state(true);
     let errorMessage = $state('');
