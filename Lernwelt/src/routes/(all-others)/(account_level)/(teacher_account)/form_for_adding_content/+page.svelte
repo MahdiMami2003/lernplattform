@@ -40,14 +40,14 @@
             message = '';
 
             // Validierung
-            if (!title || !subject || !schoolClass || !pdfFile) {
-                message = 'Bitte fülle alle Pflichtfelder aus und wähle eine PDF-Datei!';
+            if (!title || !description || !subject || !schoolClass) {
+                message = 'Bitte fülle alle Pflichtfelder aus!';
                 uploading = false;
                 return;
             }
 
-            // Prüfe ob PDF
-            if (pdfFile.type !== 'application/pdf') {
+            // Prüfe ob PDF vorhanden ist und ob es eine PDF ist
+            if (pdfFile && pdfFile.type !== 'application/pdf') {
                 message = 'Bitte nur PDF-Dateien hochladen!';
                 uploading = false;
                 return;
@@ -64,22 +64,26 @@
 
             const newId = maxIdData && maxIdData.length > 0 ? maxIdData[0].id + 1 : 1;
 
-            // 2. Upload PDF zu Supabase Storage
-            const bucketFolder = subjectToBucket[subject] || 'Other';
-            const fileName = `${bucketFolder}/${subject}_${newId}.pdf`;
+            let fileUrl = null;
 
-            const { error: uploadError } = await supabase.storage
-                .from('lehrmaterialien')
-                .upload(fileName, pdfFile);
+            // 2. Upload PDF zu Supabase Storage (nur wenn vorhanden)
+            if (pdfFile) {
+                const bucketFolder = subjectToBucket[subject] || 'Other';
+                const fileName = `${bucketFolder}/${subject}_${newId}.pdf`;
 
-            if (uploadError) throw uploadError;
+                const { error: uploadError } = await supabase.storage
+                    .from('lehrmaterialien')
+                    .upload(fileName, pdfFile);
 
-            // 3. Hole die öffentliche URL
-            const { data: urlData } = supabase.storage
-                .from('lehrmaterialien')
-                .getPublicUrl(fileName);
+                if (uploadError) throw uploadError;
 
-            const fileUrl = urlData.publicUrl;
+                // 3. Hole die öffentliche URL
+                const { data: urlData } = supabase.storage
+                    .from('lehrmaterialien')
+                    .getPublicUrl(fileName);
+
+                fileUrl = urlData.publicUrl;
+            }
 
             // 4. Füge Eintrag in Datenbank ein
             const { error: insertError } = await supabase
@@ -87,7 +91,7 @@
                 .insert({
                     id: newId,
                     title: title,
-                    description: description || null,
+                    description: description,
                     subject: subject,
                     school_class: schoolClass,
                     file_url: fileUrl,
@@ -122,31 +126,31 @@
                     type="text"
                     id="title"
                     bind:value={title}
-                    placeholder="z.B. Bruchrechnung Einführung"
+                    placeholder="-"
                     required
             >
         </div>
 
         <div class="form-group">
-            <label for="description">Beschreibung (optional)</label>
+            <label for="description">Beschreibung *</label>
             <textarea
                     id="description"
                     bind:value={description}
-                    placeholder="Kurze Beschreibung des Inhalts..."
-                    rows="3"
+                    placeholder="Freitext&#10;&#10;"
+                    rows="8"
+                    required
             ></textarea>
         </div>
 
         <div class="form-group">
             <label for="subject">Schulfach *</label>
-            <select id="subject" bind:value={subject} required>
-                <option value="">-- Bitte wählen --</option>
-                <option value="Mathe">Mathe</option>
-                <option value="Englisch">Englisch</option>
-                <option value="Deutsch">Deutsch</option>
-                <option value="Geschichte">Geschichte</option>
-                <option value="Biologie">Biologie</option>
-            </select>
+            <input
+                    type="text"
+                    id="subject"
+                    bind:value={subject}
+                    placeholder="Mathe, Englisch, etc."
+                    required
+            >
         </div>
 
         <div class="form-group">
@@ -161,13 +165,12 @@
         </div>
 
         <div class="form-group">
-            <label for="pdfFile">PDF hochladen *</label>
+            <label for="pdfFile">PDF hochladen (optional)</label>
             <input
                     type="file"
                     id="pdfFile"
                     accept=".pdf"
                     on:change={handleFileChange}
-                    required
             >
             {#if pdfFile}
                 <p class="file-info">📄 Ausgewählt: {pdfFile.name}</p>
@@ -251,6 +254,7 @@
     textarea {
         resize: vertical;
         font-family: inherit;
+        min-height: 150px;
     }
 
     button {

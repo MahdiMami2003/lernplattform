@@ -5,22 +5,33 @@
 
     let { supabase, session } = data;
 
-    /** @type {string | null} */
-    let userRole = null;
+    let userRole = $state(null);
+    let editingRight = $state(null);
 
     onMount(async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        // Hole den eingeloggten User
+        const { data: userData, error } = await supabase.auth.getUser();
 
-        if (user) {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
+        if (error || !userData?.user) {
+            console.error("Fehler beim Holen des Users:", error);
+            return;
+        }
 
-            if (profile) {
-                userRole = profile.role;
-            }
+        // Hole Profil aus DB (mit editing_right)
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role, editing_right')
+            .eq('id', userData.user.id)
+            .single();
+
+        if (profileError) {
+            console.error("Fehler beim Holen des Profils:", profileError);
+            return;
+        } else {
+            console.log("Gefundenes Profil:", profile);
+            userRole = profile.role;
+            editingRight = profile.editing_right;
+            console.log("User Role:", userRole, "Editing Right:", editingRight);
         }
     });
 
@@ -71,12 +82,19 @@
             minute: '2-digit'
         }) + ' Uhr';
     }
+
+    /**
+     * Prüft ob User Bearbeitungsrechte hat
+     */
+    function hasEditingRights() {
+        return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
+    }
 </script>
 
 <div id="placeholder">
     <div class="header">
         <h1>Neuigkeiten & Termine</h1>
-        {#if userRole === 'admin' || userRole === 'teacher'}
+        {#if hasEditingRights()}
             <a href="/create_appointments_page" class="add-button">➕ Neuen Termin hinzufügen</a>
         {/if}
     </div>
@@ -93,9 +111,11 @@
                                 <h2>{appointment.title}</h2>
                                 <span class="date-badge">{formatDateTime(appointment.event_date)}</span>
                             </div>
-                            <button class="delete-btn" on:click={() => deleteAppointment(appointment.id)}>
-                                🗑️ Löschen
-                            </button>
+                            {#if hasEditingRights()}
+                                <button class="delete-btn" on:click={() => deleteAppointment(appointment.id)}>
+                                    🗑️ Löschen
+                                </button>
+                            {/if}
                         </div>
                         <div class="card-body">
                             <p>{appointment.content || '-'}</p>
@@ -103,9 +123,6 @@
                     </div>
                 {/each}
             </div>
-
-            <!-- Button NACH der Liste, nicht in der Schleife -->
-            <a href="/create_appointments_page" class="bottom-btn">➕ Neuen Termin hinzufügen</a>
 
         {:else}
             <p class="empty-message">Aktuell stehen keine Termine an.</p>
