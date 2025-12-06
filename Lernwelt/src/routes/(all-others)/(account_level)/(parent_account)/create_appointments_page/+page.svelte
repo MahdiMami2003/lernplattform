@@ -1,6 +1,5 @@
 <script>
     import { goto } from '$app/navigation';
-    import { onMount } from 'svelte';
 
     let { data } = $props();
 
@@ -10,24 +9,8 @@
     let content = '';
     let eventDate = '';
     let eventTime = '';
-    let selectedClassId = null;
-    let classes = [];
     let uploading = false;
     let message = '';
-
-    onMount(async () => {
-        // Lade alle Klassen für Dropdown
-        const { data, error } = await supabase
-            .from('classes')
-            .select('id, name')
-            .order('name', { ascending: true });
-
-        if (error) {
-            console.error('Fehler beim Laden der Klassen:', error);
-        } else {
-            classes = data || [];
-        }
-    });
 
     async function handleSubmit() {
         try {
@@ -50,18 +33,15 @@
                 .insert({
                     title: title,
                     content: content,
-                    event_date: fullDateTime,
-                    classid: selectedClassId || null
+                    event_date: fullDateTime
                 });
 
             if (insertError) throw insertError;
 
             message = '✅ Termin erfolgreich hinzugefügt!';
 
-            // Warte kurz und leite zur Übersicht
-            setTimeout(() => {
-                goto('/appointments_page_id8');
-            }, 2000);
+            // Sofortige Weiterleitung zur Übersicht
+            goto('/appointments_page_id8');
 
         } catch (error) {
             console.error('Fehler:', error);
@@ -118,16 +98,6 @@
                         required
                 >
             </div>
-        </div>
-
-        <div class="form-group">
-            <label for="classId">Klasse (optional)</label>
-            <select id="classId" bind:value={selectedClassId}>
-                <option value={null}>-- Allgemein (für alle) --</option>
-                {#each classes as cls}
-                    <option value={cls.id}>{cls.name}</option>
-                {/each}
-            </select>
         </div>
 
         <button type="submit" disabled={uploading}>
@@ -188,7 +158,6 @@
     input[type="text"],
     input[type="date"],
     input[type="time"],
-    select,
     textarea {
         width: 100%;
         padding: 12px;
