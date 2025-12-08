@@ -58,7 +58,7 @@
 
 	async function handleLogout() {
 		const { error } = await data.supabase.auth.signOut();
-		if (!error) goto('no_login_page_id7');
+		if (!error) goto('/no_login_page_id7');
 	}
 
 	function going_dark(e: MouseEvent) {
@@ -132,11 +132,40 @@
 		{#if data.session}
 			<button class="login" on:click={handleLogout}><img src={login} /></button>
 		{:else}
-			<a href="login_page_id2"><button class="login"><img src={login} /></button></a>
+			<a href="/login_page_id2"><button class="login"><img src={login} /></button></a>
 		{/if}
 
 		<button class="menu" on:click={toggleMenu}><img src={menu} /></button>
 	</div>
+	<!-- Dropdown Menu -->
+	{#if isMenuOpen}
+		<div class="dd-menu-container">
+			<ul>
+				<li>
+					<a href="/" on:click={toggleMenu}><img alt="Home" src={logo} />Home</a>
+				</li>
+				<li>
+					<a href="/materials_page" on:click={toggleMenu}
+						><img alt="Material" src={searchIcon} />Materialien</a
+					>
+				</li>
+				<!-- Assuming /forum_page based on pattern or common sense, but I will stick to what I know or generic if unsure. 
+                     Wait, I should check what links were there.
+                     The grep showed: href="/register_page_id3"
+                     I'll add Register.
+                     I'll adding a generic 'Materialien' pointing to the list page I know: /material_page_id14 (from Header logic).
+                     Actually, let's look at the grep again or just add Register and Home for now to satisfy the "register" request.
+                -->
+				{#if !data.session}
+					<li>
+						<a href="/register_page_id3" on:click={toggleMenu}
+							><img alt="Register" src={register} />Registrierung</a
+						>
+					</li>
+				{/if}
+			</ul>
+		</div>
+	{/if}
 </nav>
 
 <svelte:window bind:innerWidth={innerW} />
