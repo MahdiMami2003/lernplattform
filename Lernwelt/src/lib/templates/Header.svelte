@@ -5,6 +5,13 @@
 	import register from '$lib/assets/icons/register.png';
 	import searchIcon from '$lib/assets/icons/search.png';
 	import menu from '$lib/assets/icons/menu.png';
+	import access from '$lib/assets/icons/access.png';
+	import classroom from '$lib/assets/icons/class.png';
+	import progress from '$lib/assets/icons/prog.png';
+	import subject from '$lib/assets/icons/sub.png';
+	import task from '$lib/assets/icons/tasks.png';
+
+	import { fly } from 'svelte/transition';
 
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabaseClient';
@@ -149,13 +156,6 @@
 						><img alt="Material" src={searchIcon} />Materialien</a
 					>
 				</li>
-				<!-- Assuming /forum_page based on pattern or common sense, but I will stick to what I know or generic if unsure. 
-                     Wait, I should check what links were there.
-                     The grep showed: href="/register_page_id3"
-                     I'll add Register.
-                     I'll adding a generic 'Materialien' pointing to the list page I know: /material_page_id14 (from Header logic).
-                     Actually, let's look at the grep again or just add Register and Home for now to satisfy the "register" request.
-                -->
 				{#if !data.session}
 					<li>
 						<a href="/register_page_id3" on:click={toggleMenu}
@@ -165,6 +165,85 @@
 				{/if}
 			</ul>
 		</div>
+	{/if}
+
+	<!-- Sidebar Overlay/Container -->
+	{#if innerW > 1000}
+		{#if showMainSidebar}
+			<div class="nav__cont" transition:fly={{ x: -200, duration: 1000, opacity: 0 }}>
+				<ul class="nav">
+					{#if !testlogin}
+						<li class="nav__items" id="reg">
+							<a href="/register_page_id3">
+								<img alt="Registrieren" src={register} />
+								<span class="nav-text">Registrieren</span>
+							</a>
+						</li>
+					{/if}
+
+					<li class="nav__items" id="sub">
+						<a href="/material_page_id14">
+							<img alt="Fächer" src={subject} />
+							<span class="nav-text">Fächer</span>
+						</a>
+					</li>
+
+					<li class="nav__items" id="task">
+						<a href="game_page_id12">
+							<img alt="Aufgaben" src={task} />
+							<span class="nav-text">Aufgaben</span>
+						</a>
+					</li>
+
+					{#if testlogin}
+						<li class="nav__items" id="prog">
+							<a href="#">
+								<img alt="Fortschritt" src={progress} />
+								<span class="nav-text">Fortschritt</span>
+							</a>
+						</li>
+						<li class="nav__items" id="classroom">
+							<a href="#">
+								<img alt="Klassenzimmer" src={classroom} />
+								<span class="nav-text">Klasse</span>
+							</a>
+						</li>
+					{/if}
+
+					<li class="nav__items" id="access">
+						<a on:click={toggle_slide_left} href="#">
+							<img alt="Barrierefreiheit" src={access} />
+							<span class="nav-text">Barrierefrei</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		{:else}
+			<div class="nav__cont" transition:fly={{ x: -200, duration: 1000, opacity: 0 }}>
+				<ul class="nav">
+					<li class="nav__items" id="reg">
+						<a href="#" on:click={going_dark}>
+							<span class="nav-text">Darkmode</span>
+						</a>
+					</li>
+					<li class="nav__items" id="sub">
+						<a href="#">
+							<span class="nav-text">Kontrastmodus</span>
+						</a>
+					</li>
+					<li class="nav__items" id="task">
+						<a href="#">
+							<span class="nav-text">Sprache ändern</span>
+						</a>
+					</li>
+					<li class="nav__items" id="access">
+						<a on:click={toggle_slide_left} href="#">
+							<span class="nav-text">Zurück</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		{/if}
 	{/if}
 </nav>
 
@@ -475,5 +554,95 @@
 		}
 	}
 
-	/* Removed old overlay search styles */
+	@media (max-height: 500px) {
+		.dd-menu-container {
+			overflow-y: auto;
+		}
+	}
+
+	/*========== Nav-Bar vertical ==============*/
+	.nav__cont {
+		position: fixed;
+		width: 5rem;
+		border: 3px outset #7c98bf;
+		border-radius: 0.8em;
+		margin-left: 3px;
+		margin-top: min(45dvh, 50%);
+		padding-top: 1rem;
+		height: auto;
+		z-index: 1001;
+		background-color: #a0bdca;
+		overflow: hidden;
+		transition: width 0.3s ease;
+		cursor: pointer;
+		box-shadow: 4px 7px 10px rgba(0, 0, 0, 0.4);
+	}
+
+	.nav__cont:hover {
+		width: 12rem;
+	}
+
+	.nav {
+		list-style-type: none;
+		color: white;
+		margin: 0;
+		padding: 0;
+	}
+
+	.nav__items {
+		padding-bottom: 1rem;
+		font-family: 'roboto', Arial, sans-serif;
+	}
+
+	.nav__items a:hover {
+		background-color: #99becc;
+		filter: brightness(1.4);
+	}
+
+	.nav__items a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-right: 0.5rem;
+		height: 3rem;
+		text-decoration: none;
+		color: black;
+		font-family: 'roboto', Arial, sans-serif;
+		font-weight: 400;
+		border-top: #44546a 1px solid;
+		border-bottom: #44546a solid 1px;
+	}
+
+	.nav__items img {
+		width: 2.5rem;
+		height: 2.5rem;
+		object-fit: contain;
+		flex-shrink: 0;
+		transition: margin-left 0.3s ease;
+	}
+
+	.nav-text {
+		display: none;
+		opacity: 0;
+		white-space: nowrap;
+		margin-left: 1rem;
+		font-size: 1.1rem;
+		transition:
+			opacity 0.2s ease,
+			visibility 0.2s ease;
+	}
+
+	.nav__cont:hover .nav__items a {
+		justify-content: flex-start;
+	}
+
+	.nav__cont:hover .nav__items img {
+		margin-left: 1.25rem;
+	}
+
+	.nav__cont:hover .nav-text {
+		display: initial;
+		opacity: 1;
+		transition-delay: 0.2s;
+	}
 </style>
