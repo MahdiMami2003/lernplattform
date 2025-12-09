@@ -69,26 +69,21 @@
             {:else}
                 {#each classes as schoolClass}
                     <article class="class-card">
-                        <h3>
-                            <a href="/class_page_id9/{schoolClass.id}" class="class-link">
-                                {schoolClass.name}
-                            </a>
-                        </h3>
-                        <p class="class-info">Fächer:</p>
-                        <ul>
-                            <li>
-                                Mathematik
-                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
-                            </li>
-                            <li>
-                                Deutsch
-                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
-                            </li>
-                            <li>
-                                Biologie
-                                <a href="/material_page_id14"><button class="small-btn">Bearbeiten</button></a>
-                            </li>
-                        </ul>
+                        <h3>{schoolClass.name}</h3>
+                        <div class="class-actions">
+                            <!-- Lernstand der ganzen Klasse -->
+                            <p>📌Lernfortschritt der Klasse einsehen</p>
+                            <a href={"/class_page_id9/" + schoolClass.id}><button class="small-btn">Lernstand ansehen</button></a>
+                            <!-- Materialien für diese Klasse -->
+                            <p>📚Unterrichtsmaterial bearbeiten</p>
+                            <a href={"/material_page_id14?classId=" + schoolClass.id}><button class="small-btn">Materialien verwalten</button></a>
+                            <!-- Termine & Aktuelles -->
+                            <p>📅Termine und Aktuelles bearbeiten</p>
+                            <a href={"/create_appointments_page?classId=" + schoolClass.id}><button class="small-btn">Termine bearbeiten</button></a>
+                            <!-- Wochentests -->
+                            <p>📝Wochentests und spielerische Fragen bearbeiten</p>
+                            <a href={"/form_for_adding_weekly_test?classId=" + schoolClass.id}><button class="small-btn">Wochentests bearbeiten</button></a>
+                        </div>
                     </article>
                 {/each}
             {/if}
