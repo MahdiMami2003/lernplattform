@@ -65,7 +65,7 @@
 
 	async function handleLogout() {
 		const { error } = await data.supabase.auth.signOut();
-		if (!error) goto('/no_login_page_id7');
+		if (!error) window.location.href = '/';
 	}
 
 	function going_dark(e: MouseEvent) {
@@ -139,7 +139,7 @@
 		{#if data.session}
 			<button class="login" on:click={handleLogout}><img src={login} /></button>
 		{:else}
-			<a href="/login_page_id2"><button class="login"><img src={login} /></button></a>
+			<button class="login" style="cursor: default;"><img src={login} /></button>
 		{/if}
 
 		<button class="menu" on:click={toggleMenu}><img src={menu} /></button>
