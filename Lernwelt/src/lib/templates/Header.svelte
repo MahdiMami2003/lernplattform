@@ -65,7 +65,7 @@
 
 	async function handleLogout() {
 		const { error } = await data.supabase.auth.signOut();
-		if (!error) goto('/');
+		if (!error) window.location.href = '/';
 	}
 
 	function going_dark(e: MouseEvent) {
