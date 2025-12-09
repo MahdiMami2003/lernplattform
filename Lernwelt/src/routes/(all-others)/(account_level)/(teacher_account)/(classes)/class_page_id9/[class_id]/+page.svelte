@@ -2,111 +2,136 @@
     import { page } from '$app/stores';
     import { onMount } from "svelte";
 
+    // Props von SvelteKit (für Supabase)
     let { data } = $props();
+    let { supabase } = data;
 
-    let { supabase, session } = data;
-
-
-    let classId = $page.params.class_id;
-
+    // State
+    let classId = $state("");
     let students = $state([]);
     let className = $state("");
     let loading = $state(true);
 
     onMount(async () => {
-        // 1. Namen der Klasse holen
-        const { data: classData, error: classError } = await supabase
+        // 1. Die Klassen-ID aus der URL holen
+        classId = $page.params.classId || $page.params.class_id || $page.params.slug;
+
+        if (!classId) {
+            loading = false;
+            return;
+        }
+
+        // 2. Den Namen der Klasse laden (für die Überschrift)
+        const { data: cls } = await supabase
             .from('classes')
             .select('name')
             .eq('id', classId)
             .single();
 
-        if (classData) className = classData.name;
+        if (cls) className = cls.name;
 
-        // 2. Schüler holen (MIT DER ZWISCHENTABELLE)
-        // Wir fragen 'profiles' ab, filtern aber basierend auf 'has_schoolclass'
-        const { data: studentData, error: studentError } = await supabase
+        // 3. Alle Schüler dieser Klasse laden
+        // Wir filtern nach 'class_id' und stellen sicher, dass es nur 'student'-Rollen sind
+        const { data: list, error } = await supabase
             .from('profiles')
-            .select(`
-                full_name,
-                role,
-                has_schoolclass!inner(class_id)
-            `)
-            // Der Filter greift auf die verknüpfte Tabelle zu:
-            .eq('has_schoolclass.class_id', classId);
+            .select('*')
+            .eq('class_id', classId)
+            .eq('role', 'student')
+            .order('full_name');
 
-        if (studentError) {
-            console.error("Fehler beim Laden der Schüler:", studentError);
-        } else {
-            students = studentData;
-        }
+        if (!error) students = list || [];
         loading = false;
     });
 </script>
 
-
 <div class="container">
     <a href="/teacher_landing_page_id6" class="back-link">← Zurück zur Übersicht</a>
 
-
     {#if loading}
-        <p>Lade Klassendaten...</p>
+        <div class="loading-state">⏳ Daten werden geladen...</div>
     {:else}
-        <h1>Mitglieder der {className}</h1>
+        <div class="header">
+            <h1>Klasse: {className || 'Unbekannt'}</h1>
+            <p>Übersicht aller Schülerinnen und Schüler</p>
+        </div>
 
-        <div class="student-list">
-            {#if students.length === 0}
-                <p>Noch keine Schüler in dieser Klasse registriert.</p>
-            {:else}
-                <table>
+        {#if students.length === 0}
+            <div class="empty-state">
+                <p>📭 In dieser Klasse sind noch keine Schüler registriert.</p>
+            </div>
+        {:else}
+            <div class="table-wrapper">
+                <table class="styled-table">
                     <thead>
                     <tr>
+                        <th>Avatar</th>
                         <th>Name</th>
-                        <th>Rolle</th>
+                        <th>Level</th>
+                        <th>Aktion</th>
                     </tr>
                     </thead>
                     <tbody>
                     {#each students as student}
                         <tr>
-                            <td>{student.full_name}</td>
-                            {#if ((student.role === 'admin')||(student.role === 'teacher'))}<td>Lehrperson </td>{:else}<td>Schüler*in </td>{/if}
+                            <td>
+                                <img
+                                        src={student.avatar_url}
+                                        class="table-avatar"
+                                        alt="Avatar"
+                                        onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${student.full_name}&background=random`}
+                                />
+                            </td>
+                            <td>
+                                <strong>{student.full_name}</strong>
+                            </td>
+                            <td>
+                                <span class="level-badge">Lvl {student.level || 1}</span>
+                            </td>
+                            <td>
+                                <a href={"/student_landing_page_id5?userId=" + student.id}>
+                                    <button class="action-btn">Fortschritt ansehen</button>
+                                </a>
+                            </td>
                         </tr>
                     {/each}
                     </tbody>
                 </table>
-            {/if}
-        </div>
+            </div>
+        {/if}
     {/if}
 </div>
 
-
 <style>
-    .container {
-        padding: 2rem;
-        font-family: "Inter", sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        height: 100vh;
-    }
-    .back-link {
-        display: inline-block;
-        margin-bottom: 1rem;
-        color: #666;
-        text-decoration: none;
-    }
-    .back-link:hover { text-decoration: underline; color: #000; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; font-family: "Inter", sans-serif; }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
+    .back-link {
+        display: inline-block; margin-bottom: 1.5rem; color: #666; text-decoration: none; font-weight: 500;
+        padding: 0.5rem 1rem; background: #f5f5f5; border-radius: 8px; transition: all 0.2s;
     }
-    th, td {
-        text-align: left;
-        padding: 0.8rem;
-        border-bottom: 1px solid #ddd;
+    .back-link:hover { background: #e0e0e0; color: #000; }
+
+    .header h1 { margin-bottom: 0.2rem; color: #333; }
+    .header p { color: #666; margin-top: 0; }
+
+    .table-wrapper {
+        border: 1px solid #eee; border-radius: 12px; overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-top: 1.5rem;
     }
-    th {
-        background-color: #fbead7;
+
+    .styled-table { width: 100%; border-collapse: collapse; background: white; }
+    .styled-table th { background: #f3be6a; color: white; text-align: left; padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
+    .styled-table td { padding: 1rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .styled-table tr:last-child td { border-bottom: none; }
+    .styled-table tr:hover { background: #fafafa; }
+
+    .table-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .level-badge { background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+
+    .action-btn {
+        background: #236c93; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px;
+        cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
     }
+    .action-btn:hover { background: #1a5070; transform: translateY(-1px); }
+
+    .loading-state, .empty-state { text-align: center; padding: 3rem; color: #888; background: #f9f9f9; border-radius: 12px; }
 </style>
