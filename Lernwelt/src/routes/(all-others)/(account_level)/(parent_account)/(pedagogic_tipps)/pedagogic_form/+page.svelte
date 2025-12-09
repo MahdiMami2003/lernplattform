@@ -6,9 +6,8 @@
     let { supabase, session } = data;
 
     let title = '';
+    let description = '';
     let content = '';
-    let eventDate = '';
-    let eventTime = '';
     let uploading = false;
     let message = '';
 
@@ -18,30 +17,30 @@
             message = '';
 
             // Validierung
-            if (!title || !content || !eventDate || !eventTime) {
+            if (!title || !description || !content) {
                 message = 'Bitte fülle alle Pflichtfelder aus!';
                 uploading = false;
                 return;
             }
 
-            // Kombiniere Datum und Uhrzeit
-            const fullDateTime = `${eventDate}T${eventTime}:00`;
-
             // Füge Eintrag in Datenbank ein
             const { error: insertError } = await supabase
-                .from('appointments')
+                .from('pedagogic_tips')
                 .insert({
                     title: title,
+                    description: description,
                     content: content,
-                    event_date: fullDateTime
+                    created_at: new Date().toISOString()
                 });
 
             if (insertError) throw insertError;
 
-            message = '✅ Termin erfolgreich hinzugefügt!';
+            message = '✅ Tipp erfolgreich hinzugefügt!';
 
-            // Sofortige Weiterleitung zur Übersicht
-            goto('/appointments_page_id8');
+            // Warte kurz und leite zur Übersicht
+            setTimeout(() => {
+                goto('/pedagogy_page_id10');
+            }, 2000);
 
         } catch (error) {
             console.error('Fehler:', error);
@@ -53,7 +52,7 @@
 </script>
 
 <div class="container">
-    <h1>📅 Neuen Termin hinzufügen</h1>
+    <h1>📚 Neuen pädagogischen Tipp hinzufügen</h1>
 
     <form on:submit|preventDefault={handleSubmit}>
         <div class="form-group">
@@ -62,9 +61,20 @@
                     type="text"
                     id="title"
                     bind:value={title}
-                    placeholder="z.B. Elternsprechtag"
+                    placeholder="z.B. Wie motiviere ich mein Kind zum Lernen?"
                     required
             >
+        </div>
+
+        <div class="form-group">
+            <label for="description">Kurzbeschreibung *</label>
+            <textarea
+                    id="description"
+                    bind:value={description}
+                    placeholder="Kurze Zusammenfassung des Tipps (wird in der Übersicht angezeigt)..."
+                    rows="3"
+                    required
+            ></textarea>
         </div>
 
         <div class="form-group">
@@ -72,39 +82,17 @@
             <textarea
                     id="content"
                     bind:value={content}
-                    placeholder="Beschreibung des Termins..."
-                    rows="5"
+                    placeholder="Ausführlicher Inhalt des pädagogischen Tipps...&#10;&#10;Zeilenumbrüche werden automatisch übernommen."
+                    rows="12"
                     required
             ></textarea>
         </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label for="eventDate">Datum *</label>
-                <input
-                        type="date"
-                        id="eventDate"
-                        bind:value={eventDate}
-                        required
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="eventTime">Uhrzeit *</label>
-                <input
-                        type="time"
-                        id="eventTime"
-                        bind:value={eventTime}
-                        required
-                >
-            </div>
-        </div>
-
         <button type="submit" disabled={uploading}>
             {#if uploading}
-                ⏳ Wird erstellt...
+                ⏳ Wird gespeichert...
             {:else}
-                ✅ Termin hinzufügen
+                ✅ Tipp hinzufügen
             {/if}
         </button>
     </form>
@@ -115,12 +103,12 @@
         </div>
     {/if}
 
-    <a href="/appointments_page_id8" class="back-link">← Zurück zur Übersicht</a>
+    <a href="/pedagogy_page_id10" class="back-link">← Zurück zur Übersicht</a>
 </div>
 
 <style>
     .container {
-        max-width: 700px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 40px 20px;
     }
@@ -142,12 +130,6 @@
         margin-bottom: 20px;
     }
 
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
-
     label {
         display: block;
         font-weight: bold;
@@ -156,8 +138,6 @@
     }
 
     input[type="text"],
-    input[type="date"],
-    input[type="time"],
     textarea {
         width: 100%;
         padding: 12px;
@@ -165,11 +145,20 @@
         border-radius: 5px;
         font-size: 16px;
         box-sizing: border-box;
+        font-family: inherit;
     }
 
     textarea {
         resize: vertical;
-        font-family: inherit;
+        line-height: 1.6;
+    }
+
+    textarea#description {
+        min-height: 80px;
+    }
+
+    textarea#content {
+        min-height: 250px;
     }
 
     button {
@@ -224,11 +213,5 @@
 
     .back-link:hover {
         text-decoration: underline;
-    }
-
-    @media (max-width: 600px) {
-        .form-row {
-            grid-template-columns: 1fr;
-        }
     }
 </style>

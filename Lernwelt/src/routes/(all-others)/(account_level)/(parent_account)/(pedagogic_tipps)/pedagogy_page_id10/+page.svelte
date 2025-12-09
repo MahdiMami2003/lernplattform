@@ -35,51 +35,30 @@
         }
     });
 
-    async function getMaterials() {
+    async function getTips() {
         let query = supabase
-            .from('materials')
+            .from('pedagogic_tips')
             .select('*')
-            .order('subject', { ascending: true });
+            .order('created_at', { ascending: false });
 
-        // TODO: Klassenfilter für Studenten implementieren, sobald Klassenstruktur bekannt
-        // Aktuell: Alle Materialien für alle anzeigen
-
-        let {data: materials, error} = await query;
+        let {data: tips, error} = await query;
 
         if (error) {
             console.error('Fehler:', error);
             return [];
         }
 
-        return materials || [];
-    }
-
-    /**
-     * @param {any[]} materials
-     * @returns {Record<string, any[]>}
-     */
-    function groupBySubject(materials) {
-        /** @type {Record<string, any[]>} */
-        const grouped = {};
-
-        materials.forEach(material => {
-            if (!grouped[material.subject]) {
-                grouped[material.subject] = [];
-            }
-            grouped[material.subject].push(material);
-        });
-
-        return grouped;
+        return tips || [];
     }
 
     /**
      * @param {number} id
      */
-    async function deleteMaterial(id) {
+    async function deleteTip(id) {
         if (!confirm('Wirklich löschen?')) return;
 
         const { error } = await supabase
-            .from('materials')
+            .from('pedagogic_tips')
             .delete()
             .eq('id', id);
 
@@ -101,40 +80,36 @@
 
 <div id="placeholder">
     <div class="header">
-        <h1>Übersicht Lerninhalte</h1>
+        <h1>Pädagogische Tipps</h1>
         {#if hasEditingRights()}
-            <a href="/form_for_adding_content" class="add-button">➕ Aufgabe hinzufügen</a>
+            <a href="/pedagogic_form" class="add-button">➕ Neuen Tipp hinzufügen</a>
         {/if}
     </div>
 
-    {#await getMaterials()}
-        <p class="loading">Lade Materialien...</p>
-    {:then materials}
-        {#if materials && materials.length > 0}
-            {@const groupedMaterials = groupBySubject(materials)}
+    {#await getTips()}
+        <p class="loading">Lade Tipps...</p>
+    {:then tips}
+        {#if tips && tips.length > 0}
+            <ul class="tips-list">
+                {#each tips as tip}
+                    <li class="tip-item">
+                        <a href="/pedagogic_content/{tip.id}" class="tip-link">
+                            <div class="tip-title">{tip.title}</div>
+                            {#if tip.description}
+                                <div class="tip-preview">{tip.description}</div>
+                            {/if}
+                        </a>
 
-            {#each Object.entries(groupedMaterials) as [subject, items]}
-                <section class="subject-section">
-                    <h2>{subject}</h2>
-                    <ul>
-                        {#each items as material}
-                            <li class="material-item">
-                                <a href="/materials_content_page_16/{material.id}" class="material-link">
-                                    {material.title}
-                                </a>
-
-                                {#if hasEditingRights()}
-                                    <button class="delete-btn" on:click={() => deleteMaterial(material.id)}>
-                                        🗑️ Löschen
-                                    </button>
-                                {/if}
-                            </li>
-                        {/each}
-                    </ul>
-                </section>
-            {/each}
+                        {#if hasEditingRights()}
+                            <button class="delete-btn" on:click={() => deleteTip(tip.id)}>
+                                🗑️ Löschen
+                            </button>
+                        {/if}
+                    </li>
+                {/each}
+            </ul>
         {:else}
-            <p class="no-materials">Keine Materialien für deine Klasse gefunden.</p>
+            <p class="no-tips">Aktuell sind keine pädagogischen Tipps verfügbar.</p>
         {/if}
     {:catch error}
         <p class="error">Fehler beim Laden: {error.message}</p>
@@ -185,28 +160,14 @@
         transform: translateY(-2px);
     }
 
-    /* ---- Subject Sections ---- */
-    .subject-section {
-        margin-bottom: 2.5rem;
-    }
-
-    .subject-section h2 {
-        color: #0f2940;
-        border-bottom: 3px solid #f3b06a;
-        padding-bottom: 0.75rem;
-        margin-bottom: 1.2rem;
-        font-size: clamp(1.3rem, 3vw, 1.8rem);
-        font-weight: 600;
-    }
-
-    ul {
+    /* ---- Tips List ---- */
+    .tips-list {
         list-style: none;
         padding: 0;
         margin: 0;
     }
 
-    /* ---- Material Items ---- */
-    .material-item {
+    .tip-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -215,7 +176,7 @@
         flex-wrap: wrap;
     }
 
-    .material-link {
+    .tip-link {
         flex: 1;
         min-width: 250px;
         display: block;
@@ -225,17 +186,28 @@
         border-radius: 0.8rem;
         text-decoration: none;
         color: #0f2940;
-        font-weight: 500;
         transition: all 0.2s ease;
         border: 1px solid #ffeed8;
         box-shadow: 0 2px 6px rgba(15, 41, 64, 0.08);
     }
 
-    .material-link:hover {
+    .tip-link:hover {
         background-color: #f5d4b3;
         border-left-color: #d89c48;
         transform: translateX(4px);
         box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
+    }
+
+    .tip-title {
+        font-weight: 600;
+        font-size: 1.1em;
+        margin-bottom: 0.3rem;
+    }
+
+    .tip-preview {
+        font-size: 0.9em;
+        color: #666;
+        line-height: 1.4;
     }
 
     /* ---- Delete Button ---- */
@@ -259,7 +231,7 @@
     }
 
     /* ---- Messages ---- */
-    .loading, .no-materials {
+    .loading, .no-tips {
         text-align: center;
         color: #666;
         font-size: 1.1rem;
@@ -277,7 +249,7 @@
 
     /* ---- Responsive ---- */
     @media (max-width: 600px) {
-        .material-item {
+        .tip-item {
             flex-direction: column;
             align-items: flex-start;
         }

@@ -67,6 +67,10 @@
             <div class="material-detail">
                 <h1>{material.title}</h1>
 
+                {#if material.description}
+                    <p class="description-text">{@html material.description.replace(/\n/g, '<br>')}</p>
+                {/if}
+
                 {#if material.file_url}
                     <div class="pdf-section">
                         <iframe
@@ -80,12 +84,14 @@
                                 class="download-btn"
                                 on:click={() => downloadPDF(material.file_url, `${material.title}.pdf`)}
                         >
-                            PDF herunterladen
+                            📥 PDF herunterladen
                         </button>
                     </div>
                 {:else}
                     <p class="no-pdf">Kein PDF verfügbar</p>
                 {/if}
+
+                <a href="/material_page_id14" class="back-link">← Zurück zur Übersicht</a>
             </div>
         {:else}
             <div class="error">
@@ -119,6 +125,17 @@
         text-align: center;
     }
 
+    .description-text {
+        color: #333;
+        line-height: 1.8;
+        margin: 0 0 30px 0;
+        font-size: 1.1em;
+        text-align: center;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .pdf-section {
         margin-top: 20px;
         display: flex;
@@ -149,6 +166,19 @@
 
     .download-btn:hover {
         background: #45a049;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 25px;
+        color: #4CAF50;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
     }
 
     .no-pdf {
