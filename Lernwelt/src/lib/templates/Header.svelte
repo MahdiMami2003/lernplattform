@@ -139,7 +139,7 @@
 		{#if data.session}
 			<button class="login" on:click={handleLogout}><img src={login} /></button>
 		{:else}
-			<a href="/"><button class="login"><img src={login} /></button></a>
+			<button class="login" style="cursor: default;"><img src={login} /></button>
 		{/if}
 
 		<button class="menu" on:click={toggleMenu}><img src={menu} /></button>
