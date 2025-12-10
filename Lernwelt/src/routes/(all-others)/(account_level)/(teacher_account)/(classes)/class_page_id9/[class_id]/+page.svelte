@@ -2,36 +2,29 @@
     import { page } from '$app/stores';
     import { onMount } from "svelte";
 
-    // Props von SvelteKit (für Supabase)
     let { data } = $props();
     let { supabase } = data;
 
-    // State
     let classId = $state("");
     let students = $state([]);
     let className = $state("");
     let loading = $state(true);
 
     onMount(async () => {
-        // 1. Die Klassen-ID aus der URL holen
+        // ID aus URL holen
         classId = $page.params.classId || $page.params.class_id || $page.params.slug;
 
-        if (!classId) {
-            loading = false;
-            return;
-        }
+        if (!classId) { loading = false; return; }
 
-        // 2. Den Namen der Klasse laden (für die Überschrift)
+        // Klassenname
         const { data: cls } = await supabase
             .from('classes')
             .select('name')
             .eq('id', classId)
             .single();
-
         if (cls) className = cls.name;
 
-        // 3. Alle Schüler dieser Klasse laden
-        // Wir filtern nach 'class_id' und stellen sicher, dass es nur 'student'-Rollen sind
+        // Schüler laden (Nur Schüler dieser Klasse)
         const { data: list, error } = await supabase
             .from('profiles')
             .select('*')
@@ -48,7 +41,7 @@
     <a href="/teacher_landing_page_id6" class="back-link">← Zurück zur Übersicht</a>
 
     {#if loading}
-        <div class="loading-state">⏳ Daten werden geladen...</div>
+        <div class="loading-state">⏳ Lade Klasse...</div>
     {:else}
         <div class="header">
             <h1>Klasse: {className || 'Unbekannt'}</h1>
@@ -56,9 +49,7 @@
         </div>
 
         {#if students.length === 0}
-            <div class="empty-state">
-                <p>📭 In dieser Klasse sind noch keine Schüler registriert.</p>
-            </div>
+            <div class="empty-state">📭 Keine Schüler in dieser Klasse.</div>
         {:else}
             <div class="table-wrapper">
                 <table class="styled-table">
@@ -76,19 +67,14 @@
                             <td>
                                 <img
                                         src={student.avatar_url}
-                                        class="table-avatar"
-                                        alt="Avatar"
+                                        class="table-avatar" alt="Avatar"
                                         onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${student.full_name}&background=random`}
                                 />
                             </td>
+                            <td><strong>{student.full_name}</strong></td>
+                            <td><span class="level-badge">Lvl {student.level || 1}</span></td>
                             <td>
-                                <strong>{student.full_name}</strong>
-                            </td>
-                            <td>
-                                <span class="level-badge">Lvl {student.level || 1}</span>
-                            </td>
-                            <td>
-                                <a href={"/student_landing_page_id5?userId=" + student.id}>
+                                <a href={"/progress_page_id11?userId=" + student.id}>
                                     <button class="action-btn">Fortschritt ansehen</button>
                                 </a>
                             </td>
@@ -102,36 +88,15 @@
 </div>
 
 <style>
+    /* ... Deine Styles von vorhin (die waren gut!) ... */
     .container { max-width: 900px; margin: 0 auto; padding: 2rem; font-family: "Inter", sans-serif; }
-
-    .back-link {
-        display: inline-block; margin-bottom: 1.5rem; color: #666; text-decoration: none; font-weight: 500;
-        padding: 0.5rem 1rem; background: #f5f5f5; border-radius: 8px; transition: all 0.2s;
-    }
-    .back-link:hover { background: #e0e0e0; color: #000; }
-
-    .header h1 { margin-bottom: 0.2rem; color: #333; }
-    .header p { color: #666; margin-top: 0; }
-
-    .table-wrapper {
-        border: 1px solid #eee; border-radius: 12px; overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-top: 1.5rem;
-    }
-
+    .back-link { display: inline-block; margin-bottom: 1.5rem; color: #666; text-decoration: none; padding: 0.5rem 1rem; background: #f5f5f5; border-radius: 8px; }
+    .table-wrapper { border: 1px solid #eee; border-radius: 12px; overflow: hidden; margin-top: 1.5rem; }
     .styled-table { width: 100%; border-collapse: collapse; background: white; }
-    .styled-table th { background: #f3be6a; color: white; text-align: left; padding: 1rem; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
-    .styled-table td { padding: 1rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
-    .styled-table tr:last-child td { border-bottom: none; }
-    .styled-table tr:hover { background: #fafafa; }
-
-    .table-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .styled-table th { background: #f3be6a; color: white; text-align: left; padding: 1rem; }
+    .styled-table td { padding: 1rem; border-bottom: 1px solid #f0f0f0; }
+    .table-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .level-badge { background: #e3f2fd; color: #1565c0; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
-
-    .action-btn {
-        background: #236c93; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px;
-        cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s;
-    }
-    .action-btn:hover { background: #1a5070; transform: translateY(-1px); }
-
+    .action-btn { background: #236c93; color: white; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
     .loading-state, .empty-state { text-align: center; padding: 3rem; color: #888; background: #f9f9f9; border-radius: 12px; }
 </style>

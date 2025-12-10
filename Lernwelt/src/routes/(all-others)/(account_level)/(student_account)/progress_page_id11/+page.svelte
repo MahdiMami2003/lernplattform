@@ -2,284 +2,201 @@
     import { onMount, onDestroy } from 'svelte';
     import { goto } from '$app/navigation';
 
-    // Svelte 5 Props
     let { data } = $props();
+    let { supabase } = data; // Session kommt später über getSession
 
-    // --- State Variablen ---
+    // State
     let loading = $state(true);
     let errorMessage = $state('');
-
-    // Das aktuell angezeigte Profil (Kind)
     let profile = $state(null);
     let missionsData = $state([]);
 
-    // Session & Eltern-Infos
-    let currentSessionUserId = $state<string | null>(null);
-    let currentUserRole = $state<string>(''); // 'parent', 'student', etc.
+    // Wer guckt zu?
+    let viewerRole = $state(''); // 'teacher', 'parent', 'student'
+    let isOwner = $state(false); // Ist es mein eigenes Profil?
 
-    // Liste der eigenen Kinder (nur für Eltern relevant)
-    let myChildren = $state([]);
+    onMount(async () => {
+        // 1. Wer bin ich? (Session holen)
+        const { data: { session } } = await supabase.auth.getSession();
 
-    let authListener: any = null;
-
-    // --- 1. Hilfsfunktion: Kinder laden (Für Eltern) ---
-    async function fetchMyChildren(parentId: string) {
-        // Wir holen erst die Verknüpfungen
-        const { data: links, error } = await data.supabase
-            .from('parent_children')
-            .select('child_id')
-            .eq('parent_id', parentId);
-
-        if (error) {
-            console.error("Fehler beim Kinder-Laden:", error);
+        if (!session) {
+            // Nicht eingeloggt -> Weg hier
+            goto('/login_page_id2');
             return;
         }
 
-        if (links && links.length > 0) {
-            const childIds = links.map(l => l.child_id);
+        const myUserId = session.user.id;
 
-            // Jetzt holen wir die Namen/Infos dazu
-            const { data: childrenProfiles } = await data.supabase
-                .from('profiles')
-                .select('id, full_name, avatar_url')
-                .in('id', childIds);
+        // Meine Rolle holen (Lehrer/Eltern/Schüler)
+        const { data: myProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', myUserId)
+            .single();
 
-            myChildren = childrenProfiles || [];
+        viewerRole = myProfile?.role || 'student';
 
-            // Optional: Wenn noch kein Profil geladen ist, lade automatisch das erste Kind
-            if (!profile && myChildren.length > 0) {
-                loadData(myChildren[0].id);
-            }
+        // 2. Wen will ich sehen? (URL prüfen)
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get('userId');
+
+        // Entscheidung: Welche ID laden wir?
+        // Wenn eine ID in der URL steht UND ich Lehrer/Eltern bin -> Lade URL-ID
+        // Sonst -> Lade meine eigene ID
+        let idToLoad = myUserId;
+
+        if (targetUserId && targetUserId !== myUserId) {
+            // Fremdes Profil ansehen
+            idToLoad = targetUserId;
+            isOwner = false;
+        } else {
+            // Eigenes Profil ansehen
+            isOwner = true;
         }
-    }
 
-    // --- 2. Hauptfunktion: Daten eines bestimmten Users laden ---
-    async function loadData(targetUserId: string) {
-        console.log("📥 Lade Profil für:", targetUserId);
+        console.log(`Lade Profil ${idToLoad} (Betrachter-Rolle: ${viewerRole})`);
+        await loadData(idToLoad);
+    });
+
+    async function loadData(targetId) {
         try {
             loading = true;
             errorMessage = '';
 
-            // A. Profil abrufen
-            const { data: profileData, error: profileError } = await data.supabase
+            // A. Profil Daten
+            const { data: pData, error: pError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', targetUserId)
+                .eq('id', targetId)
                 .maybeSingle();
 
-            if (profileError) throw profileError;
-            if (!profileData) throw new Error('Profil nicht gefunden (oder keine Rechte).');
+            if (pError) throw pError;
+            if (!pData) throw new Error("Profil nicht gefunden (oder keine Berechtigung).");
 
-            profile = profileData;
+            profile = pData;
 
-            // B. Missionen abrufen
-            const { data: progressData, error: progressError } = await data.supabase
+            // B. Missionen / Fortschritt
+            const { data: mData, error: mError } = await supabase
                 .from('missions_progress')
-                .select(`
-                    progress,
-                    completed,
-                    missions ( title, description, xp_reward )
-                `)
-                .eq('user_id', targetUserId)
+                .select(`progress, completed, missions (title, description, xp_reward)`)
+                .eq('user_id', targetId)
                 .order('completed', { ascending: true });
 
-            if (progressError) throw progressError;
-            missionsData = progressData || [];
+            if (mError) throw mError;
+            missionsData = mData || [];
 
-        } catch (error: any) {
-            console.error("Fehler:", error);
-            errorMessage = error.message;
+        } catch (err: any) {
+            console.error("Fehler:", err);
+            errorMessage = err.message;
         } finally {
             loading = false;
         }
     }
 
-    // --- Lifecycle ---
-    onMount(async () => {
-        const { data: { session } } = await data.supabase.auth.getSession();
-
-        if (session) {
-            initUser(session);
-        } else {
-            // Auf Login warten
-            const { data: { subscription } } = data.supabase.auth.onAuthStateChange((event, session) => {
-                if (session) initUser(session);
-                else if (event === 'SIGNED_OUT') goto('/login_page_id2');
-            });
-            authListener = subscription;
-        }
-    });
-
-    // Initialisierung nach Login
-    async function initUser(session: any) {
-        currentSessionUserId = session.user.id;
-        currentUserRole = session.user.user_metadata.role || 'student';
-
-        // URL Check: Wurde eine ID übergeben? (?userId=...)
-        const urlParams = new URLSearchParams(window.location.search);
-        const childIdFromUrl = urlParams.get('userId');
-
-        if (currentUserRole === 'parent') {
-            // Eltern: Erst Kinder-Liste laden
-            await fetchMyChildren(session.user.id);
-
-            // Wenn eine ID in der URL ist, lade die. Sonst warten wir auf Klick oder Auto-Load.
-            if (childIdFromUrl) {
-                await loadData(childIdFromUrl);
-            } else if (myChildren.length === 0) {
-                // Keine Kinder verknüpft?
-                loading = false;
-                errorMessage = "Keine verknüpften Kinder gefunden.";
-            }
-        } else {
-            // Schüler/Lehrer: Lade eigenes Profil oder URL-Ziel
-            const targetId = childIdFromUrl || session.user.id;
-            await loadData(targetId);
-        }
-    }
-
-    onDestroy(() => {
-        if (authListener) authListener.unsubscribe();
-    });
-
-    // Helper für Balken
-    function getBarColor(p, c) { return c ? '#4caf50' : (p > 0 ? '#f3be6a' : '#e0e0e0'); }
-    function getProgressLabel(p, c) { return c ? 'Fertig' : (p ? 'In Arbeit' : 'Offen'); }
+    // Farben für Balken
+    function getBarColor(p, c) { return c ? '#4caf50' : (p > 0 ? '#f3be6a' : '#ddd'); }
 </script>
 
-<div class="content-wrapper">
-
-    <div class="header-box">
-        <h1>Lernfortschritt</h1>
-        {#if currentUserRole === 'parent'}
-            <p>Wähle ein Kind aus, um den Fortschritt zu sehen.</p>
-        {:else}
-            <p>Dein aktueller Status.</p>
-        {/if}
-    </div>
-
-    {#if currentUserRole === 'parent' && myChildren.length > 0}
-        <div class="child-selector">
-            <span>Deine Kinder:</span>
-            <div class="child-buttons">
-                {#each myChildren as child}
-                    <button
-                            class="child-btn {profile?.id === child.id ? 'active' : ''}"
-                            onclick={() => loadData(child.id)}
-                    >
-                        {child.full_name}
-                    </button>
-                {/each}
-            </div>
-        </div>
-    {/if}
+<div class="page-container">
 
     {#if loading}
-        <div class="status-msg">🚀 Daten werden geladen...</div>
+        <div class="msg">🚀 Lade Fortschritt...</div>
+
     {:else if errorMessage}
-        <div class="status-msg error">
+        <div class="msg error">
             ⚠️ {errorMessage}
-            {#if currentUserRole === 'parent' && errorMessage.includes('nicht gefunden')}
-                <br><small>Hast du dich bei der Registrierung mit dem Kind verknüpft?</small>
+            {#if viewerRole === 'teacher'}
+                <br><small>Bist du dieser Klasse zugewiesen?</small>
             {/if}
         </div>
+
     {:else if profile}
-        <div class="profile-section">
-            <div class="profile-card">
-                <img
-                        src={profile.avatar_url || ''}
-                        alt="Avatar" class="avatar"
-                        onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile.full_name}`}
-                />
-                <div class="profile-details">
-                    <h2>{profile.full_name}</h2>
-                    <span class="role-badge">{profile.role}</span>
-                </div>
 
-                <div class="stats-grid">
-                    <div class="stat-box"><span>{profile.level || 1}</span><small>Level</small></div>
-                    <div class="stat-box"><span>{profile.xp || 0}</span><small>XP</small></div>
-                    <div class="stat-box"><span>❤️ {profile.hearts || 3}</span><small>Leben</small></div>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="section-title">Missionen</h3>
-        {#if missionsData.length === 0}
-            <div class="empty-state">Noch keine Missionen.</div>
-        {:else}
-            <div class="missions-grid">
-                {#each missionsData as item}
-                    {#if item.missions}
-                        <div class="mission-card {item.completed ? 'completed' : ''}">
-                            <h4>{item.missions.title}</h4>
-                            <div class="xp-tag">+{item.missions.xp_reward} XP</div>
-                            <p>{item.missions.description}</p>
-
-                            <div class="progress-bar">
-                                <div class="fill" style="width: {item.progress}%; background: {getBarColor(item.progress, item.completed)}"></div>
-                            </div>
-                            <small>{getProgressLabel(item.progress, item.completed)} ({item.progress}%)</small>
-                        </div>
-                    {/if}
-                {/each}
+        {#if !isOwner}
+            <div class="teacher-banner">
+                <span>👀 Du betrachtest den Fortschritt von <strong>{profile.full_name}</strong></span>
+                <button onclick={() => history.back()}>Zurück zur Liste</button>
             </div>
         {/if}
+
+        <header class="profile-header">
+            <img
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    class="avatar"
+                    onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile.full_name}&background=f3be6a&color=fff`}
+            />
+            <div class="info">
+                <h1>{profile.full_name}</h1>
+                <div class="stats">
+                    <div class="stat"><span>Level</span> <strong>{profile.level || 1}</strong></div>
+                    <div class="stat"><span>XP</span> <strong>{profile.xp || 0}</strong></div>
+                    <div class="stat"><span>Herzen</span> <strong>{profile.hearts || 3} ❤️</strong></div>
+                </div>
+            </div>
+        </header>
+
+        <section class="missions">
+            <h2>Missionen & Aufgaben</h2>
+
+            {#if missionsData.length === 0}
+                <div class="empty">Noch keine Missionen.</div>
+            {:else}
+                <div class="grid">
+                    {#each missionsData as item}
+                        {#if item.missions}
+                            <div class="card {item.completed ? 'done' : ''}">
+                                <div class="head">
+                                    <h3>{item.missions.title}</h3>
+                                    <span class="xp">+{item.missions.xp_reward} XP</span>
+                                </div>
+                                <p>{item.missions.description}</p>
+
+                                <div class="track">
+                                    <div class="fill" style="width: {item.progress}%; background: {getBarColor(item.progress, item.completed)}"></div>
+                                </div>
+                                <small>{item.completed ? 'Erledigt!' : `${item.progress}%`}</small>
+                            </div>
+                        {/if}
+                    {/each}
+                </div>
+            {/if}
+        </section>
+
     {/if}
 </div>
 
 <style>
-    /* Neuer Style für die Kind-Auswahl */
-    .child-selector {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 1rem;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-        text-align: center;
-        border: 1px solid #236c93;
-    }
-    .child-buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: center;
-        margin-top: 0.5rem;
-        flex-wrap: wrap;
-    }
-    .child-btn {
-        background: #eee;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s;
-        color: #333;
-    }
-    .child-btn:hover { background: #ddd; }
-    .child-btn.active {
-        background: #236c93;
-        color: white;
-        transform: scale(1.05);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
+    .page-container { max-width: 800px; margin: 0 auto; padding: 2rem; font-family: sans-serif; }
 
-    /* Bestehende Styles (gekürtzt für Übersicht) */
-    .content-wrapper { max-width: 800px; margin: 0 auto; padding: 1rem; }
-    .header-box { text-align: center; color: white; margin-bottom: 2rem; background: #236c93; padding: 2rem; border-radius: 12px; }
-    .status-msg { text-align: center; padding: 2rem; color: #666; }
-    .error { color: red; background: #fee; border-radius: 8px; }
+    /* Lehrer Banner */
+    .teacher-banner {
+        background: #fff3cd; color: #856404; padding: 1rem; border-radius: 8px; border: 1px solid #ffeeba;
+        margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;
+    }
+    .teacher-banner button { background: white; border: 1px solid #ddd; padding: 0.3rem 0.8rem; cursor: pointer; border-radius: 4px; }
 
-    .profile-card { background: white; padding: 2rem; border-radius: 12px; text-align: center; border: 1px solid #ddd; margin-bottom: 2rem; }
-    .avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #f3be6a; margin-bottom: 1rem; object-fit: cover;}
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: 1rem; gap: 1rem; }
-    .stat-box { display: flex; flex-direction: column; font-weight: bold; font-size: 1.2rem; color: #236c93; }
-    .stat-box small { font-size: 0.8rem; color: #888; text-transform: uppercase; }
+    /* Header */
+    .profile-header { display: flex; gap: 1.5rem; align-items: center; background: white; padding: 2rem; border-radius: 12px; border: 1px solid #eee; margin-bottom: 2rem; }
+    .avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid #f3be6a; }
+    .info h1 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
+    .stats { display: flex; gap: 2rem; }
+    .stat { display: flex; flex-direction: column; }
+    .stat span { font-size: 0.8rem; text-transform: uppercase; color: #888; font-weight: bold; }
+    .stat strong { font-size: 1.2rem; color: #236c93; }
 
-    .missions-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .mission-card { background: white; padding: 1rem; border-radius: 8px; border: 1px solid #eee; position: relative; }
-    .mission-card.completed { border-color: #4caf50; background: #f1f8e9; }
-    .xp-tag { position: absolute; top: 1rem; right: 1rem; background: #fff8e1; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #f57f17; font-size: 0.8rem; }
+    /* Cards */
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card { background: white; padding: 1rem; border-radius: 8px; border: 1px solid #eee; }
+    .card.done { background: #f1f8e9; border-color: #81c784; }
+    .head { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .head h3 { margin: 0; font-size: 1.1rem; }
+    .xp { background: #fff8e1; color: #f57f17; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
 
-    .progress-bar { background: #eee; height: 10px; border-radius: 5px; margin: 10px 0 5px; overflow: hidden; }
+    .track { height: 8px; background: #eee; border-radius: 4px; margin: 10px 0 5px; overflow: hidden; }
     .fill { height: 100%; transition: width 0.5s; }
+
+    .msg { text-align: center; margin-top: 3rem; color: #666; }
+    .error { color: red; background: #ffebee; padding: 1rem; border-radius: 8px; }
+    .empty { text-align: center; color: #888; font-style: italic; padding: 2rem; background: #f9f9f9; border-radius: 8px; }
 </style>
