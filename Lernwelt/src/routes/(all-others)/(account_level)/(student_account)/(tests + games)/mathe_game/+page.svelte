@@ -1,390 +1,391 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
+    import { page } from '$app/stores'; // <--- WICHTIG: Für URL Parameter
 
     let { data } = $props();
 
     let { supabase, session } = data;
 
-	/* ========== TYPES ========== */
-	type Question = {
-		id?: number;
-		question: string;
-		answers: (string | null)[];
-		correctIndex: number;
-		xpReward: number;
-	};
+    /* ========== TYPES ========== */
+    type Question = {
+        id?: number;
+        question: string;
+        answers: (string | null)[];
+        correctIndex: number;
+        xpReward: number;
+    };
 
-	type Profile = {
-		id: string;
-		xp: number;
-		level: number;
-		streak: number;
-		hearts: number;
-		last_boss?: string;
-		last_grade?: number;
-	};
+    type Profile = {
+        id: string;
+        xp: number;
+        level: number;
+        streak: number;
+        hearts: number;
+        last_boss?: string;
+        last_grade?: number;
+    };
 
-	type ConfettiPiece = {
-		id: number;
-		left: number;
-		duration: number;
-		delay: number;
-		color: string;
-	};
+    type ConfettiPiece = {
+        id: number;
+        left: number;
+        duration: number;
+        delay: number;
+        color: string;
+    };
 
-	/* ========== STATE (MUSS MIT $state()!!!) ========== */
-	let loading = $state(true);
-	let loadError = $state<string | null>(null);
-	let profiles = $state<Profile | null>(null);
+    /* ========== STATE ========== */
+    let loading = $state(true);
+    let loadError = $state<string | null>(null);
+    let profiles = $state<Profile | null>(null);
 
-	let xp = $state(0);
-	let level = $state(1);
-	let streak = $state(0);
-	const MAX_HEARTS = 3;
-	let hearts = $state(MAX_HEARTS);
+    let xp = $state(0);
+    let level = $state(1);
+    let streak = $state(0);
+    const MAX_HEARTS = 3;
+    let hearts = $state(MAX_HEARTS);
 
-	let questions = $state<Question[]>([]);
-	let currentIndex = $state(0);
-	let selectedIndex = $state<number | null>(null);
-	let locked = $state(false);
-	let correctCount = $state(0);
+    let questions = $state<Question[]>([]);
+    let currentIndex = $state(0);
+    let selectedIndex = $state<number | null>(null);
+    let locked = $state(false);
+    let correctCount = $state(0);
 
-	let showSummary = $state(false);
-	let outOfHearts = $state(false);
-	let levelUpVisible = $state(false);
+    let showSummary = $state(false);
+    let outOfHearts = $state(false);
+    let levelUpVisible = $state(false);
 
-	let sessionXp = $state(0);
-	let confettiPieces = $state<ConfettiPiece[]>([]);
+    let sessionXp = $state(0);
+    let confettiPieces = $state<ConfettiPiece[]>([]);
 
-	// Fortschritt & XP als derived
-	const progress = $derived(() =>
-		questions.length > 0 ? (currentIndex / questions.length) * 100 : 0
-	);
-	const xpProgress = $derived(() => (xp / 100) * 100);
+    // Fortschritt & XP als derived
+    const progress = $derived(() =>
+        questions.length > 0 ? (currentIndex / questions.length) * 100 : 0
+    );
+    const xpProgress = $derived(() => (xp / 100) * 100);
 
-	/* ========= HELPER ========= */
-	function shuffle<T>(array: T[]): T[] {
-		return [...array].sort(() => Math.random() - 0.5);
-	}
+    /* ========= HELPER ========= */
+    function shuffle<T>(array: T[]): T[] {
+        return [...array].sort(() => Math.random() - 0.5);
+    }
 
-	async function updateProfile(update: Partial<Profile>) {
-		if (!profiles) return;
-		await supabase.from('profiles').update(update).eq('id', profiles.id);
-	}
+    async function updateProfile(update: Partial<Profile>) {
+        if (!profiles) return;
+        await supabase.from('profiles').update(update).eq('id', profiles.id);
+    }
 
-	/* ========= LOAD DATA ========= */
-	/* ========= LOAD DATA ========= */
-	/* ========= LOAD DATA ========= */
-	async function loadProfileAndQuestions() {
-		try {
-			loading = true;
-			loadError = null;
+    /* ========= LOAD DATA ========= */
+    async function loadProfileAndQuestions() {
+        try {
+            loading = true;
+            loadError = null;
 
-			/* ===============================
-				 1️⃣ USER OPTIONAL LADEN
-			================================= */
-			const { data: authData } = await supabase.auth.getUser();
-			const user = authData?.user ?? null; // Benutzer kann null sein!
+            // 0️⃣ Kategorie aus URL lesen
+            const category = $page.url.searchParams.get('category');
+            console.log("🔹 Mathe Game gestartet. Kategorie:", category || "Alle");
 
-			if (user) {
-				const { data: profileData } = await supabase
-					.from('profiles')
-					.select('*')
-					.eq('id', user.id)
-					.single();
+            /* ===============================
+                1️⃣ USER OPTIONAL LADEN
+            ================================= */
+            const { data: authData } = await supabase.auth.getUser();
+            const user = authData?.user ?? null;
 
-				if (profileData) {
-					profiles = profileData;
-					xp = profileData.xp ?? 0;
-					level = profileData.level ?? 1;
-					streak = profileData.streak ?? 0;
-					hearts = profileData.hearts ?? MAX_HEARTS;
+            if (user) {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
 
-					// ⭐ NEU HINZUFÜGEN:
-					if (profiles.hearts < MAX_HEARTS) {
-						hearts = MAX_HEARTS;
-						await updateProfile({ hearts: MAX_HEARTS });
-						console.log("❤️ Herzen automatisch zurückgesetzt (neues Spiel)");
-					}
-				}
-			} else {
-				console.log('⚠ Kein Login – Spiel läuft im Gastmodus');
-				profiles = null; // Gast-User
-			}
+                if (profileData) {
+                    profiles = profileData;
+                    xp = profileData.xp ?? 0;
+                    level = profileData.level ?? 1;
+                    streak = profileData.streak ?? 0;
+                    hearts = profileData.hearts ?? MAX_HEARTS;
 
-			/* ===============================
-				 2️⃣ FRAGEN IMMER LADEN! 🎯
-			================================= */
-			const { data, error } = await supabase.rpc('get_random_questions', { limit_count: 5 });
+                    if (profiles.hearts < MAX_HEARTS) {
+                        hearts = MAX_HEARTS;
+                        await updateProfile({ hearts: MAX_HEARTS });
+                        console.log("❤️ Herzen automatisch zurückgesetzt.");
+                    }
+                }
+            } else {
+                console.log('⚠ Kein Login – Spiel läuft im Gastmodus');
+                profiles = null;
+            }
 
-			if (error) {
-				console.error('❌ Fehler bei RPC:', error);
-				loadError = 'Fragen konnten nicht geladen werden.';
-			} else if (!data || data.length === 0) {
-				console.warn('⚠ Keine Mathe-Fragen gefunden – Dummy!');
-				questions = [
-					{
-						question: 'Was ist 5 + 7?',
-						answers: ['10', '11', '12', '13'],
-						correctIndex: 2,
-						xpReward: 10
-					}
-				];
-			} else {
-				questions = shuffle(
-					data.map((q) => ({
-						id: q.id,
-						question: q.question,
-						answers: [q.a1, q.a2, q.a3, q.a4],
-						correctIndex: q.correct_index,
-						xpReward: q.xp_reward ?? 10
-					}))
-				);
-			}
-		} catch (err) {
-			console.error(err);
-			loadError = 'Unerwarteter Fehler beim Laden.';
-		} finally {
-			loading = false;
-			currentIndex = 0;
-			selectedIndex = null;
-			locked = false;
-			correctCount = 0;
-			showSummary = false;
-			outOfHearts = false;
-		}
+            /* ===============================
+                2️⃣ FRAGEN LADEN (MIT KATEGORIE FILTER) 🎯
+            ================================= */
 
+            // Wir bauen die Query zusammen
+            let query = supabase
+                .from('questions')
+                .select('*')
+                .ilike('subject', 'Mathe%'); // Nur Mathe Fragen
 
-	}
+            // Falls eine Kategorie gewählt wurde, filtern wir danach
+            if (category) {
+                query = query.eq('category', category);
+            }
 
+            // Wir laden bis zu 20 Fragen, um sie client-seitig zu mischen
+            const { data, error } = await query.limit(20);
 
+            if (error) {
+                console.error('❌ Fehler beim Laden:', error);
+                loadError = 'Fragen konnten nicht geladen werden.';
+            } else if (!data || data.length === 0) {
+                console.warn('⚠ Keine Mathe-Fragen gefunden.');
+                // Fallback Dummy Frage, damit das Spiel nicht leer bleibt
+                questions = [
+                    {
+                        question: 'Was ist 5 + 7?',
+                        answers: ['10', '11', '12', '13'],
+                        correctIndex: 2,
+                        xpReward: 10
+                    }
+                ];
+            } else {
+                // Daten mischen und die ersten 5 nehmen
+                const mixedData = shuffle(data).slice(0, 5);
 
-	function goNextOrFinish() {
-		if (currentIndex < questions.length - 1) {
-			currentIndex++;
-			selectedIndex = null;
-			locked = false;  // 🔓 WICHTIG – wieder freigeben!!!
-		} else {
-			showSummary = true;
-			saveBossResult();
-		}
-	}
-	/* ========= ANSWER CLICK ========== */
-	function handleAnswerClick(index: number) {
-		if (locked || showSummary || outOfHearts) return; //  Klick-Sperre
+                questions = mixedData.map((q) => ({
+                    id: q.id,
+                    question: q.question,
+                    answers: [q.a1, q.a2, q.a3, q.a4],
+                    correctIndex: q.correct_index,
+                    xpReward: q.xp_reward ?? 10
+                }));
+            }
+        } catch (err) {
+            console.error(err);
+            loadError = 'Unerwarteter Fehler beim Laden.';
+        } finally {
+            loading = false;
+            currentIndex = 0;
+            selectedIndex = null;
+            locked = false;
+            correctCount = 0;
+            showSummary = false;
+            outOfHearts = false;
+        }
+    }
 
-		console.log("Klick funktioniert! Index =", index); // TEST
-		selectedIndex = index;   // Antwort speichern
-		locked = true;           // vorübergehend sperren
+    function goNextOrFinish() {
+        if (currentIndex < questions.length - 1) {
+            currentIndex++;
+            selectedIndex = null;
+            locked = false;
+        } else {
+            showSummary = true;
+            saveBossResult();
+        }
+    }
 
-		const current = questions[currentIndex];
-		const isCorrect = index === current.correctIndex;
+    /* ========= ANSWER CLICK ========== */
+    function handleAnswerClick(index: number) {
+        if (locked || showSummary || outOfHearts) return;
 
-		if (isCorrect) {
-			correctCount++;
-			rewardXP(current.xpReward);
-		} else {
-			loseHeart();
-		}
+        console.log("Antwort gewählt:", index);
+        selectedIndex = index;
+        locked = true;
 
-		setTimeout(() => {
-			if (!outOfHearts) {
-				goNextOrFinish();  // NÄCHSTE Frage laden
-			}
-		}, 800);
-	}
+        const current = questions[currentIndex];
+        const isCorrect = index === current.correctIndex;
 
+        if (isCorrect) {
+            correctCount++;
+            rewardXP(current.xpReward);
+        } else {
+            loseHeart();
+        }
 
+        setTimeout(() => {
+            if (!outOfHearts) {
+                goNextOrFinish();
+            }
+        }, 1000); // Etwas Zeit lassen um Farbe zu sehen
+    }
 
-	async function rewardXP(amount: number) {
-		xp += amount;
-		sessionXp += amount;
+    async function rewardXP(amount: number) {
+        xp += amount;
+        sessionXp += amount;
 
-		// Level Up hier prüfen
-		if (xp >= 100) {
-			xp -= 100;
-			level++;
-			levelUpVisible = true;
-			setTimeout(() => (levelUpVisible = false), 2000);
-		}
+        if (xp >= 100) {
+            xp -= 100;
+            level++;
+            levelUpVisible = true;
+            setTimeout(() => (levelUpVisible = false), 2000);
+        }
 
-		if (profiles) {
-			await updateProfile({ xp, level }); // ← beide speichern
-		}
-	}
+        if (profiles) {
+            await updateProfile({ xp, level });
+        }
+    }
 
+    async function loseHeart() {
+        hearts = Math.max(0, hearts - 1);
+        if (hearts === 0) outOfHearts = true;
+        await updateProfile({ hearts });
+    }
 
+    async function saveBossResult() {
+        const grade = Math.ceil(6 - (correctCount / questions.length) * 5);
+        await updateProfile({ last_boss: 'Classe10Math', last_grade: grade });
 
-	async function loseHeart() {
-		hearts = Math.max(0, hearts - 1);
-		if (hearts === 0) outOfHearts = true;
-		await updateProfile({ hearts });
-	}
+        if (correctCount > 0) {
+            streak++;
+            await updateProfile({ streak });
+        }
+    }
 
-	async function saveBossResult() {
-		const grade = Math.ceil(6 - (correctCount / questions.length) * 5);
-		await updateProfile({ last_boss: 'Classe10Math', last_grade: grade });
+    async function restartLesson() {
+        currentIndex = 0;
+        selectedIndex = null;
+        outOfHearts = false;
+        showSummary = false;
+        hearts = MAX_HEARTS;
+        correctCount = 0;
 
-		if (correctCount > 0) {
-			streak++;
-			await updateProfile({ streak });
-		}
-	}
+        if (profiles) {
+            await updateProfile({ hearts: MAX_HEARTS });
+        }
 
-	async function restartLesson() {
-		currentIndex = 0;
-		selectedIndex = null;
-		outOfHearts = false;
-		showSummary = false;
-		hearts = MAX_HEARTS;
-		correctCount = 0;
+        await loadProfileAndQuestions();
+    }
 
-		// ️ WICHTIG: Datenbank aktualisieren!
-		if (profiles) {
-			await updateProfile({ hearts: MAX_HEARTS });
-		}
-
-		await loadProfileAndQuestions();  // NEUES SPIEL
-	}
-
-
-
-
-
-	onMount(loadProfileAndQuestions);
+    onMount(loadProfileAndQuestions);
 </script>
 
 
 {#if loading}
-	<div class="loading"><p>Spiel wird geladen…</p></div>
+    <div class="loading"><p>Spiel wird geladen…</p></div>
 
 {:else if loadError}
-	<div class="error">
-		<p>{loadError}</p>
-		<button on:click={loadProfileAndQuestions}>Neu laden</button>
-	</div>
+    <div class="error">
+        <p>{loadError}</p>
+        <button on:click={loadProfileAndQuestions}>Neu laden</button>
+    </div>
 
 {:else if questions.length === 0}
-	<div class="error">
-		<p>Für Mathe sind aktuell keine Fragen vorhanden.</p>
-		<button on:click={() => goto('/student_landing_page_id5', { reload: true })}>
-			Dashboard
-		</button>
-
-	</div>
+    <div class="error">
+        <p>Für diese Kategorie sind aktuell keine Fragen vorhanden.</p>
+        <button on:click={() => goto('/student_landing_page_id5', { reload: true })}>
+            Dashboard
+        </button>
+    </div>
 
 {:else}
-	<!-- GAME UI -->
-	<div class="game-root">
-		{#if levelUpVisible}
-			<div class="levelup-popup">
-				🎉 Level {level} erreicht!
-			</div>
-		{/if}
+    <div class="game-root">
+        {#if levelUpVisible}
+            <div class="levelup-popup">
+                🎉 Level {level} erreicht!
+            </div>
+        {/if}
 
-		{#each confettiPieces as piece (piece.id)}
-			<div
-				class="confetti"
-				style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
-			></div>
-		{/each}
+        {#each confettiPieces as piece (piece.id)}
+            <div
+                    class="confetti"
+                    style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
+            ></div>
+        {/each}
 
-		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+        <header class="hud">
+            <button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
 
-			<div class="hud-center">
-				<div class="progress-top">
-					<div class="progress-inner" style={`width: ${progress}%`}></div>
-				</div>
-				<p class="question-count">Frage {currentIndex + 1} / {questions.length}</p>
-			</div>
+            <div class="hud-center">
+                <div class="progress-top">
+                    <div class="progress-inner" style={`width: ${progress}%`}></div>
+                </div>
+                <p class="question-count">Frage {currentIndex + 1} / {questions.length}</p>
+            </div>
 
-			<div class="hud-right">
-				<div class="hearts">
-					{#each Array(MAX_HEARTS) as _, i}
-						<span class:lost={i >= hearts}>❤️</span>
-					{/each}
-				</div>
+            <div class="hud-right">
+                <div class="hearts">
+                    {#each Array(MAX_HEARTS) as _, i}
+                        <span class:lost={i >= hearts}>❤️</span>
+                    {/each}
+                </div>
 
-				<div class="xp-display">
-					<span>Lvl {level}</span>
-					<div class="xp-bar">
-						<div class="xp-inner" style={`width: ${xpProgress}%`}></div>
-					</div>
-				</div>
+                <div class="xp-display">
+                    <span>Lvl {level}</span>
+                    <div class="xp-bar">
+                        <div class="xp-inner" style={`width: ${xpProgress}%`}></div>
+                    </div>
+                </div>
 
-				<div class="streak">
-					<span>🔥</span>{streak}
-				</div>
-			</div>
-		</header>
+                <div class="streak">
+                    <span>🔥</span>{streak}
+                </div>
+            </div>
+        </header>
 
-		{#if !showSummary && !outOfHearts}
-			<main class="card">
-				<h2 class="question">{questions[currentIndex].question}</h2>
-				<div class="answers">
-					{#each questions[currentIndex].answers as ans, i}
-						{#if ans}
-							<button
-								class="answer-btn {locked && i === questions[currentIndex].correctIndex ? 'correct' : ''} {locked && selectedIndex === i && selectedIndex !== questions[currentIndex].correctIndex ? 'wrong' : ''}"
-								on:click={() => handleAnswerClick(i)}
-								disabled={locked}
-							>
-								{ans}
-							</button>
+        {#if !showSummary && !outOfHearts}
+            <main class="card">
+                <h2 class="question">{questions[currentIndex].question}</h2>
+                <div class="answers">
+                    {#each questions[currentIndex].answers as ans, i}
+                        {#if ans}
+                            <button
+                                    class="answer-btn {locked && i === questions[currentIndex].correctIndex ? 'correct' : ''} {locked && selectedIndex === i && selectedIndex !== questions[currentIndex].correctIndex ? 'wrong' : ''}"
+                                    on:click={() => handleAnswerClick(i)}
+                                    disabled={locked}
+                            >
+                                {ans}
+                            </button>
+                        {/if}
+                    {/each}
+                </div>
+            </main>
+        {:else}
+            <section class="summary">
+                <h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
 
-						{/if}
-					{/each}
-				</div>
-			</main>
-		{:else}
-			<section class="summary">
-				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
+                <div class="xp-chest">
+                    <div class="chest-glow"></div>
+                    <div class="chest-lid"></div>
+                    <div class="chest-box"></div>
+                </div>
 
-				<div class="xp-chest">
-					<div class="chest-glow"></div>
-					<div class="chest-lid"></div>
-					<div class="chest-box"></div>
-				</div>
+                <div class="summary-stats">
+                    <div>
+                        <span>Richtige Antworten</span>
+                        <strong>{correctCount} / {questions.length}</strong>
+                    </div>
+                    <div>
+                        <span>Level</span>
+                        <strong>{level}</strong>
+                    </div>
+                </div>
 
-				<div class="summary-stats">
-					<div>
-						<span>Richtige Antworten</span>
-						<strong>{correctCount} / {questions.length}</strong>
-					</div>
-					<div>
-						<span>Level</span>
-						<strong>{level}</strong>
-					</div>
-				</div>
+                {#if sessionXp > 0}
+                    <p class="xp-earned">+{sessionXp} XP</p>
+                {/if}
 
-				{#if sessionXp > 0}
-					<p class="xp-earned">+{sessionXp} XP</p>
-				{/if}
+                <div class="achievements">
+                    <p>Freigeschaltete Badges:</p>
+                    <div class="badge-row">
+                        {#if correctCount === questions.length}
+                            <span class="badge">Perfekte Runde 🏅</span>
+                        {/if}
+                        {#if streak >= 3}
+                            <span class="badge">Streak-Meister 🔥</span>
+                        {/if}
+                        {#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
+                            <span class="badge">Mathe-Held 📘</span>
+                        {/if}
+                    </div>
+                </div>
 
-				<div class="achievements">
-					<p>Freigeschaltete Badges:</p>
-					<div class="badge-row">
-						{#if correctCount === questions.length}
-							<span class="badge">Perfekte Runde 🏅</span>
-						{/if}
-						{#if streak >= 3}
-							<span class="badge">Streak-Meister 🔥</span>
-						{/if}
-						{#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
-							<span class="badge">Mathe-Held 📘</span>
-						{/if}
-					</div>
-				</div>
-
-				<div class="summary-actions">
-					<button on:click={restartLesson}>Nochmal spielen</button>
-					<button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
-				</div>
-			</section>
-		{/if}
-	</div>
+                <div class="summary-actions">
+                    <button on:click={restartLesson}>Nochmal spielen</button>
+                    <button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
+                </div>
+            </section>
+        {/if}
+    </div>
 {/if}
 
 <style>
@@ -538,28 +539,14 @@
     }
 
     @keyframes popup {
-        0% {
-            transform: translate(-50%, -50%) scale(0.8);
-            opacity: 0;
-        }
-        50% {
-            transform: translate(-50%, -50%) scale(1.08);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-        }
+        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+        50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
 
     @keyframes fadeOut {
-        0%,
-        60% {
-            opacity: 1;
-        }
-        100% {
-            opacity: 0;
-        }
+        0%, 60% { opacity: 1; }
+        100% { opacity: 0; }
     }
 
     /* CARD */
@@ -592,11 +579,7 @@
         background: #f8fbff;
         font-size: 1rem;
         cursor: pointer;
-        transition:
-                transform 0.12s,
-                box-shadow 0.12s,
-                border-color 0.12s,
-                background 0.12s;
+        transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s, background 0.12s;
     }
 
     .answer-btn:hover:not(:disabled) {
@@ -686,18 +669,9 @@
     }
 
     @keyframes glow {
-        0% {
-            transform: translateX(-50%) scale(0.9);
-            opacity: 0.7;
-        }
-        50% {
-            transform: translateX(-50%) scale(1.05);
-            opacity: 1;
-        }
-        100% {
-            transform: translateX(-50%) scale(0.9);
-            opacity: 0.7;
-        }
+        0% { transform: translateX(-50%) scale(0.9); opacity: 0.7; }
+        50% { transform: translateX(-50%) scale(1.05); opacity: 1; }
+        100% { transform: translateX(-50%) scale(0.9); opacity: 0.7; }
     }
 
     .summary-stats {
@@ -776,30 +750,11 @@
     }
 
     @keyframes confetti-fall {
-        from {
-            transform: translateY(-20px) rotate(0deg);
-            opacity: 1;
-        }
-        to {
-            transform: translateY(110vh) rotate(360deg);
-            opacity: 0;
-        }
+        from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
 
     @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(16px);
-        }
-    .answer-btn.correct {
-        background: #c6f6d5;
-        border-color: #3ba776;
-    }
-
-    .answer-btn.wrong {
-        background: #ffd1d1;
-        border-color: #ff6b6b;
-    }
-
+        from { opacity: 0; transform: translateY(16px); }
     }
 </style>
