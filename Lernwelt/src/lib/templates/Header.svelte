@@ -167,6 +167,8 @@
 		</div>
 	{/if}
 
+
+
 	<!-- Sidebar Overlay/Container -->
 	{#if innerW > 1000}
 		{#if showMainSidebar}
@@ -246,7 +248,9 @@
 		{/if}
 	{/if}
 </nav>
-
+<div class="bread-bar">
+ 
+</div>
 <svelte:window bind:innerWidth={innerW} />
 
 <style>
@@ -259,7 +263,6 @@
 		background-color: #333333;
 		color: white;
 	}
-
 	.header-root {
 		position: fixed;
 		top: 0;
@@ -280,6 +283,7 @@
 
 	.signature {
 		display: flex;
+        height: var(--header-height);
 		flex-basis: auto;
 		align-items: center;
 		justify-content: start;
@@ -458,10 +462,54 @@
 		border-radius: 1rem;
 	}
 
+    /* --- NEUE BREADCRUMB BAR --- */
+    .bread-bar {
+        position: fixed;
+        top: var(--header-height); /* Beginnt direkt unter dem Header */
+        left: 0;
+        width: 100%;
+        height: var(--bread-height);
+        background-color: #f1af69; /* Helleres Beige passend zum Header */
+        border-bottom: 1px solid #e0cdb0;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem; /* Gleiches Padding wie Header für Ausrichtung */
+        box-sizing: border-box;
+        z-index: 990; /* Unter Header (1000) und Mobile Menu (999) */
+        font-size: 0.85rem;
+        color: #44546a;
+    }
+
+    .bread-bar a {
+        text-decoration: none;
+        color: #44546a;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+
+    .bread-bar a:hover {
+        color: #000;
+        text-decoration: underline;
+    }
+
+    .bread-bar .separator {
+        margin: 0 0.5rem;
+        color: #888;
+        font-size: 0.7rem; /* Kleinerer Pfeil */
+    }
+
+    .bread-bar .current {
+        font-weight: bold;
+        color: #222;
+        cursor: default;
+    }
+
 	@media (max-width: 1000px) {
-		.user-info {
-			display: none;
-		}
+
+        .signature p{
+            display: none;
+        }
 		.q_mark,
 		.login {
 			display: none; /* Hide others to make room for search on mobile? User didn't specify, but safer */
@@ -567,7 +615,7 @@
 		border: 3px outset #7c98bf;
 		border-radius: 0.8em;
 		margin-left: 3px;
-		margin-top: min(45dvh, 50%);
+		margin-top: max(45dvh, 50%);
 		padding-top: 1rem;
 		height: auto;
 		z-index: 1001;

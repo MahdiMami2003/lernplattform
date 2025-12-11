@@ -32,6 +32,7 @@
         --header-height: min(4rem, 5dvh);
         --main-padding: 2.5rem;
         --main-radius: 0.75rem;
+        --bread-height: min(2rem, 2.5dvh);
 
         display: grid;
         grid-template-columns: 1fr 10fr 1fr;
@@ -58,7 +59,7 @@
 
         padding: var(--main-padding);
         border-radius: var(--main-radius);
-        margin-top: var(--header-height);
+        margin-top: min(1rem, 10dvh);
         margin-bottom: 2rem;
 
         font-family: Arial, Helvetica, sans-serif;
