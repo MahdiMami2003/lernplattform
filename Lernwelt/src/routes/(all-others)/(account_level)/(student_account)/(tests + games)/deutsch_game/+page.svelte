@@ -247,6 +247,7 @@
 
 
 	onMount(loadProfileAndQuestions);
+    }
 
 </script>
 
