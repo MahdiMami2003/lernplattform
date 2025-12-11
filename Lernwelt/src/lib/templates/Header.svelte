@@ -190,8 +190,8 @@
 
 					<li class="nav__items" id="task">
 						<a
-							href={data.session ? 'game_page_id12' : '#'}
-							style={!data.session ? 'cursor: not-allowed; opacity: 0.5;' : ''}
+							href={data.session ? '/game_page_id12' : '#'}
+							class={!data.session ? 'disabled-link' : ''}
 							title={!data.session ? 'Bitte einloggen' : ''}
 							on:click={!data.session ? (e) => e.preventDefault() : undefined}
 						>
@@ -649,5 +649,16 @@
 		display: initial;
 		opacity: 1;
 		transition-delay: 0.2s;
+	}
+
+	.nav__items a.disabled-link {
+		cursor: not-allowed;
+		opacity: 0.5;
+		background-color: rgba(0, 0, 0, 0.1);
+	}
+
+	.nav__items a.disabled-link:hover {
+		background-color: rgba(0, 0, 0, 0.1);
+		filter: none;
 	}
 </style>
