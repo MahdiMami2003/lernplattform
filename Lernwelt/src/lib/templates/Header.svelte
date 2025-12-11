@@ -189,9 +189,14 @@
 					</li>
 
 					<li class="nav__items" id="task">
-						<a href="game_page_id12">
+						<a
+							href={data.session ? 'game_page_id12' : '#'}
+							style={!data.session ? 'cursor: not-allowed; opacity: 0.5;' : ''}
+							title={!data.session ? 'Bitte einloggen' : ''}
+							on:click={!data.session ? (e) => e.preventDefault() : undefined}
+						>
 							<img alt="Aufgaben" src={task} />
-							<span class="nav-text">Aufgaben</span>
+							<span class="nav-text">Aufgaben {!data.session ? '🔒' : ''}</span>
 						</a>
 					</li>
 
