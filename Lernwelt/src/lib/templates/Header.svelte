@@ -10,7 +10,7 @@
 	import progress from '$lib/assets/icons/prog.png';
 	import subject from '$lib/assets/icons/sub.png';
 	import task from '$lib/assets/icons/tasks.png';
-
+    import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import { fly } from 'svelte/transition';
 
 	import { goto } from '$app/navigation';
@@ -249,7 +249,7 @@
 	{/if}
 </nav>
 <div class="bread-bar">
- 
+    <Breadcrumbs />
 </div>
 <svelte:window bind:innerWidth={innerW} />
 
