@@ -390,7 +390,6 @@
 		{/if}
 	</div>
 {/if}
->>>>>>> Stashed changes
 
 <style>
 	:global(body) {
