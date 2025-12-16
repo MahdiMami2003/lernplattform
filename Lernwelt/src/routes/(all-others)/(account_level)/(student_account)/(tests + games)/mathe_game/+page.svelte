@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-
+    import { _ } from '$lib/i18n/config';
 	let { data } = $props();
 
 	let { supabase, session } = data;

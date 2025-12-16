@@ -1,8 +1,9 @@
 // src/routes/+layout.js
 import { createBrowserClient, isBrowser, parse, serialize } from '@supabase/ssr'
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
-
+import { setupI18n } from '$lib/i18n/config'
 export const load = async ({ fetch, data, depends }) => {
+    setupI18n()
     depends('supabase:auth')
 
     const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {

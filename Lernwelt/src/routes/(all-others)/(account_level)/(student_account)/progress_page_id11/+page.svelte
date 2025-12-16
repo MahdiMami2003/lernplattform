@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-
+    import { _ } from '$lib/i18n/config';
     let { data } = $props();
     let { supabase } = data;
 
@@ -149,19 +149,19 @@
 <div class="page-container">
 
     {#if loading}
-        <div class="msg">🚀 Lade Daten...</div>
+        <div class="msg">🚀 {$_('progress.loading')}</div>
 
     {:else if errorMessage}
         <div class="msg error">
             ⚠️ {errorMessage}
             <br><br>
-            <button onclick={() => history.back()}>Zurück</button>
+            <button onclick={() => history.back()}>{$_('common.back')}</button>
         </div>
 
     {:else if showChildSelection}
         <div class="selection-screen">
-            <h1>Wen möchtest du sehen?</h1>
-            <p>Bitte wähle eines deiner Kinder aus:</p>
+            <h1>{$_('progress.select_title')}</h1>
+            <p>{$_('progress.select_subtitle')}</p>
 
             <div class="child-grid">
                 {#each myChildren as child}
@@ -169,14 +169,18 @@
                         <img
                                 src={child.avatar_url}
                                 alt={child.full_name}
-                                onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${child.full_name}&background=random`}
+                                onerror={(e) => (e.target as HTMLImageElement).src =
+              `https://ui-avatars.com/api/?name=${child.full_name}&background=random`}
                         />
                         <span>{child.full_name}</span>
                     </button>
                 {/each}
             </div>
-            <br>
-            <a href="/parents_landing_page_id4" style="color:#666;">Zurück zum Dashboard</a>
+
+            <br />
+            <a href="/parents_landing_page_id4" style="color:#666;">
+                {$_('progress.back_to_dashboard')}
+            </a>
         </div>
 
     {:else if profile}
@@ -184,47 +188,49 @@
         {#if viewerRole === 'parent'}
             <div class="info-banner parent">
                 <div class="banner-text">
-                    <span>Du siehst: <strong>{profile.full_name}</strong></span>
+                    <span>{$_('progress.parent_viewing')} <strong>{profile.full_name}</strong></span>
                 </div>
                 <div class="banner-actions">
                     {#if myChildren.length > 1}
                         <button class="switch-btn" onclick={() => showChildSelection = true}>
-                            👥 Anderes Kind
+                            👥 {$_('progress.other_child')}
                         </button>
                     {/if}
-                    <a href="/parents_landing_page_id4" class="back-link">Dashboard</a>
+                    <a href="/parents_landing_page_id4" class="back-link">{$_('progress.dashboard')}</a>
                 </div>
             </div>
         {/if}
 
         {#if viewerRole === 'teacher'}
             <div class="info-banner teacher">
-                <span>👨‍🏫 Schüler-Ansicht: <strong>{profile.full_name}</strong></span>
-                <button class="back-btn" onclick={() => history.back()}>Zurück zur Liste</button>
+                <span>👨‍🏫 {$_('progress.teacher_view')} <strong>{profile.full_name}</strong></span>
+                <button class="back-btn" onclick={() => history.back()}>{$_('progress.back_to_list')}</button>
             </div>
         {/if}
 
         <header class="profile-header">
             <img
                     src={profile.avatar_url}
-                    alt="Avatar"
+                    alt={$_('progress.avatar_alt')}
                     class="avatar"
-                    onerror={(e) => e.target.src = `https://ui-avatars.com/api/?name=${profile.full_name}&background=f3be6a&color=fff`}
+                    onerror={(e) => (e.target as HTMLImageElement).src =
+        `https://ui-avatars.com/api/?name=${profile.full_name}&background=f3be6a&color=fff`}
             />
             <div class="info">
                 <h1>{profile.full_name}</h1>
                 <div class="stats">
-                    <div class="stat"><span>Level</span> <strong>{profile.level || 1}</strong></div>
-                    <div class="stat"><span>XP</span> <strong>{profile.xp || 0}</strong></div>
-                    <div class="stat"><span>Herzen</span> <strong>{profile.hearts || 3} ❤️</strong></div>
+                    <div class="stat"><span>{$_('progress.level')}</span> <strong>{profile.level || 1}</strong></div>
+                    <div class="stat"><span>{$_('progress.xp')}</span> <strong>{profile.xp || 0}</strong></div>
+                    <div class="stat"><span>{$_('progress.hearts')}</span> <strong>{profile.hearts || 3} ❤️</strong></div>
                 </div>
             </div>
         </header>
 
         <section class="missions">
-            <h2>Lernfortschritt</h2>
+            <h2>{$_('progress.learning_progress')}</h2>
+
             {#if missionsData.length === 0}
-                <div class="empty">Noch keine Aufgaben gestartet.</div>
+                <div class="empty">{$_('progress.no_missions')}</div>
             {:else}
                 <div class="grid">
                     {#each missionsData as item}
@@ -232,12 +238,15 @@
                             <div class="card {item.completed ? 'done' : ''}">
                                 <div class="head">
                                     <h3>{item.missions.title}</h3>
-                                    <span class="xp">+{item.missions.xp_reward} XP</span>
+                                    <span class="xp">+{item.missions.xp_reward} {$_('progress.xp_short')}</span>
                                 </div>
                                 <div class="track">
-                                    <div class="fill" style="width: {item.progress}%; background: {getBarColor(item.progress, item.completed)}"></div>
+                                    <div
+                                            class="fill"
+                                            style="width: {item.progress}%; background: {getBarColor(item.progress, item.completed)}"
+                                    />
                                 </div>
-                                <small>{item.completed ? 'Fertig!' : `${item.progress}%`}</small>
+                                <small>{item.completed ? $_('progress.done') : `${item.progress}%`}</small>
                             </div>
                         {/if}
                     {/each}
@@ -246,6 +255,7 @@
         </section>
 
     {/if}
+
 </div>
 
 <style>

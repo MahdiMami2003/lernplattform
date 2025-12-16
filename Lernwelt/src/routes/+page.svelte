@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+    import { browser } from '$app/environment';
+    import { locale, _ } from '$lib/i18n/config';
+    function setLang(l: 'de' | 'en') {
+        locale.set(l);
+        if (browser) localStorage.setItem('lang', l);
+    }
 
-	function goStudent() {
+    function goStudent() {
 		goto('/student_landing_page_id5');
 	}
 	function goTeacher() {
@@ -30,7 +36,7 @@
 	async function handleLogin(e: Event) {
 		e.preventDefault();
 		try {
-			message = 'Melde an...';
+			message = $_('login.logging_in');
 
 			const { data, error } = await supabase.auth.signInWithPassword({
 				email: email,
@@ -52,7 +58,7 @@
 				throw userError;
 			}
 
-			message = 'Anmeldung erfolgreich! Leite weiter...';
+			message = $_('login.success_redirect');
 
 			// Leite basierend auf der Rolle weiter
 			if (userData.role === 'student') {
@@ -63,10 +69,10 @@
 				await goto('/parents_landing_page_id4'); // Passe den Pfad an
 			} else {
 				// Falls keine Rolle gefunden wurde
-				throw new Error('Keine gültige Rolle gefunden');
+				throw new Error($_('login.no_valid_role'));
 			}
 		} catch (error: any) {
-			message = `Anmeldung fehlgeschlagen: ${error.message}`;
+			message = `${$_('login.failed')}: ${error?.message ?? error}`;
 			// Lösche nur das Passwort, behalte die E-Mail
 			password = '';
 		}
@@ -75,20 +81,24 @@
 
 <div class="landing_grid">
 	<main class="main_container">
+        <div class="lang-switch">
+            <button type="button" class:selected={$locale === 'de'} onclick={() => setLang('de')}>DE</button>
+            <button type="button" class:selected={$locale === 'en'} onclick={() => setLang('en')}>EN</button>
+        </div>
 		<header>
-			<h1 class="start-title">Willkommen in der <br /> HSGG-Lernwelt</h1>
-			<p class="start-subtitle">Deine digitale Umgebung zum Lernen, Üben und Begleiten.</p>
+			<h1 class="start-title">{$_('login.title')}</h1>
+			<p class="start-subtitle">{$_('login.subtitle')}</p>
 		</header>
 
 		<div class="center-content-wrapper">
-			<h2>Melde dich an und leg los!</h2>
+			<h2>{$_('login.cta')}</h2>
 			<div class="auth-section">
 				<form onsubmit={handleLogin} class="login-form">
 					<div class="input-row">
 						<input
 							type="email"
 							class="login-input"
-							placeholder="E-Mail Adresse"
+							placeholder={$_('login.email_placeholder')}
 							bind:value={email}
 							required
 						/>
@@ -96,43 +106,43 @@
 							type="password"
 							class="login-input"
 							name="password"
-							placeholder="Passwort"
+							placeholder={$_('login.password_placeholder')}
 							bind:value={password}
 							required
 						/>
 					</div>
-					<button type="submit" class="full-width-btn primary-btn">Einloggen</button>
+					<button type="submit" class="full-width-btn primary-btn">{$_('login.login_button')}</button>
 					{#if message}
 						<p style="color: red; margin-top: 0.5rem; font-size: 0.9rem;">{message}</p>
 					{/if}
 				</form>
 
 				<button class="full-width-btn secondary-btn" type="button" onclick={goReg}>
-					Noch keine Nutzerdaten? Hier gehts zur Registrierung
+                    {$_('login.register_button')}
 				</button>
 			</div>
 
 			<div class="guest-section">
-				<div class="divider"><span>oder</span></div>
+				<div class="divider"><span>{$_('login.or')}</span></div>
 				<button class="guest-btn" type="button" onclick={goGuest}>
-					Ohne Login fortfahren &rarr;
+                    {$_('login.guest_button')}
 				</button>
 			</div>
 		</div>
 		<section class="start-roles">
-			<h2 class="start-roles-title">Quick-Links für das Sprint-Meeting:</h2>
+			<h2 class="start-roles-title">{$_('login.quick_links')}</h2>
 			<div class="start-roles-grid">
 				<button class="role-card" type="button" onclick={goStudent}>
 					<span class="role-icon">🧒</span>
-					<span class="role-title">Schüler*in</span>
+					<span class="role-title">{$_('login.role_student')}</span>
 				</button>
 				<button class="role-card" type="button" onclick={goTeacher}>
 					<span class="role-icon">👩‍🏫</span>
-					<span class="role-title">Lehrperson</span>
+					<span class="role-title">{$_('login.role_teacher')}</span>
 				</button>
 				<button class="role-card" type="button" onclick={goParent}>
 					<span class="role-icon">👨‍👩‍👧</span>
-					<span class="role-title">Elternteil</span>
+					<span class="role-title">{$_('login.role_parent')}</span>
 				</button>
 			</div>
 		</section>
@@ -151,6 +161,7 @@
 	}
 
 	.main_container {
+        position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -165,8 +176,28 @@
 		text-align: center;
 		box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
 	}
+    .lang-switch {
+        position: absolute;
+        top: 0.8rem;
+        right: 0.8rem;
+        display: flex;
+        gap: 0.4rem;
+    }
+    .lang-switch button {
+        border: 1px solid #ccc;
+        background: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
 
-	/* --- NEU: Wrapper für die Zentrierung --- */
+    .lang-switch button.selected {
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    /* --- NEU: Wrapper für die Zentrierung --- */
 	.center-content-wrapper {
 		display: flex;
 		flex-direction: column;
