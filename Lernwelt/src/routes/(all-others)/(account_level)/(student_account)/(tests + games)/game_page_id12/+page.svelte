@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-
+    import { _ } from '$lib/i18n/config';
 	let { data } = $props();
 	let { supabase, session } = data;
 
@@ -172,7 +172,7 @@
 			on:keydown={() => {}}
 		></div>
 		<div class="modal">
-			<h2>Wähle deinen Avatar</h2>
+			<h2>{$_('student.avatar_choose')}</h2>
 			<div class="avatar-list">
 				{#each avatars as a}
 					<button class="img-btn" on:click={() => selectAvatar(a)}>
@@ -192,15 +192,15 @@
 			on:keydown={() => {}}
 		></div>
 		<div class="modal category-modal">
-			<h2>Thema wählen für {selectedSubjectName}</h2>
+			<h2> {$_("student.choose_topic_for", { subject: selectedSubjectName })}</h2>
 
 			{#if loadingCategories}
-				<p>Lade Themen...</p>
+				<p>{$_('student.loading_topics')}</p>
 			{:else}
-				<div class="category-grid">
-					<button class="cat-btn all" on:click={() => startGameWithCategory(null)}>
-						🎲 Alles mischen
-					</button>
+                <div class="category-grid">
+                    <button class="cat-btn all" on:click={() => startGameWithCategory(null)}>
+                        {$_('student.shuffle_all')}
+                    </button>
 
 					{#each availableCategories as cat}
 						<button class="cat-btn" on:click={() => startGameWithCategory(cat)}>
@@ -210,30 +210,30 @@
 				</div>
 			{/if}
 
-			<button class="close-btn" on:click={() => (categoryModal = false)}>Abbrechen</button>
+			<button class="close-btn" on:click={() => (categoryModal = false)}>{$_('student.cancel')}</button>
 		</div>
 	{/if}
 
-	<h1>Willkommen zurück, {userName} 👋</h1>
-	<p>Deine Lernreise geht weiter.</p>
+	<h1>{$_('student.welcome_back', { values: { name: userName } })}</h1>
+	<p>{$_('student.learning_journey')}</p>
 
 	{#if levelUpVisible}
-		<div class="level-up-popup">🎉 Level Up! Level {level}!</div>
+		<div class="level-up-popup">{$_('student.level_up', { values: {level} })}</div>
 	{/if}
 
 	<div class="xp-container">
 		<div class="xp-fill" style="width: {xp}%"></div>
 	</div>
-	<p class="xp-label">Level {level} · {xp}% XP</p>
+	<p class="xp-label">{$_('student.level_xp', { values: { level, xp } })}</p>
 </section>
 
 <section class="subjects">
-	<h2>Wähle ein Fach</h2>
+	<h2>{$_('student.choose_subject')}</h2>
 	<div class="subject-grid">
-		<button on:click={() => openSubject('Mathe', '/mathe_game')}>➕ Mathe</button>
-		<button on:click={() => openSubject('Physik', '/physik_game')}>⚛ Physik</button>
-		<button on:click={() => openSubject('Deutsch', '/deutsch_game')}>📘 Deutsch</button>
-		<button on:click={() => openSubject('English', '/englisch_game')}>🌎 Englisch</button>
+		<button on:click={() => openSubject('Mathe', '/mathe_game')}>➕ {$_('subjects.math')}</button>
+		<button on:click={() => openSubject('Physik', '/physik_game')}>⚛ {$_('subjects.physics')}</button>
+		<button on:click={() => openSubject('Deutsch', '/deutsch_game')}>📘 {$_('subjects.german')}</button>
+		<button on:click={() => openSubject('English', '/englisch_game')}>🌎 {$_('subjects.english')}</button>
 	</div>
 </section>
 

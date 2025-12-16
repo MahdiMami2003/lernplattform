@@ -7,40 +7,40 @@
 
     let { supabase, session } = data;
 
-
+    import { _ } from '$lib/i18n/config';
 </script>
 
 
-<body>
+
 <div id="placeholder">
-    <h1>Hallo liebe:r Schüler:in</h1>
-    <div>Herzlich willkommen auf der Website der HSGG Lernwelt</div>
-    <div>Bitte klicke auf das Thema das dich interessiert.</div>
-    <br>
+    <h1>{$_('student.title')}</h1>
+    <div>{$_('student.welcome')}</div>
+    <div>{$_('student.choose_topic')}</div>
+    <br />
 
     <ul>
-        <li class="landing_liste">
-            <a href="/game_page_id12"><h3>Game Page</h3></a>
-            <div class="link_description">Aufgaben & Gamification!</div>
+        <li class="landing_list">
+            <a href="/game_page_id12"><h3>{$_('student.game_title')}</h3></a>
+            <div class="link_description">{$_('student.game_desc')}</div>
         </li>
 
-        <li class="landing_liste">
-            <a href="/weekly_test_page_id17"><h3>Weekly Tests</h3></a>
-            <div class="link_description">Wöchentliche Kompetenzchecks</div>
+        <li class="landing_list">
+            <a href="/weekly_test_page_id17"><h3>{$_('student.weekly_title')}</h3></a>
+            <div class="link_description">{$_('student.weekly_desc')}</div>
         </li>
 
-        <li class="landing_liste">
-            <a href="/progress_page_id11"><h3>Fortschritt</h3></a>
-            <div class="link_description">Deine Lernstatistiken im Überblick</div>
+        <li class="landing_list">
+            <a href="/progress_page_id11"><h3>{$_('student.progress_title')}</h3></a>
+            <div class="link_description">{$_('student.progress_desc')}</div>
         </li>
 
-        <li class="landing_liste">
-            <a href="/material_page_id14"><h3>Lernunterlagen</h3></a>
-            <div class="link_description">Materialien für dein Lernen</div>
+        <li class="landing_list">
+            <a href="/material_page_id14"><h3>{$_('student.materials_title')}</h3></a>
+            <div class="link_description">{$_('student.materials_desc')}</div>
         </li>
     </ul>
 </div>
-</body>
+
 
 
 
@@ -56,27 +56,44 @@
         text-decoration: none;
     }
 
-    .landing_liste {
-        list-style-type: none;
-        border: solid thin lightgray;
-        margin: 1dvh;
-        padding-left: 3dvh;
+    #placeholder {
+        max-width: 1100px;
+        margin: 2rem auto;
+        padding: 2rem;
         background-color: #f5f5dc;
-        border-radius: 5px;
+        border-radius: 1rem;
     }
-
-    li:hover {
+    #placeholder ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    /*li:hover {
         background-color: #dcdcc5;
+    }*/
+    .landing_list {
+        background: #fff7e6;
+        border-radius: 1.4rem;
+        padding: 1.6rem;
+        border: 2px solid #f0d9a6;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
+    .landing_list:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+    }
     a:hover {
         color: #0077cc;
         text-decoration: underline;
     }
 
     .link_description {
-        padding-bottom: 2dvh;
-        padding-left: 3dvh;
+        margin-top: 0.6rem;
+        font-size: 0.95rem;
+        color: #444;
     }
 
 
