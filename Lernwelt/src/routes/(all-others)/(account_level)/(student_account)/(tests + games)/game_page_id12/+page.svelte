@@ -252,7 +252,7 @@
 			<span class="slider"></span>
 		</label>
 		<span class="mode-label">
-			{isClozeMode ? '📝 Lückentext-Modus (AI Powered)' : '🎮 Standard-Modus (Minispiele)'}
+			{isClozeMode ? 'Lückentext-Modus' : 'Standard-Modus (Minispiele)'}
 		</span>
 	</div>
 
