@@ -10,13 +10,13 @@
 	import progress from '$lib/assets/icons/prog.png';
 	import subject from '$lib/assets/icons/sub.png';
 	import task from '$lib/assets/icons/tasks.png';
-    import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import { fly } from 'svelte/transition';
 
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabaseClient';
-    import { browser } from '$app/environment';
-    import { locale, _ } from '$lib/i18n/config';
+	import { browser } from '$app/environment';
+	import { locale, _ } from '$lib/i18n/config';
 	let { data } = $props();
 
 	// SIDEBAR STATES
@@ -83,18 +83,18 @@
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen;
 	}
-    let showLangMenu = $state(false);
+	let showLangMenu = $state(false);
 
-    function toggleLangMenu(e?: MouseEvent) {
-        e?.preventDefault();
-        showLangMenu = !showLangMenu;
-    }
+	function toggleLangMenu(e?: MouseEvent) {
+		e?.preventDefault();
+		showLangMenu = !showLangMenu;
+	}
 
-    function setLang(l: 'de' | 'en') {
-        locale.set(l);
-        if (browser) localStorage.setItem('lang', l);
-        showLangMenu = false;
-    }
+	function setLang(l: 'de' | 'en') {
+		locale.set(l);
+		if (browser) localStorage.setItem('lang', l);
+		showLangMenu = false;
+	}
 </script>
 
 <nav class="header-root">
@@ -180,8 +180,6 @@
 		</div>
 	{/if}
 
-
-
 	<!-- Sidebar Overlay/Container -->
 	{#if innerW > 1000}
 		{#if showMainSidebar}
@@ -204,15 +202,25 @@
 					</li>
 
 					<li class="nav__items" id="task">
-						<a
-							href={data.session ? '/game_page_id12' : '#'}
-							class={!data.session ? 'disabled-link' : ''}
-							title={!data.session ? 'Bitte einloggen' : ''}
-							onclick={!data.session ? (e) => e.preventDefault() : undefined}
-						>
-							<img alt="Aufgaben" src={task} />
-							<span class="nav-text">Aufgaben {!data.session ? '🔒' : ''}</span>
-						</a>
+						{#if data.session}
+							<a href="/game_page_id12">
+								<img alt="Aufgaben" src={task} />
+								<span class="nav-text">Aufgaben</span>
+							</a>
+						{:else}
+							<div class="nav__items_disabled_wrapper" style="cursor: not-allowed;">
+								<a
+									href="#"
+									class="disabled-link"
+									title="Bitte zuerst einloggen!"
+									onclick={(e) => e.preventDefault()}
+									style="pointer-events: none;"
+								>
+									<img alt="Aufgaben" src={task} />
+									<span class="nav-text">Aufgaben 🔒</span>
+								</a>
+							</div>
+						{/if}
 					</li>
 
 					{#if testlogin}
@@ -251,35 +259,29 @@
 							<span class="nav-text">Kontrastmodus</span>
 						</a>
 					</li>
-                    <li class="nav__items" id="task">
-                        <a href="#" onclick={toggleLangMenu}>
-                            <span class="nav-text">{$_('header.change_language')}</span>
-                        </a>
+					<li class="nav__items" id="task">
+						<a href="#" onclick={toggleLangMenu}>
+							<span class="nav-text">{$_('header.change_language')}</span>
+						</a>
 
-                        {#if showLangMenu}
-                            <div class="lang-submenu">
-                                <button
-                                        class:selected={$locale === 'de'}
-                                        onclick={() => setLang('de')}
-                                >DE</button>
+						{#if showLangMenu}
+							<div class="lang-submenu">
+								<button class:selected={$locale === 'de'} onclick={() => setLang('de')}>DE</button>
 
-                                <button
-                                        class:selected={$locale === 'en'}
-                                        onclick={() => setLang('en')}
-                                >EN</button>
-                            </div>
-                        {/if}
-                    </li>
-                    <li class="nav__items" id="access">
-                        <a onclick={toggle_slide_left} href="#"> <span class="nav-text">Zurück</span> </a>
-                    </li>
+								<button class:selected={$locale === 'en'} onclick={() => setLang('en')}>EN</button>
+							</div>
+						{/if}
+					</li>
+					<li class="nav__items" id="access">
+						<a onclick={toggle_slide_left} href="#"> <span class="nav-text">Zurück</span> </a>
+					</li>
 				</ul>
 			</div>
 		{/if}
 	{/if}
 </nav>
 <div class="bread-bar">
-    <Breadcrumbs />
+	<Breadcrumbs />
 </div>
 <svelte:window bind:innerWidth={innerW} />
 
@@ -313,7 +315,7 @@
 
 	.signature {
 		display: flex;
-        height: var(--header-height);
+		height: var(--header-height);
 		flex-basis: auto;
 		align-items: center;
 		justify-content: start;
@@ -492,54 +494,53 @@
 		border-radius: 1rem;
 	}
 
-    /* --- NEUE BREADCRUMB BAR --- */
-    .bread-bar {
-        position: fixed;
-        top: var(--header-height); /* Beginnt direkt unter dem Header */
-        left: 0;
-        width: 100%;
-        height: var(--bread-height);
-        background-color: #f1af69; /* Helleres Beige passend zum Header */
-        border-bottom: 1px solid #e0cdb0;
-        display: flex;
-        align-items: center;
-        padding: 0 1rem; /* Gleiches Padding wie Header für Ausrichtung */
-        box-sizing: border-box;
-        z-index: 990; /* Unter Header (1000) und Mobile Menu (999) */
-        font-size: 0.85rem;
-        color: #44546a;
-    }
+	/* --- NEUE BREADCRUMB BAR --- */
+	.bread-bar {
+		position: fixed;
+		top: var(--header-height); /* Beginnt direkt unter dem Header */
+		left: 0;
+		width: 100%;
+		height: var(--bread-height);
+		background-color: #f1af69; /* Helleres Beige passend zum Header */
+		border-bottom: 1px solid #e0cdb0;
+		display: flex;
+		align-items: center;
+		padding: 0 1rem; /* Gleiches Padding wie Header für Ausrichtung */
+		box-sizing: border-box;
+		z-index: 990; /* Unter Header (1000) und Mobile Menu (999) */
+		font-size: 0.85rem;
+		color: #44546a;
+	}
 
-    .bread-bar a {
-        text-decoration: none;
-        color: #44546a;
-        transition: color 0.2s;
-        display: flex;
-        align-items: center;
-    }
+	.bread-bar a {
+		text-decoration: none;
+		color: #44546a;
+		transition: color 0.2s;
+		display: flex;
+		align-items: center;
+	}
 
-    .bread-bar a:hover {
-        color: #000;
-        text-decoration: underline;
-    }
+	.bread-bar a:hover {
+		color: #000;
+		text-decoration: underline;
+	}
 
-    .bread-bar .separator {
-        margin: 0 0.5rem;
-        color: #888;
-        font-size: 0.7rem; /* Kleinerer Pfeil */
-    }
+	.bread-bar .separator {
+		margin: 0 0.5rem;
+		color: #888;
+		font-size: 0.7rem; /* Kleinerer Pfeil */
+	}
 
-    .bread-bar .current {
-        font-weight: bold;
-        color: #222;
-        cursor: default;
-    }
+	.bread-bar .current {
+		font-weight: bold;
+		color: #222;
+		cursor: default;
+	}
 
 	@media (max-width: 1000px) {
-
-        .signature p{
-            display: none;
-        }
+		.signature p {
+			display: none;
+		}
 		.q_mark,
 		.login {
 			display: none; /* Hide others to make room for search on mobile? User didn't specify, but safer */
@@ -734,24 +735,24 @@
 		background-color: rgba(0, 0, 0, 0.1);
 		filter: none;
 	}
-    .lang-submenu {
-        margin-left: 1rem;
-        margin-top: 0.4rem;
-        display: flex;
-        gap: 0.4rem;
-    }
+	.lang-submenu {
+		margin-left: 1rem;
+		margin-top: 0.4rem;
+		display: flex;
+		gap: 0.4rem;
+	}
 
-    .lang-submenu button {
-        border: 1px solid #ccc;
-        background: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.85rem;
-    }
+	.lang-submenu button {
+		border: 1px solid #ccc;
+		background: white;
+		padding: 0.25rem 0.5rem;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 0.85rem;
+	}
 
-    .lang-submenu button.selected {
-        font-weight: 700;
-        text-decoration: underline;
-    }
+	.lang-submenu button.selected {
+		font-weight: 700;
+		text-decoration: underline;
+	}
 </style>

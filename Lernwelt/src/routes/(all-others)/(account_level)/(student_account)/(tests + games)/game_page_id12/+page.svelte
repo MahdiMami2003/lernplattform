@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-    import { _ } from '$lib/i18n/config';
+	import { _ } from '$lib/i18n/config';
 	let { data } = $props();
 	let { supabase, session } = data;
 
@@ -82,11 +82,24 @@
 		loadingCategories = false;
 	}
 
+	// Toggle für Lückentext-Modus
+	let isClozeMode = $state(false);
+
 	function startGameWithCategory(category: string | null) {
 		let url = selectedTargetRoute;
-		if (category) {
-			url += `?category=${encodeURIComponent(category)}`;
+
+		if (isClozeMode) {
+			// Redirect to generic Cloze Game engine
+			// Route: /cloze_game?subject=[Subject]&topic=[Category]
+			const topic = category || 'Allgemein';
+			url = `/cloze_game?subject=${encodeURIComponent(selectedSubjectName)}&topic=${encodeURIComponent(topic)}`;
+		} else {
+			// Normal Game
+			if (category) {
+				url += `?category=${encodeURIComponent(category)}`;
+			}
 		}
+
 		categoryModal = false;
 		goto(url);
 	}
@@ -192,15 +205,15 @@
 			on:keydown={() => {}}
 		></div>
 		<div class="modal category-modal">
-            <h2> {$_("student.choose_topic_for", { values: { subject: selectedSubjectName } })}</h2>
+			<h2>{$_('student.choose_topic_for', { values: { subject: selectedSubjectName } })}</h2>
 
 			{#if loadingCategories}
 				<p>{$_('student.loading_topics')}</p>
 			{:else}
-                <div class="category-grid">
-                    <button class="cat-btn all" on:click={() => startGameWithCategory(null)}>
-                        {$_('student.shuffle_all')}
-                    </button>
+				<div class="category-grid">
+					<button class="cat-btn all" on:click={() => startGameWithCategory(null)}>
+						{$_('student.shuffle_all')}
+					</button>
 
 					{#each availableCategories as cat}
 						<button class="cat-btn" on:click={() => startGameWithCategory(cat)}>
@@ -210,7 +223,9 @@
 				</div>
 			{/if}
 
-			<button class="close-btn" on:click={() => (categoryModal = false)}>{$_('student.cancel')}</button>
+			<button class="close-btn" on:click={() => (categoryModal = false)}
+				>{$_('student.cancel')}</button
+			>
 		</div>
 	{/if}
 
@@ -218,7 +233,7 @@
 	<p>{$_('student.learning_journey')}</p>
 
 	{#if levelUpVisible}
-		<div class="level-up-popup">{$_('student.level_up', { values: {level} })}</div>
+		<div class="level-up-popup">{$_('student.level_up', { values: { level } })}</div>
 	{/if}
 
 	<div class="xp-container">
@@ -229,11 +244,29 @@
 
 <section class="subjects">
 	<h2>{$_('student.choose_subject')}</h2>
+
+	<!-- Game Mode Toggle -->
+	<div class="mode-toggle">
+		<label class="toggle-switch">
+			<input type="checkbox" bind:checked={isClozeMode} />
+			<span class="slider"></span>
+		</label>
+		<span class="mode-label">
+			{isClozeMode ? '📝 Lückentext-Modus (AI Powered)' : '🎮 Standard-Modus (Minispiele)'}
+		</span>
+	</div>
+
 	<div class="subject-grid">
 		<button on:click={() => openSubject('Mathe', '/mathe_game')}>➕ {$_('subjects.math')}</button>
-		<button on:click={() => openSubject('Physik', '/physik_game')}>⚛ {$_('subjects.physics')}</button>
-		<button on:click={() => openSubject('Deutsch', '/deutsch_game')}>📘 {$_('subjects.german')}</button>
-		<button on:click={() => openSubject('English', '/englisch_game')}>🌎 {$_('subjects.english')}</button>
+		<button on:click={() => openSubject('Physik', '/physik_game')}
+			>⚛ {$_('subjects.physics')}</button
+		>
+		<button on:click={() => openSubject('Deutsch', '/deutsch_game')}
+			>📘 {$_('subjects.german')}</button
+		>
+		<button on:click={() => openSubject('English', '/englisch_game')}
+			>🌎 {$_('subjects.english')}</button
+		>
 	</div>
 </section>
 
@@ -442,6 +475,71 @@
 		color: #718096;
 		cursor: pointer;
 		text-decoration: underline;
+	}
+
+	/* TOGGLE SWITCH */
+	.mode-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.8rem;
+		margin: 1.5rem 0;
+	}
+
+	.mode-label {
+		font-weight: 700;
+		color: #2d3748;
+		font-size: 1.1rem;
+	}
+
+	.toggle-switch {
+		position: relative;
+		display: inline-block;
+		width: 50px;
+		height: 28px;
+	}
+
+	.toggle-switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #cbd5e1;
+		transition: 0.4s;
+		border-radius: 34px;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: '';
+		height: 20px;
+		width: 20px;
+		left: 4px;
+		bottom: 4px;
+		background-color: white;
+		transition: 0.4s;
+		border-radius: 50%;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+	}
+
+	input:checked + .slider {
+		background-color: #3ba776;
+	}
+
+	input:focus + .slider {
+		box-shadow: 0 0 1px #3ba776;
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(22px);
 	}
 
 	.level-up-popup {
