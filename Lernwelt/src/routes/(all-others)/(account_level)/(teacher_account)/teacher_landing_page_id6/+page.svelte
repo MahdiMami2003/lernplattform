@@ -96,7 +96,7 @@
     }
 </script>
 
-<div id="placeholder">
+<div id="placeholder" class="main_container">
     <h1 class="überschrift">{$_('teacher.title')}</h1>
     <p class="untertitel">
         {$_('teacher.subtitle')}
@@ -189,73 +189,28 @@
 </div>
 
 <style>
-    /* ---- NEUE STYLES FÜR DEN MANAGER ---- */
-    .class-manager-section {
-        margin-top: 2rem;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 1.2rem;
-        padding: 1.5rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-    .hint-text { margin-bottom: 1rem; color: #666; font-style: italic; }
-
-    .manager-tags { display: flex; flex-wrap: wrap; gap: 0.8rem; }
-
-    .class-select-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        border: 2px solid #ddd;
-        background: white;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex; align-items: center; gap: 0.5rem;
-        transition: all 0.2s;
-        font-size: 0.9rem;
-    }
-    .class-select-btn:hover { background: #f0f0f0; border-color: #ccc; }
-
-    /* Wenn ausgewählt (Aktiv) */
-    .class-select-btn.active {
-        background-color: #236c93; /* Dein Blau-Ton */
-        color: white;
-        border-color: #236c93;
-    }
-    .class-select-btn.active:hover { background-color: #1a5070; }
-
-    .empty-hint {
-        text-align: center; padding: 2rem; background: #f9f9f9;
-        border-radius: 12px; border: 2px dashed #ddd; color: #777;
-    }
-
-
-    /* ---- DEINE BESTEHENDEN STYLES ---- */
-    .class-link {
-        text-decoration: none;
-        color: inherit;
-        transition: color 0.2s;
-    }
-    .class-link:hover {
-        color: #d89c48;
-        text-decoration: underline;
-    }
-    /* ---- Grundlayout ---- */
+    /* ============ MAIN CONTAINER ============ */
     #placeholder {
         min-height: 100vh;
         font-family: 'Inter', Arial, Helvetica, sans-serif;
         padding-bottom: 2rem;
-        max-width: 1200px; /* Begrenzt Breite */
+        max-width: 1200px;
         margin: 0 auto;
         padding: 1rem;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* ---- Titel ---- */
+    /* ============ TYPOGRAPHY ============ */
     .überschrift {
         display: flex;
         justify-content: center;
         font-size: clamp(1.8rem, 4vw, 3rem);
         font-weight: 700;
         text-align: center;
+        color: var(--text-primary);
+        transition: color 0.3s ease;
     }
 
     .untertitel {
@@ -263,43 +218,139 @@
         justify-content: center;
         font-size: clamp(1rem, 2vw, 1.4rem);
         margin-top: clamp(0.5rem, 2vw, 2rem);
-        color: #444;
+        color: var(--text-secondary);
         text-align: center;
+        transition: color 0.3s ease;
     }
 
-    /* ---- Tipps ---- */
+    h2 {
+        color: var(--text-primary);
+        transition: color 0.3s ease;
+    }
+
+    h3 {
+        color: var(--text-primary);
+        margin-top: 0;
+        transition: color 0.3s ease;
+    }
+
+    p {
+        color: var(--text-secondary);
+        transition: color 0.3s ease;
+    }
+
+    /* ============ TIPPS SECTION ============ */
     .tipps-grid {
-        background-color: #fbead7;
+        background-color: var(--bg-card);
         border-radius: 1.2rem;
-        border: 1px solid #ffeed8;
+        border: 1px solid var(--border-color);
         padding: 1rem 1.2rem;
         font-size: clamp(0.9rem, 1.8vw, 1rem);
-        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
     }
 
-    /* ---- Allgemeine Verwaltung ---- */
+    /* ============ GENERAL SECTION ============ */
     .general-section {
         margin-top: 2rem;
     }
+
     .general-grid {
         display: grid;
         gap: 1rem;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
+
     .card {
-        background-color: #e3f2fd;
-        border: 1px solid #bbdefb;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 1.2rem;
         padding: 1.2rem;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-    .card h3 {
-        margin-top: 0;
-        color: #1565c0;
+        transition: all 0.3s ease;
     }
 
-    /* ---- Klassenübersicht ---- */
-    .classes-section { margin-top: 2rem; }
+    .card:hover {
+        background-color: var(--bg-hover);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ============ CLASS MANAGER SECTION ============ */
+    .class-manager-section {
+        margin-top: 2rem;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1.2rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .hint-text {
+        margin-bottom: 1rem;
+        color: var(--text-muted);
+        font-style: italic;
+        transition: color 0.3s ease;
+    }
+
+    .manager-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .class-select-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        border: 2px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+
+    .class-select-btn:hover {
+        background: var(--bg-hover);
+        border-color: var(--border-accent);
+    }
+
+    .class-select-btn:focus-visible {
+        outline: 2px solid var(--button-bg);
+        outline-offset: 2px;
+    }
+
+    /* Wenn ausgewählt (Aktiv) */
+    .class-select-btn.active {
+        background-color: var(--button-bg);
+        color: var(--text-primary);
+        border-color: var(--button-bg);
+    }
+
+    .class-select-btn.active:hover {
+        background-color: var(--button-hover);
+    }
+
+    /* ============ EMPTY HINT ============ */
+    .empty-hint {
+        text-align: center;
+        padding: 2rem;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 2px dashed var(--border-color);
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+    }
+
+    /* ============ CLASSES SECTION ============ */
+    .classes-section {
+        margin-top: 2rem;
+    }
 
     .class-grid {
         display: grid;
@@ -308,20 +359,19 @@
     }
 
     .class-card {
-        background-color: #fbead7;
+        background-color: var(--bg-card);
         border-radius: 1.2rem;
         padding: 1.2rem 1.4rem;
-        border: 1px solid #ffeed8;
-        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
         font-size: clamp(0.9rem, 1.8vw, 1rem);
-        transition:
-                transform 0.15s ease,
-                box-shadow 0.15s ease;
+        transition: all 0.3s ease;
     }
 
     .class-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(15, 41, 64, 0.18);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+        background-color: var(--bg-hover);
     }
 
     .class-card ul {
@@ -336,58 +386,103 @@
         gap: 0.5rem;
     }
 
-    /* ---- Buttons klein ---- */
+    /* ============ BUTTONS ============ */
     .small-btn {
         padding: 0.35rem 0.9rem;
-        background-color: #f4d4b3;
+        background-color: var(--button-bg);
         font-size: clamp(0.75rem, 1.5vw, 0.9rem);
-        border: 1px solid #f3b06a;
-        color: #000;
+        border: 1px solid var(--button-border);
+        color: var(--text-primary);
         border-radius: 999px;
         cursor: pointer;
         font-weight: 600;
-        transition:
-                background 0.2s,
-                transform 0.15s;
+        transition: all 0.2s;
+        min-height: 44px;
     }
 
     .small-btn:hover {
-        background-color: #efc48b;
+        background-color: var(--button-hover);
         transform: translateY(-1px);
     }
 
-    /* ---- Admin Panel ---- */
+    .small-btn:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
+
+    /* ============ ADMIN PANEL ============ */
     .admin-panel {
         margin-top: 3rem;
         padding: 1.8rem;
-        background-color: #f3be6a;
-        border: 2px solid #d8b16c;
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-accent);
         border-radius: 1.2rem;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
         max-width: 700px;
+        transition: all 0.3s ease;
     }
 
     .admin-btn {
         margin: 0.5rem 0.5rem 0 0;
         padding: 0.65rem 1.3rem;
-        background-color: #f3e7d9;
-        border: 1px solid #e2d2c0;
-        color: #000;
+        background-color: var(--button-bg);
+        border: 1px solid var(--button-border);
+        color: var(--text-primary);
         font-weight: 600;
         border-radius: 999px;
         cursor: pointer;
-        transition:
-                background 0.2s,
-                transform 0.15s;
+        transition: all 0.2s;
+        min-height: 44px;
     }
 
     .admin-btn:hover {
-        background-color: #ecdac4;
+        background-color: var(--button-hover);
         transform: translateY(-2px);
     }
 
-    /* ---- Reset ---- */
+    .admin-btn:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
+
+    /* ============ LINKS ============ */
+    .class-link {
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: color 0.2s;
+    }
+
+    .class-link:hover {
+        color: var(--button-hover);
+        text-decoration: underline;
+    }
+
+    a {
+        color: var(--button-bg);
+        transition: color 0.2s;
+    }
+
+    a:hover {
+        color: var(--button-hover);
+    }
+
+    /* ============ RESET ============ */
     div {
         margin: 0;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+        #placeholder {
+            padding: 0.5rem;
+        }
+
+        .class-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .general-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>

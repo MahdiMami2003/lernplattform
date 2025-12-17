@@ -53,42 +53,79 @@
 </script>
 
 <!-- Das HTML für deine Leiste -->
-    {#each breadService.crumbs as crumb, index}
-        <a href={crumb.href} class:current={index === breadService.crumbs.length - 1}>
-            {crumb.label}
-        </a>
+{#each breadService.crumbs as crumb, index}
+    <a
+            href={crumb.href}
+            class:current={index === breadService.crumbs.length - 1}
+            aria-current={index === breadService.crumbs.length - 1 ? 'page' : undefined}
+    >
+        {crumb.label}
+    </a>
 
-        {#if index < breadService.crumbs.length - 1}
-            <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
-        {/if}
-    {/each}
-
+    {#if index < breadService.crumbs.length - 1}
+        <span class="separator" aria-hidden="true">
+            <i class="fa-solid fa-chevron-right"></i>
+        </span>
+    {/if}
+{/each}
 
 <style>
+    /* ============ BREADCRUMB LINKS ============ */
     a {
         text-decoration: none;
-        color: #44546a;
-        transition: color 0.2s;
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
         display: flex;
         align-items: center;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
     }
 
-    a:hover {
-        color: #000;
+    a:hover:not(.current) {
+        color: var(--text-primary);
         text-decoration: underline;
+        background-color: var(--bg-hover);
     }
 
-    /* Aktive Seite nicht klickbar machen oder hervorheben */
-     a.current {
+    a:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
+
+    /* ============ AKTUELLE SEITE ============ */
+    a.current {
         font-weight: bold;
-        color: #222;
+        color: var(--text-primary);
         pointer-events: none;
+        cursor: default;
         text-decoration: none;
+        transition: color 0.3s ease;
     }
 
+    /* ============ SEPARATOR ============ */
     .separator {
         margin: 0 0.5rem;
-        color: #888;
+        color: var(--text-muted);
         font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        transition: color 0.3s ease;
+    }
+
+    .separator i {
+        color: var(--text-muted);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+        a {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .separator {
+            margin: 0 0.3rem;
+            font-size: 0.6rem;
+        }
     }
 </style>
