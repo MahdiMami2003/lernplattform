@@ -1,16 +1,18 @@
+<script>
+    import { _ } from '$lib/i18n/config';
+</script>
 <div class="impressum-wrapper">
 
-    <h1>Impressum</h1>
+    <h1>{$_('imprint.title')}</h1>
 
     <p class="description">
-        Diese Website ist ein schulisches Projekt der HSGG-Lernwelt.
-        Die Inhalte dienen ausschließlich zu Demonstrations- und Lernzwecken.
+        {$_('imprint.subtitle')}
     </p>
 
     <div class="impressum-box">
 
         <section>
-            <h2>Verantwortlich gemäß § 5 TMG</h2>
+            <h2>{$_('imprint.responsible_title')}</h2>
             <p>
                 Max Mustermann<br />
                 Musterstraße 12<br />
@@ -20,7 +22,7 @@
         </section>
 
         <section>
-            <h2>Kontakt</h2>
+            <h2>{$_('imprint.contact_title')}</h2>
             <p>
                 E-Mail: beispiel@example.com<br />
                 Telefon: 0123 456789
@@ -28,18 +30,16 @@
         </section>
 
         <section>
-            <h2>Haftungsausschluss</h2>
+            <h2>{$_('imprint.disclaimer_title')}</h2>
             <p>
-                Diese Website dient als Demonstrations- und Schulungsprojekt.
-                Keine Inhalte entsprechen einem realen Unternehmensangebot.
+                {$_('imprint.disclaimer_text')}
             </p>
         </section>
 
         <section>
-            <h2>Urheberrecht</h2>
+            <h2>{$_('imprint.copyright_title')}</h2>
             <p>
-                Texte, Code und Gestaltung sind Teil eines Lernprojekts und dürfen
-                nur im Rahmen der Schulnutzung oder mit Zustimmung weiterverwendet werden.
+                {$_('imprint.copyright_text')}
             </p>
         </section>
 
