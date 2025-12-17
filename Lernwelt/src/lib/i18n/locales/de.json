@@ -99,8 +99,8 @@
     "reload": "Neu laden",
     "no_questions": "Für diese Kategorie sind aktuell keine Fragen vorhanden.",
     "dashboard": "Dashboard",
-    "level_reached": "🎉 Level {level} erreicht!",
-    "question_count": "Frage {current} / {total}",
+    "level_reached": "🎉 Level erreicht!",
+    "question_count": "Frage",
     "no_hearts": "😥 Keine Herzen mehr",
     "well_done": "🎉 Super gemacht!",
     "correct_answers": "Richtige Antworten",
@@ -110,7 +110,73 @@
     "badge_perfect": "Perfekte Runde 🏅",
     "badge_streak": "Streak-Meister 🔥",
     "badge_math_hero": "Mathe-Held 📘",
+    "badge_phy_hero": "Physik-Profi ⚛",
     "play_again": "Nochmal spielen"
+  },
+  "parent": {
+    "title": "Hallo liebes Elternteil.",
+    "welcome": "Herzlich willkommen auf der Website der HSGG Lernwelt",
+    "instruction": "Bitte klicken Sie auf das Thema, das Sie interessiert.",
+
+    "sections": {
+      "appointments_title": "Termine und Aktuelles",
+      "appointments_desc": "Hier finden Sie aktuelle Informationen, die Sie nicht verpassen sollten.",
+
+      "progress_title": "Fortschritt meines Kindes",
+      "progress_desc": "Falls Sie sehen wollen, auf welchem Lernstand Ihr Kind ist, klicken Sie hier.",
+
+      "tips_title": "Pädagogische Tipps",
+      "tips_desc": "Wenn Sie herausfinden wollen, wie Sie Ihr Kind beim Lernen unterstützen können, klicken Sie hier.",
+
+      "materials_title": "Lernunterlagen meines Kindes",
+      "materials_desc": "Hier finden Sie die Lernunterlagen, die Ihrem Kind zur Verfügung gestellt werden."
+    }
+  },
+  "appointment": {
+    "title": "Neuigkeiten & Termine",
+    "loading": "Lade Termine...",
+    "empty": "Aktuell stehen keine Termine an.",
+    "add": "Neuen Termin hinzufügen"
+  },
+  "pedagogy": {
+    "errors": {
+      "not_found_title": "Tipp nicht gefunden",
+      "not_found_text": "Der angeforderte Tipp existiert nicht.",
+      "load_error_title": "Fehler beim Laden",
+      "load_error_text": "Es gab ein Problem beim Laden des Tipps.",
+      "back_link": "Zurück zur Übersicht"
+    },
+    "add": "Neuen Termin hinzufügen"
+  },
+  "materials": {
+    "title": "Übersicht Lerninhalte",
+    "loading": "Lade Materialien...",
+    "empty": "Keine Materialien für deine Klasse gefunden.",
+    "add": "Aufgabe hinzufügen",
+    "delete": "Löschen",
+    "confirm_delete": "Wirklich löschen?",
+    "delete_error": "Fehler beim Löschen!",
+    "load_error": "Fehler beim Laden:",
+    "download_pdf": "PDF herunterladen",
+    "no_pdf": "Kein PDF verfügbar",
+    "not_found_title": "Material nicht gefunden",
+    "not_found_text": "Die angeforderte Material-ID existiert nicht.",
+    "loading_m": "Lade Material..."
+  },
+  "teacher_class": {
+    "loading": "⏳ Lade Klasse...",
+    "title": "Klasse:",
+    "subtitle": "Übersicht aller Schülerinnen und Schüler",
+    "empty": "📭 Keine Schüler in dieser Klasse.",
+    "table": {
+      "avatar": "Avatar",
+      "name": "Name",
+      "level": "Level",
+      "action": "Aktion"
+    },
+    "button": {
+      "progress": "Fortschritt ansehen"
+    }
   }
 }
 

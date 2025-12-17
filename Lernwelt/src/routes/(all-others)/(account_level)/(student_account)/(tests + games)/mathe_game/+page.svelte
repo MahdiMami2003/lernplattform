@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+    import {locale} from "svelte-i18n";
     import { _ } from '$lib/i18n/config';
 	let { data } = $props();
 
@@ -258,18 +259,34 @@
 	}
 
 	onMount(loadProfileAndQuestions);
+    function getSubject(q) {
+        return $locale === 'en'
+            ? q.subject_en || q.subject
+            : q.subject;
+    }
+    function getQuestion(q) {
+        return $locale === 'en'
+            ? q.question_en || q.question
+            : q.question;
+    }
+
+    function getCategory(q) {
+        return $locale === 'en'
+            ? q.category_en || q.category
+            : q.category;
+    }
 </script>
 
 {#if loading}
-	<div class="loading"><p>Spiel wird geladen…</p></div>
+	<div class="loading"><p>{$_("game.loading")}</p></div>
 {:else if loadError}
 	<div class="error">
 		<p>{loadError}</p>
-		<button on:click={loadProfileAndQuestions}>Neu laden</button>
+		<button on:click={loadProfileAndQuestions}>{$_("game.reload")}</button>
 	</div>
 {:else if questions.length === 0}
 	<div class="error">
-		<p>Für diese Kategorie sind aktuell keine Fragen vorhanden.</p>
+		<p>{$_("game.no_questions")}</p>
 		<button on:click={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
 			Dashboard
 		</button>
@@ -278,7 +295,7 @@
 	<div class="game-root">
 		{#if levelUpVisible}
 			<div class="levelup-popup">
-				🎉 Level {level} erreicht!
+                {$_("game.level_reached")} {level}
 			</div>
 		{/if}
 
@@ -296,7 +313,7 @@
 				<div class="progress-top">
 					<div class="progress-inner" style={`width: ${progress}%`}></div>
 				</div>
-				<p class="question-count">Frage {currentIndex + 1} / {questions.length}</p>
+				<p class="question-count">{$_("game.question_count")} {currentIndex + 1} / {questions.length}</p>
 			</div>
 
 			<div class="hud-right">
@@ -354,7 +371,7 @@
 
 				<div class="summary-stats">
 					<div>
-						<span>Richtige Antworten</span>
+						<span>{$_("game.correct_answers")}</span>
 						<strong>{correctCount} / {questions.length}</strong>
 					</div>
 					<div>
@@ -368,22 +385,22 @@
 				{/if}
 
 				<div class="achievements">
-					<p>Freigeschaltete Badges:</p>
+					<p>{$_("game.badges_title")}</p>
 					<div class="badge-row">
 						{#if correctCount === questions.length}
-							<span class="badge">Perfekte Runde 🏅</span>
+							<span class="badge">{$_("game.badge_perfect")}</span>
 						{/if}
 						{#if streak >= 3}
-							<span class="badge">Streak-Meister 🔥</span>
+							<span class="badge">{$_("game.badge_streak")}</span>
 						{/if}
 						{#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
-							<span class="badge">Mathe-Held 📘</span>
+							<span class="badge">{$_("game.badge_math_hero")}</span>
 						{/if}
 					</div>
 				</div>
 
 				<div class="summary-actions">
-					<button on:click={restartLesson}>Nochmal spielen</button>
+					<button on:click={restartLesson}>{$_("game.play_again")}</button>
 					<button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
 				</div>
 			</section>

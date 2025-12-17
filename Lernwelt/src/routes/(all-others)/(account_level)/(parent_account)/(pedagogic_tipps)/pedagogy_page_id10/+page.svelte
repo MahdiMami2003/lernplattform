@@ -1,6 +1,9 @@
 <script>
     import { onMount } from 'svelte';
 
+
+    import {locale} from "svelte-i18n";
+    import { _ } from 'svelte-i18n';
     let { data } = $props();
 
     let { supabase, session } = data;
@@ -76,13 +79,30 @@
     function hasEditingRights() {
         return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
     }
+    function getTitle(tip) {
+        return $locale === 'en'
+            ? tip.title_en || tip.title
+            : tip.title;
+    }
+
+    function getDescription(tip) {
+        return $locale === 'en'
+            ? tip.description_en || tip.description
+            : tip.description;
+    }
+
+    function getContent(tip) {
+        return $locale === 'en'
+            ? tip.content_en || tip.content
+            : tip.content;
+    }
 </script>
 
 <div id="placeholder">
     <div class="header">
-        <h1>Pädagogische Tipps</h1>
+        <h1>{$_('parent.sections.tips_title')}</h1>
         {#if hasEditingRights()}
-            <a href="/pedagogic_form" class="add-button">➕ Neuen Tipp hinzufügen</a>
+            <a href="/pedagogic_form" class="add-button">➕ {$_('pedagogy.add')}</a>
         {/if}
     </div>
 
@@ -94,9 +114,9 @@
                 {#each tips as tip}
                     <li class="tip-item">
                         <a href="/pedagogic_content/{tip.id}" class="tip-link">
-                            <div class="tip-title">{tip.title}</div>
+                            <div class="tip-title">{getTitle(tip)}</div>
                             {#if tip.description}
-                                <div class="tip-preview">{tip.description}</div>
+                                <div class="tip-preview">{getDescription(tip)}</div>
                             {/if}
                         </a>
 
@@ -112,7 +132,7 @@
             <p class="no-tips">Aktuell sind keine pädagogischen Tipps verfügbar.</p>
         {/if}
     {:catch error}
-        <p class="error">Fehler beim Laden: {error.message}</p>
+        <p class="error">{$_('pedagogy.errors.load_error_title')}: {error.message}</p>
     {/await}
 </div>
 
