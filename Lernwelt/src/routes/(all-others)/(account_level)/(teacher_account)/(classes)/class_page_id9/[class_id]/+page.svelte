@@ -1,7 +1,7 @@
 <script>
     import { page } from '$app/stores';
     import { onMount } from "svelte";
-
+    import { _ } from '$lib/i18n/config';
     let { data } = $props();
     let { supabase } = data;
 
@@ -38,27 +38,28 @@
 </script>
 
 <div class="container">
-    <a href="/teacher_landing_page_id6" class="back-link">← Zurück zur Übersicht</a>
+    <a href="/teacher_landing_page_id6" class="back-link">←{$_("pedagogy.errors.back_link")}</a>
 
     {#if loading}
-        <div class="loading-state">⏳ Lade Klasse...</div>
+        <div class="loading-state">{$_("teacher_class.loading")}</div>
     {:else}
         <div class="header">
-            <h1>Klasse: {className || 'Unbekannt'}</h1>
-            <p>Übersicht aller Schülerinnen und Schüler</p>
+            <h1>{$_("teacher_class.title")} {className || 'Unbekannt'}</h1>
+            <p>{$_("teacher_class.subtitle")}</p>
         </div>
 
         {#if students.length === 0}
-            <div class="empty-state">📭 Keine Schüler in dieser Klasse.</div>
+            <div class="empty-state">{$_("teacher_class.empty")}</div>
         {:else}
             <div class="table-wrapper">
                 <table class="styled-table">
                     <thead>
                     <tr>
-                        <th>Avatar</th>
-                        <th>Name</th>
-                        <th>Level</th>
-                        <th>Aktion</th>
+                        <th>{$_("teacher_class.table.avatar")}</th>
+                        <th>{$_("teacher_class.table.name")}</th>
+                        <th>{$_("teacher_class.table.level")}</th>
+                        <th>{$_("teacher_class.table.action")}</th>
+
                     </tr>
                     </thead>
                     <tbody>
@@ -75,7 +76,7 @@
                             <td><span class="level-badge">Lvl {student.level || 1}</span></td>
                             <td>
                                 <a href={"/progress_page_id11?userId=" + student.id}>
-                                    <button class="action-btn">Fortschritt ansehen</button>
+                                    <button class="action-btn">{$_("teacher_class.button.progress")}</button>
                                 </a>
                             </td>
                         </tr>

@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
-
+    import { locale } from '$lib/i18n/config';
+    import { _ } from '$lib/i18n/config';
     let { data } = $props();
 
     let { supabase, session } = data;
@@ -89,18 +90,30 @@
     function hasEditingRights() {
         return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
     }
+    function getTitle(item) {
+        return $locale === 'en'
+            ? item.title_en || item.title
+            : item.title;
+    }
+
+    function getContent(item) {
+        return $locale === 'en'
+            ? item.content_en || item.content
+            : item.content;
+    }
+
 </script>
 
 <div id="placeholder">
     <div class="header">
-        <h1>Neuigkeiten & Termine</h1>
+        <h1>{$_('appointment.title')}</h1>
         {#if hasEditingRights()}
-            <a href="/create_appointments_page" class="add-button">➕ Neuen Termin hinzufügen</a>
+            <a href="/create_appointments_page" class="add-button">➕ {$_('appointment.add')}</a>
         {/if}
     </div>
 
     {#await getAppointments()}
-        <p>Lade Termine...</p>
+        <p>{$_('appointment.loading')}</p>
     {:then appointments}
         {#if appointments && appointments.length > 0}
             <div class="appointments-list">
@@ -108,7 +121,7 @@
                     <div class="appointment-card">
                         <div class="card-header">
                             <div class="header-content">
-                                <h2>{appointment.title}</h2>
+                                <h2>{getTitle(appointment)}</h2>
                                 <span class="date-badge">{formatDateTime(appointment.event_date)}</span>
                             </div>
                             {#if hasEditingRights()}
@@ -118,14 +131,14 @@
                             {/if}
                         </div>
                         <div class="card-body">
-                            <p>{appointment.content || '-'}</p>
+                            <p>{getContent(appointment) || '-'}</p>
                         </div>
                     </div>
                 {/each}
             </div>
 
         {:else}
-            <p class="empty-message">Aktuell stehen keine Termine an.</p>
+            <p class="empty-message">{$_('appointment.empty')}</p>
         {/if}
     {:catch error}
         <p style="color: red;">Fehler beim Laden</p>
