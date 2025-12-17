@@ -1,6 +1,8 @@
 <script>
     import { page } from '$app/stores';
 
+    import {locale} from "svelte-i18n";
+    import { _ } from 'svelte-i18n';
     let { data } = $props();
 
     let { supabase, session } = data;
@@ -57,18 +59,28 @@
             alert('Download fehlgeschlagen. Bitte versuche es erneut.');
         }
     }
+    function getTitle(material) {
+        return $locale === 'en'
+            ? material.title_en || material.title
+            : material.title;
+    }
+    function getDescription(material) {
+        return $locale === 'en'
+            ? material.description_en || material.description
+            : material.description;
+    }
 </script>
 
 <div id="content-container">
     {#await getMaterial()}
-        <p>Lade Material...</p>
+        <p>{$_('materials.loading_m')}</p>
     {:then material}
         {#if material}
             <div class="material-detail">
-                <h1>{material.title}</h1>
+                <h1>{getTitle(material)}</h1>
 
                 {#if material.description}
-                    <p class="description-text">{@html material.description.replace(/\n/g, '<br>')}</p>
+                    <p class="description-text">{@html getDescription(material).replace(/\n/g, '<br>')}</p>
                 {/if}
 
                 {#if material.file_url}
@@ -84,27 +96,27 @@
                                 class="download-btn"
                                 on:click={() => downloadPDF(material.file_url, `${material.title}.pdf`)}
                         >
-                            📥 PDF herunterladen
+                            📥 {$_('materials.download_pdf')}
                         </button>
                     </div>
                 {:else}
-                    <p class="no-pdf">Kein PDF verfügbar</p>
+                    <p class="no-pdf">{$_('materials.no_pdf')}</p>
                 {/if}
 
-                <a href="/material_page_id14" class="back-link">← Zurück zur Übersicht</a>
+                <a href="/material_page_id14" class="back-link">← {$_('pedagogy.errors.back_link')}</a>
             </div>
         {:else}
             <div class="error">
-                <h1>Material nicht gefunden</h1>
-                <p>Die angeforderte Material-ID existiert nicht.</p>
-                <a href="/material_page_id14">← Zurück zur Übersicht</a>
+                <h1>{$_('materials.not_found_title')}</h1>
+                <p>{$_('materials.not_found_texte')}</p>
+                <a href="/material_page_id14">← {$_('pedagogy.errors.back_link')}</a>
             </div>
         {/if}
     {:catch error}
         <div class="error">
-            <h1>Fehler beim Laden</h1>
-            <p>Es gab ein Problem beim Laden des Materials.</p>
-            <a href="/material_page_id14">← Zurück zur Übersicht</a>
+            <h1>{$_('materials.load_error')}</h1>
+            <p>{$_('materials.load_error')}</p>
+            <a href="/material_page_id14">← {$_('pedagogy.errors.back_link')}</a>
         </div>
     {/await}
 </div>

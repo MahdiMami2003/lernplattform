@@ -99,8 +99,8 @@
     "reload": "Reload",
     "no_questions": "There are currently no questions for this category.",
     "dashboard": "Dashboard",
-    "level_reached": "🎉 Reached level {level}!",
-    "question_count": "Question {current} / {total}",
+    "level_reached": "🎉 Reached level ",
+    "question_count": "Question",
     "no_hearts": "😥 No hearts left",
     "well_done": "🎉 Well done!",
     "correct_answers": "Correct answers",
@@ -110,7 +110,69 @@
     "badge_perfect": "Perfect round 🏅",
     "badge_streak": "Streak master 🔥",
     "badge_math_hero": "Math hero 📘",
+    "badge_phy_hero": "Physics-expert ⚛",
     "play_again": "Play again"
+  },
+  "parent": {
+    "title": "Hello dear parent.",
+    "welcome": "Welcome to the HSGG Learning World website",
+    "instruction": "Please click on the topic you are interested in.",
+    "sections": {
+      "appointments_title": "Appointments and News",
+      "appointments_desc": "Here you can find important information you should not miss.",
+      "progress_title": "My child’s progress",
+      "progress_desc": "Click here to see your child’s current learning progress.",
+      "tips_title": "Educational tips",
+      "tips_desc": "Click here to learn how you can support your child’s learning.",
+      "materials_title": "My child’s learning materials",
+      "materials_desc": "Here you can find the learning materials provided to your child."
+    }
+  },
+  "appointment": {
+    "title": "News & Events",
+    "loading": "Loading events...",
+    "empty": "There are currently no upcoming events.",
+    "add": "Add new event"
+  },
+  "pedagogy": {
+    "errors": {
+      "not_found_title": "Tip not found",
+      "not_found_text": "The requested tip does not exist.",
+      "load_error_title": "Loading error",
+      "load_error_text": "There was a problem loading the tip.",
+      "back_link": "Back to overview"
+    },
+    "add": "Add new Tip"
+  },
+  "materials": {
+    "title": "Learning materials overview",
+    "loading": "Loading materials...",
+    "empty": "No materials found for your class.",
+    "add": "Add content",
+    "delete": "Delete",
+    "confirm_delete": "Delete this item?",
+    "delete_error": "Error while deleting!",
+    "load_error": "Loading error:",
+    "download_pdf": "Download PDF",
+    "no_pdf": "No PDF available",
+    "not_found_title": "Material not found",
+    "not_found_text": "The requested material ID does not exist.",
+    "loading_m": "Loading material..."
+  },
+  "teacher_class": {
+    "loading": "⏳ Loading class...",
+    "title": "Class:",
+    "subtitle": "Overview of all students",
+    "empty": "📭 No students in this class.",
+    "table": {
+      "avatar": "Avatar",
+      "name": "Name",
+      "level": "Level",
+      "action": "Action"
+    },
+    "button": {
+      "progress": "View progress"
+    }
   }
 }
 

@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-
+    import {locale} from "svelte-i18n";
+    import { _ } from '$lib/i18n/config';
 	let { data } = $props();
 
 	let { supabase, session } = data;
@@ -251,136 +252,135 @@
 </script>
 
 {#if loading}
-	<div class="loading"><p>Spiel wird geladen…</p></div>
+    <div class="loading"><p>{$_("game.loading")}</p></div>
 {:else if loadError}
-	<div class="error">
-		<p>{loadError}</p>
-		<button on:click={loadProfileAndQuestions}>Neu laden</button>
-	</div>
+    <div class="error">
+        <p>{loadError}</p>
+        <button on:click={loadProfileAndQuestions}>{$_("game.reload")}</button>
+    </div>
 {:else if questions.length === 0}
-	<div class="error">
-		<p>Für diese Kategorie sind aktuell keine Fragen vorhanden.</p>
-		<button on:click={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
-			Zurück zum Dashboard
-		</button>
-	</div>
+    <div class="error">
+        <p>{$_("game.no_questions")}</p>
+        <button on:click={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
+            Dashboard
+        </button>
+    </div>
 {:else}
-	<div class="game-root">
-		{#if levelUpVisible}
-			<div class="levelup-popup">
-				🎉 Level {level} erreicht!
-			</div>
-		{/if}
+    <div class="game-root">
+        {#if levelUpVisible}
+            <div class="levelup-popup">
+                {$_("game.level_reached")} {level}
+            </div>
+        {/if}
 
-		{#each confettiPieces as piece (piece.id)}
-			<div
-				class="confetti"
-				style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
-			></div>
-		{/each}
+        {#each confettiPieces as piece (piece.id)}
+            <div
+                    class="confetti"
+                    style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
+            ></div>
+        {/each}
 
-		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+        <header class="hud">
+            <button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
 
-			<div class="hud-center">
-				<div class="progress-top">
-					<div class="progress-inner" style={`width: ${progress}%`}></div>
-				</div>
-				<p class="question-count">Frage {currentIndex + 1} / {questions.length}</p>
-			</div>
+            <div class="hud-center">
+                <div class="progress-top">
+                    <div class="progress-inner" style={`width: ${progress}%`}></div>
+                </div>
+                <p class="question-count">{$_("game.question_count")} {currentIndex + 1} / {questions.length}</p>
+            </div>
 
-			<div class="hud-right">
-				<div class="hearts">
-					{#each Array(MAX_HEARTS) as _, i}
-						<span class:lost={i >= hearts}>❤️</span>
-					{/each}
-				</div>
+            <div class="hud-right">
+                <div class="hearts">
+                    {#each Array(MAX_HEARTS) as _, i}
+                        <span class:lost={i >= hearts}>❤️</span>
+                    {/each}
+                </div>
 
-				<div class="xp-display">
-					<span>Lvl {level}</span>
-					<div class="xp-bar">
-						<div class="xp-inner" style={`width: ${xpProgress}%`}></div>
-					</div>
-				</div>
+                <div class="xp-display">
+                    <span>Lvl {level}</span>
+                    <div class="xp-bar">
+                        <div class="xp-inner" style={`width: ${xpProgress}%`}></div>
+                    </div>
+                </div>
 
-				<div class="streak">
-					<span>🔥</span>{streak}
-				</div>
-			</div>
-		</header>
+                <div class="streak">
+                    <span>🔥</span>{streak}
+                </div>
+            </div>
+        </header>
 
-		{#if !showSummary && !outOfHearts}
-			<main class="card">
-				<h2 class="question">{questions[currentIndex].question}</h2>
-				<div class="answers">
-					{#each questions[currentIndex].answers as ans, i}
-						{#if ans}
-							<button
-								class="answer-btn {locked && i === questions[currentIndex].correctIndex
+        {#if !showSummary && !outOfHearts}
+            <main class="card">
+                <h2 class="question">{questions[currentIndex].question}</h2>
+                <div class="answers">
+                    {#each questions[currentIndex].answers as ans, i}
+                        {#if ans}
+                            <button
+                                    class="answer-btn {locked && i === questions[currentIndex].correctIndex
 									? 'correct'
 									: ''} {locked &&
 								selectedIndex === i &&
 								selectedIndex !== questions[currentIndex].correctIndex
 									? 'wrong'
 									: ''}"
-								on:click={() => handleAnswerClick(i)}
-								disabled={locked}
-							>
-								{ans}
-							</button>
-						{/if}
-					{/each}
-				</div>
-			</main>
-		{:else}
-			<section class="summary">
-				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
+                                    on:click={() => handleAnswerClick(i)}
+                                    disabled={locked}
+                            >
+                                {ans}
+                            </button>
+                        {/if}
+                    {/each}
+                </div>
+            </main>
+        {:else}
+            <section class="summary">
+                <h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
 
-				<div class="xp-chest">
-					<div class="chest-glow"></div>
-					<div class="chest-lid"></div>
-					<div class="chest-box"></div>
-				</div>
+                <div class="xp-chest">
+                    <div class="chest-glow"></div>
+                    <div class="chest-lid"></div>
+                    <div class="chest-box"></div>
+                </div>
 
-				<div class="summary-stats">
-					<div>
-						<span>Richtige Antworten</span>
-						<strong>{correctCount} / {questions.length}</strong>
-					</div>
-					<div>
-						<span>Level</span>
-						<strong>{level}</strong>
-					</div>
-				</div>
+                <div class="summary-stats">
+                    <div>
+                        <span>{$_("game.correct_answers")}</span>
+                        <strong>{correctCount} / {questions.length}</strong>
+                    </div>
+                    <div>
+                        <span>Level</span>
+                        <strong>{level}</strong>
+                    </div>
+                </div>
 
-				{#if sessionXp > 0}
-					<p class="xp-earned">+{sessionXp} XP</p>
-				{/if}
+                {#if sessionXp > 0}
+                    <p class="xp-earned">+{sessionXp} XP</p>
+                {/if}
 
-				<div class="achievements">
-					<p>Freigeschaltete Badges:</p>
-					<div class="badge-row">
-						{#if correctCount === questions.length}
-							<span class="badge">Perfekte Runde 🏅</span>
-						{/if}
-						{#if streak >= 3}
-							<span class="badge">Streak-Meister 🔥</span>
-						{/if}
-						{#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
-							<span class="badge">Physik-Profi ⚛</span>
-						{/if}
-					</div>
-				</div>
+                <div class="achievements">
+                    <p>{$_("game.badges_title")}</p>
+                    <div class="badge-row">
+                        {#if correctCount === questions.length}
+                            <span class="badge">{$_("game.badge_perfect")}</span>
+                        {/if}
+                        {#if streak >= 3}
+                            <span class="badge">{$_("game.badge_streak")}</span>
+                        {/if}
+                        {#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
+                            <span class="badge">{$_("game.badge_phy_hero")}</span>
+                        {/if}
+                    </div>
+                </div>
 
-				<div class="summary-actions">
-					<button on:click={restartLesson}>Nochmal spielen</button>
-					<button on:click={() => goto('/student_landing_page_id5')}> Dashboard </button>
-				</div>
-			</section>
-		{/if}
-	</div>
+                <div class="summary-actions">
+                    <button on:click={restartLesson}>{$_("game.play_again")}</button>
+                    <button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
+                </div>
+            </section>
+        {/if}
+    </div>
 {/if}
-
 <style>
 	:global(body) {
 		margin: 0;
