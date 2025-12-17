@@ -1,90 +1,70 @@
+<script>
+    import { _ } from '$lib/i18n/config';
+</script>
 <div class="privacy-wrapper">
+    <h1>{$_('privacy.title')}</h1>
 
-    <h1>Datenschutzerklärung</h1>
-
-    <p class="intro">
-        Diese Website ist ein schulisches Lernprojekt.
-        Die Verarbeitung personenbezogener Daten erfolgt ausschließlich zu
-        Demonstrations- und Lernzwecken im Rahmen des Unterrichts.
-    </p>
+    <p class="intro">{$_('privacy.intro')}</p>
 
     <div class="privacy-box">
-
         <section>
-            <h2>1. Verantwortliche Stelle</h2>
+            <h2>{$_('privacy.section1.title')}</h2>
             <p>
-                HSGG-Lernwelt Schulprojekt<br />
-                Musterstraße 12<br />
-                12345 Musterstadt<br />
-                Deutschland<br />
-                E-Mail: beispiel@example.com
+                {$_('privacy.section1.line1')}<br />
+                {$_('privacy.section1.line2')}<br />
+                {$_('privacy.section1.line3')}<br />
+                {$_('privacy.section1.line4')}<br />
+                {$_('privacy.section1.line5')}
             </p>
         </section>
 
         <section>
-            <h2>2. Welche Daten verarbeiten wir?</h2>
-            <p>Wir verarbeiten personenbezogene Daten, die Sie im Rahmen
-                Ihrer Registrierung oder Nutzung angeben:
-            </p>
+            <h2>{$_('privacy.section2.title')}</h2>
+            <p>{$_('privacy.section2.text')}</p>
             <ul>
-                <li>Vor- und Nachname (falls eingegeben)</li>
-                <li>E-Mail-Adresse</li>
-                <li>Berechtigungsrolle (z.&nbsp;B. Schüler, Elternteil, Lehrperson)</li>
-                <li>Anmeldestatus / Sitzungsinformationen</li>
+                <li>{$_('privacy.section2.list.name')}</li>
+                <li>{$_('privacy.section2.list.email')}</li>
+                <li>{$_('privacy.section2.list.role')}</li>
+                <li>{$_('privacy.section2.list.session')}</li>
             </ul>
         </section>
 
         <section>
-            <h2>3. Zweck der Datenverarbeitung</h2>
-            <p>
-                Die Daten werden ausschließlich genutzt, um den Zugang zur Lernwelt zu ermöglichen,
-                Benutzerrollen zu verwalten und Funktionen innerhalb des Projektes bereitzustellen.
-            </p>
+            <h2>{$_('privacy.section3.title')}</h2>
+            <p>{$_('privacy.section3.text')}</p>
         </section>
 
         <section>
-            <h2>4. Speicherung Ihrer Daten (Supabase)</h2>
+            <h2>{$_('privacy.section4.title')}</h2>
             <p>
-                Die Benutzerkonten und Anmeldedaten werden über den Dienst
-                <strong>Supabase</strong> verarbeitet und gespeichert.
-                Supabase ist ein cloudbasierter Datenbankdienst, der zur Nutzerverwaltung und Authentifizierung eingesetzt wird.
+                {$_('privacy.section4.text1')}
+                <strong>{$_('privacy.section4.supabase')}</strong>
+                {$_('privacy.section4.text2')}
             </p>
-            <p>
-                Die Speicherung erfolgt auf Servern außerhalb unserer Schule.
-                Ein Zugriff durch Lehrer und Projektverantwortliche ist möglich,
-                jedoch nur zu Lern- und Verwaltungszwecken.
-            </p>
+            <p>{$_('privacy.section4.text3')}</p>
         </section>
 
         <section>
-            <h2>5. Weitergabe von Daten</h2>
-            <p>
-                Es erfolgt keine Weitergabe der Daten an Dritte außerhalb dieses Projekts.
-            </p>
+            <h2>{$_('privacy.section5.title')}</h2>
+            <p>{$_('privacy.section5.text')}</p>
         </section>
 
         <section>
-            <h2>6. Ihre Rechte</h2>
-            <p>Sie haben das Recht:</p>
+            <h2>{$_('privacy.section6.title')}</h2>
+            <p>{$_('privacy.section6.text')}</p>
             <ul>
-                <li>Auskunft über Ihre gespeicherten Daten zu erhalten,</li>
-                <li>eine Berichtigung oder Löschung zu verlangen,</li>
-                <li>die Nutzung Ihrer Daten zu widersprechen.</li>
+                <li>{$_('privacy.section6.list.access')}</li>
+                <li>{$_('privacy.section6.list.correct_delete')}</li>
+                <li>{$_('privacy.section6.list.object')}</li>
             </ul>
         </section>
 
         <section>
-            <h2>7. Kontakt bei Datenschutzfragen</h2>
-            <p>
-                Bei Fragen oder Anliegen können Sie uns über die im Impressum angegebene
-                E-Mail-Adresse kontaktieren.
-            </p>
+            <h2>{$_('privacy.section7.title')}</h2>
+            <p>{$_('privacy.section7.text')}</p>
         </section>
-
     </div>
-
 </div>
-
 
 <style>
     .privacy-wrapper {
