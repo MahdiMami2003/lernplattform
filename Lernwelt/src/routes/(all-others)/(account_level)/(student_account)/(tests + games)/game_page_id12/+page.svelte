@@ -192,7 +192,7 @@
 			on:keydown={() => {}}
 		></div>
 		<div class="modal category-modal">
-			<h2> {$_("student.choose_topic_for", { subject: selectedSubjectName })}</h2>
+            <h2> {$_("student.choose_topic_for", { values: { subject: selectedSubjectName } })}</h2>
 
 			{#if loadingCategories}
 				<p>{$_('student.loading_topics')}</p>
