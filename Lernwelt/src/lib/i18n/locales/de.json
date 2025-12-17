@@ -177,6 +177,154 @@
     "button": {
       "progress": "Fortschritt ansehen"
     }
+  },
+  "imprint": {
+    "title": "Impressum",
+    "subtitle": "Diese Website ist ein schulisches Projekt der HSGG-Lernwelt. Die Inhalte dienen ausschließlich zu Demonstrations- und Lernzwecken.",
+    "responsible_title": "Verantwortlich gemäß § 5 TMG",
+    "contact_title": "Kontakt",
+    "disclaimer_title": "Haftungsausschluss",
+    "disclaimer_text": "Diese Website dient als Demonstrations- und Schulungsprojekt. Keine Inhalte entsprechen einem realen Unternehmensangebot.",
+    "copyright_title": "Urheberrecht",
+    "copyright_text": "Texte, Code und Gestaltung sind Teil eines Lernprojekts und dürfen nur im Rahmen der Schulnutzung oder mit Zustimmung weiterverwendet werden."
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "intro": "Diese Website ist ein schulisches Lernprojekt. Die Verarbeitung personenbezogener Daten erfolgt ausschließlich zu Demonstrations- und Lernzwecken im Rahmen des Unterrichts.",
+    "section1": {
+      "title": "1. Verantwortliche Stelle",
+      "line1": "HSGG-Lernwelt Schulprojekt",
+      "line2": "Musterstraße 12",
+      "line3": "12345 Musterstadt",
+      "line4": "Deutschland",
+      "line5": "E-Mail: beispiel@example.com"
+    },
+    "section2": {
+      "title": "2. Welche Daten verarbeiten wir?",
+      "text": "Wir verarbeiten personenbezogene Daten, die Sie im Rahmen Ihrer Registrierung oder Nutzung angeben:",
+      "list": {
+        "name": "Vor- und Nachname (falls eingegeben)",
+        "email": "E-Mail-Adresse",
+        "role": "Berechtigungsrolle (z. B. Schüler, Elternteil, Lehrperson)",
+        "session": "Anmeldestatus / Sitzungsinformationen"
+      }
+    },
+    "section3": {
+      "title": "3. Zweck der Datenverarbeitung",
+      "text": "Die Daten werden ausschließlich genutzt, um den Zugang zur Lernwelt zu ermöglichen, Benutzerrollen zu verwalten und Funktionen innerhalb des Projektes bereitzustellen."
+    },
+    "section4": {
+      "title": "4. Speicherung Ihrer Daten (Supabase)",
+      "text1": "Die Benutzerkonten und Anmeldedaten werden über den Dienst ",
+      "supabase": "Supabase",
+      "text2": " verarbeitet und gespeichert. Supabase ist ein cloudbasierter Datenbankdienst, der zur Nutzerverwaltung und Authentifizierung eingesetzt wird.",
+      "text3": "Die Speicherung erfolgt auf Servern außerhalb unserer Schule. Ein Zugriff durch Lehrer und Projektverantwortliche ist möglich, jedoch nur zu Lern- und Verwaltungszwecken."
+    },
+    "section5": {
+      "title": "5. Weitergabe von Daten",
+      "text": "Es erfolgt keine Weitergabe der Daten an Dritte außerhalb dieses Projekts."
+    },
+    "section6": {
+      "title": "6. Ihre Rechte",
+      "text": "Sie haben das Recht:",
+      "list": {
+        "access": "Auskunft über Ihre gespeicherten Daten zu erhalten,",
+        "correct_delete": "eine Berichtigung oder Löschung zu verlangen,",
+        "object": "der Nutzung Ihrer Daten zu widersprechen."
+      }
+    },
+    "section7": {
+      "title": "7. Kontakt bei Datenschutzfragen",
+      "text": "Bei Fragen oder Anliegen können Sie uns über die im Impressum angegebene E-Mail-Adresse kontaktieren."
+    }
+  },
+  "access": {
+    "title": "Barrierefreiheit",
+    "intro": "Die HSGG-Lernwelt soll für alle nutzbar sein – unabhängig von individuellen Einschränkungen. Auf dieser Seite erklären wir, welche Einstellungen zur Barrierefreiheit es gibt und wie du sie verwenden kannst.",
+
+    "s1_title": "Darstellungs-Einstellungen",
+    "s1_intro_a": "Über das Menü",
+    "s1_intro_b": "\"Barrierefrei\"",
+    "s1_intro_c": "in der linken Seitenleiste kannst du folgende Optionen aktivieren:",
+    "s1_li1_bold": "Darkmode",
+    "s1_li1_text": "– reduziert Helligkeit für augenschonendes Arbeiten.",
+    "s1_li2_bold": "Kontrastmodus",
+    "s1_li2_text": "– erhöht den Kontrast für eine bessere Lesbarkeit.",
+    "s1_li3_bold": "Sprache ändern",
+    "s1_li3_text": "– (geplant) Anzeige in einer anderen Sprache.",
+
+    "s2_title": "Geltungsbereich der Einstellungen",
+    "s2_p1": "Die ausgewählten Einstellungen gelten für alle Seiten der Lernwelt, solange du sie nicht wieder deaktivierst. Ziel ist es, dass du nicht auf jeder Seite erneut etwas umstellen musst.",
+    "s2_note": "Hinweis: In der finalen Version können diese Einstellungen pro Benutzerkonto gespeichert werden, sodass sie auch nach einem erneuten Login erhalten bleiben.",
+
+    "s3_title": "Bekannte Einschränkungen",
+    "s3_p1": "Da es sich um ein Schul- und Lernprojekt handelt, ist die Barrierefreiheit noch nicht vollständig umgesetzt. Einige Bereiche können noch verbessert werden, zum Beispiel:",
+    "s3_li1": "Konsistente Kontraste in allen Unterseiten",
+    "s3_li2": "Alternativtexte für alle Bilder und Icons",
+    "s3_li3": "Tastatur-Navigation und Screenreader-Unterstützung",
+
+    "s4_title": "Feedback",
+    "s4_p1": "Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast, wende dich bitte an die im Impressum genannte Kontaktadresse."
+  },
+  "register": {
+    "page_title": "Willkommen bei HSG-Lernwelt",
+    "title": "Konto erstellen",
+    "subtitle": "Registriere dich, um deine Lernfortschritte zu speichern.",
+
+    "fields": {
+      "first_name": "Vorname",
+      "last_name": "Nachname",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "confirm_password": "Passwort bestätigen"
+    },
+
+    "role_title": "Du willst registrieren als:",
+    "roles": {
+      "student": "Schüler/in",
+      "teacher": "Lehrer/in",
+      "parent": "Elternteil"
+    },
+
+    "class_label": "Deine Klasse:",
+    "class_placeholder": "-- Bitte Klasse wählen --",
+
+    "parent": {
+      "select_class": "Klasse wählen:",
+      "select_child": "Kind auswählen:",
+      "child_placeholder": "-- Bitte Schüler auswählen --",
+      "add_child": "Kind hinzufügen",
+      "added_children": "Hinzugefügte Kinder",
+      "remove_child": "Entfernen",
+      "already_added": "Dieses Kind hast du schon hinzugefügt!"
+    },
+
+    "terms": {
+      "accept": "Ich akzeptiere die AGB",
+      "link_text": "AGB"
+    },
+
+    "actions": {
+      "register": "Registrieren",
+      "login": "Schon registriert? Hier einloggen"
+    },
+
+    "messages": {
+      "success_redirect": "Registrierung erfolgreich! Leite weiter...",
+      "success_confirm_email": "Registrierung erfolgreich! Bitte bestätige deine E-Mail.",
+      "failed": "Registrierung fehlgeschlagen:"
+    },
+
+    "errors": {
+      "password_mismatch": "Die Passwörter stimmen nicht überein.",
+      "accept_terms": "Bitte akzeptiere die AGB.",
+      "select_class_student": "Bitte wähle deine Klasse aus.",
+      "add_child_parent": "Bitte füge mindestens ein Kind hinzu."
+    },
+
+    "loading": {
+      "classes": "Klassen werden geladen..."
+    }
   }
 }
 

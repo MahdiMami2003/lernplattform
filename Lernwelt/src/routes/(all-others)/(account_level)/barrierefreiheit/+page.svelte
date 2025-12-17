@@ -1,56 +1,46 @@
-<div class="access-wrapper">
-    <h1>Barrierefreiheit</h1>
+<script>
+    import { _ } from 'svelte-i18n';
+</script>
 
-    <p class="intro">
-        Die HSGG-Lernwelt soll für alle nutzbar sein – unabhängig von individuellen Einschränkungen.
-        Auf dieser Seite erklären wir, welche Einstellungen zur Barrierefreiheit es gibt
-        und wie du sie verwenden kannst.
-    </p>
+<div class="access-wrapper">
+    <h1>{$_('access.title')}</h1>
+
+    <p class="intro">{$_('access.intro')}</p>
 
     <div class="access-box">
         <section>
-            <h2>Darstellungs-Einstellungen</h2>
+            <h2>{$_('access.s1_title')}</h2>
             <p>
-                Über das Menü <strong>&quot;Barrierefrei&quot;</strong> in der linken Seitenleiste kannst du folgende Optionen aktivieren:
+                {$_('access.s1_intro_a')}
+                <strong>{$_('access.s1_intro_b')}</strong>
+                {$_('access.s1_intro_c')}
             </p>
             <ul>
-                <li><strong>Darkmode</strong> – reduziert Helligkeit für augenschonendes Arbeiten.</li>
-                <li><strong>Kontrastmodus</strong> – erhöht den Kontrast für eine bessere Lesbarkeit.</li>
-                <li><strong>Sprache ändern</strong> – (geplant) Anzeige in einer anderen Sprache.</li>
+                <li><strong>{$_('access.s1_li1_bold')}</strong> {$_('access.s1_li1_text')}</li>
+                <li><strong>{$_('access.s1_li2_bold')}</strong> {$_('access.s1_li2_text')}</li>
+                <li><strong>{$_('access.s1_li3_bold')}</strong> {$_('access.s1_li3_text')}</li>
             </ul>
         </section>
 
         <section>
-            <h2>Geltungsbereich der Einstellungen</h2>
-            <p>
-                Die ausgewählten Einstellungen gelten für alle Seiten der Lernwelt, solange du sie nicht wieder
-                deaktivierst. Ziel ist es, dass du nicht auf jeder Seite erneut etwas umstellen musst.
-            </p>
-            <p class="note">
-                Hinweis: In der finalen Version können diese Einstellungen pro Benutzerkonto gespeichert werden,
-                sodass sie auch nach einem erneuten Login erhalten bleiben.
-            </p>
+            <h2>{$_('access.s2_title')}</h2>
+            <p>{$_('access.s2_p1')}</p>
+            <p class="note">{$_('access.s2_note')}</p>
         </section>
 
         <section>
-            <h2>Bekannte Einschränkungen</h2>
-            <p>
-                Da es sich um ein Schul- und Lernprojekt handelt, ist die Barrierefreiheit noch nicht vollständig
-                umgesetzt. Einige Bereiche können noch verbessert werden, zum Beispiel:
-            </p>
+            <h2>{$_('access.s3_title')}</h2>
+            <p>{$_('access.s3_p1')}</p>
             <ul>
-                <li>Konsistente Kontraste in allen Unterseiten</li>
-                <li>Alternativtexte für alle Bilder und Icons</li>
-                <li>Tastatur-Navigation und Screenreader-Unterstützung</li>
+                <li>{$_('access.s3_li1')}</li>
+                <li>{$_('access.s3_li2')}</li>
+                <li>{$_('access.s3_li3')}</li>
             </ul>
         </section>
 
         <section>
-            <h2>Feedback</h2>
-            <p>
-                Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast,
-                wende dich bitte an die im Impressum genannte Kontaktadresse.
-            </p>
+            <h2>{$_('access.s4_title')}</h2>
+            <p>{$_('access.s4_p1')}</p>
         </section>
     </div>
 </div>

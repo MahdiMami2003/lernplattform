@@ -40,7 +40,7 @@
             // Warte kurz und leite zur Übersicht
             setTimeout(() => {
                 goto('/pedagogy_page_id10');
-            }, 2000);
+            }, 1);
 
         } catch (error) {
             console.error('Fehler:', error);

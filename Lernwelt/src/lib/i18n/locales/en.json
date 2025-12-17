@@ -173,6 +173,154 @@
     "button": {
       "progress": "View progress"
     }
+  },
+  "imprint": {
+    "title": "Legal notice",
+    "subtitle": "This website is a school project of the HSGG learning platform. The content is for demonstration and learning purposes only.",
+    "responsible_title": "Responsible according to § 5 TMG",
+    "contact_title": "Contact",
+    "disclaimer_title": "Disclaimer",
+    "disclaimer_text": "This website is a demonstration and educational project. None of the content represents a real business offering.",
+    "copyright_title": "Copyright",
+    "copyright_text": "Texts, code and design are part of a learning project and may only be reused within school use or with permission."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "This website is a school learning project. Personal data is processed exclusively for demonstration and learning purposes within the scope of class activities.",
+    "section1": {
+      "title": "1. Data Controller",
+      "line1": "HSGG-Lernwelt school project",
+      "line2": "Musterstraße 12",
+      "line3": "12345 Musterstadt",
+      "line4": "Germany",
+      "line5": "Email: beispiel@example.com"
+    },
+    "section2": {
+      "title": "2. What data do we process?",
+      "text": "We process personal data that you provide during registration or use of the platform:",
+      "list": {
+        "name": "First and last name (if provided)",
+        "email": "Email address",
+        "role": "User role (e.g., student, parent, teacher)",
+        "session": "Login status / session information"
+      }
+    },
+    "section3": {
+      "title": "3. Purpose of processing",
+      "text": "The data is used exclusively to enable access to the learning platform, manage user roles, and provide features within the project."
+    },
+    "section4": {
+      "title": "4. Storage of your data (Supabase)",
+      "text1": "User accounts and login data are processed and stored using ",
+      "supabase": "Supabase",
+      "text2": ". Supabase is a cloud-based database service used for user management and authentication.",
+      "text3": "Data is stored on servers outside our school. Access by teachers and project administrators is possible, but only for learning and administrative purposes."
+    },
+    "section5": {
+      "title": "5. Data sharing",
+      "text": "No data is shared with third parties outside of this project."
+    },
+    "section6": {
+      "title": "6. Your rights",
+      "text": "You have the right to:",
+      "list": {
+        "access": "request information about your stored data,",
+        "correct_delete": "request correction or deletion,",
+        "object": "object to the use of your data."
+      }
+    },
+    "section7": {
+      "title": "7. Contact for privacy questions",
+      "text": "If you have questions or concerns, you can contact us via the email address provided in the imprint."
+    }
+  },
+  "access": {
+    "title": "Accessibility",
+    "intro": "The HSGG learning world should be usable for everyone—regardless of individual limitations. On this page we explain which accessibility settings are available and how to use them.",
+
+    "s1_title": "Display settings",
+    "s1_intro_a": "Via the menu",
+    "s1_intro_b": "\"Accessible\"",
+    "s1_intro_c": "in the left sidebar you can enable the following options:",
+    "s1_li1_bold": "Dark mode",
+    "s1_li1_text": "– reduces brightness for more comfortable viewing.",
+    "s1_li2_bold": "High contrast mode",
+    "s1_li2_text": "– increases contrast for better readability.",
+    "s1_li3_bold": "Change language",
+    "s1_li3_text": "– (planned) display in another language.",
+
+    "s2_title": "Scope of settings",
+    "s2_p1": "The selected settings apply to all pages of the learning world until you disable them again. The goal is that you don’t have to change settings on every page.",
+    "s2_note": "Note: In the final version, these settings can be saved per user account so they remain active after logging in again.",
+
+    "s3_title": "Known limitations",
+    "s3_p1": "Since this is a school learning project, accessibility is not fully implemented yet. Some areas can still be improved, for example:",
+    "s3_li1": "Consistent contrast across all subpages",
+    "s3_li2": "Alt texts for all images and icons",
+    "s3_li3": "Keyboard navigation and screen reader support",
+
+    "s4_title": "Feedback",
+    "s4_p1": "If you notice barriers or have ideas for improvement, please contact the address listed in the imprint."
+  },
+  "register": {
+    "page_title": "Welcome to HSG-Lernwelt",
+    "title": "Create an account",
+    "subtitle": "Register to save your learning progress.",
+
+    "fields": {
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "confirm_password": "Confirm password"
+    },
+
+    "role_title": "You want to register as:",
+    "roles": {
+      "student": "Student",
+      "teacher": "Teacher",
+      "parent": "Parent"
+    },
+
+    "class_label": "Your class:",
+    "class_placeholder": "-- Please select a class --",
+
+    "parent": {
+      "select_class": "Select class:",
+      "select_child": "Select child:",
+      "child_placeholder": "-- Please select a student --",
+      "add_child": "Add child",
+      "added_children": "Added children",
+      "remove_child": "Remove",
+      "already_added": "You already added this child!"
+    },
+
+    "terms": {
+      "accept": "I accept the Terms and Conditions",
+      "link_text": "Terms and Conditions"
+    },
+
+    "actions": {
+      "register": "Register",
+      "login": "Already registered? Log in here"
+    },
+
+    "messages": {
+      "success_redirect": "Registration successful! Redirecting...",
+      "success_confirm_email": "Registration successful! Please confirm your email.",
+      "failed": "Registration failed:"
+    },
+
+    "errors": {
+      "password_mismatch": "Passwords do not match.",
+      "accept_terms": "Please accept the Terms and Conditions.",
+      "select_class_student": "Please select your class.",
+      "add_child_parent": "Please add at least one child."
+    },
+
+    "loading": {
+      "classes": "Loading classes..."
+    }
   }
 }
 

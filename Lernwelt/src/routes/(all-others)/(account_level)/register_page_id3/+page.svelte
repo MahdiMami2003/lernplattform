@@ -1,7 +1,7 @@
 <script>
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
-
+    import { _ } from '$lib/i18n/config';
     let { data } = $props();
     let { supabase } = data;
 
@@ -169,36 +169,36 @@
 </script>
 
 <div id="placeholder">
-    <h1>Willkommen bei HSG-Lernwelt</h1>
-    <h2>Konto erstellen</h2>
-    <p>Registriere dich, um deine Lernfortschritte zu speichern.</p>
+    <h1>{$_('register.page_title')}</h1>
+    <h2>{$_('register.title')}</h2>
+    <p>{$_('register.subtitle')}</p>
 
     <form onsubmit={handleRegister}>
-        <input type="text" bind:value={firstName} placeholder="Vorname" required />
+        <input type="text" bind:value={firstName} placeholder={$_('register.fields.first_name')} required />
         <br />
-        <input type="text" bind:value={lastName} placeholder="Nachname" required />
+        <input type="text" bind:value={lastName} placeholder={$_('register.fields.last_name')} required />
         <br />
-        <input type="email" bind:value={email} placeholder="E-Mail-Adresse" required />
+        <input type="email" bind:value={email} placeholder={$_('register.fields.email')} required />
         <br />
-        <input type="password" bind:value={password} placeholder="Passwort" required />
+        <input type="password" bind:value={password} placeholder={$_('register.fields.password')} required />
         <br />
-        <input type="password" bind:value={confirmPassword} placeholder="Passwort bestätigen" required />
+        <input type="password" bind:value={confirmPassword} placeholder={$_('register.fields.confirm_password')} required />
         <br />
 
         <div class="role">
-            <p class="role-title">Du willst registrieren als:</p>
+            <p class="role-title">{$_('register.role_title')}</p>
             <div class="role-options">
-                <label><input type="radio" name="roles" bind:group={role} value="student" required /><span>Schüler/in</span></label>
-                <label><input type="radio" name="roles" bind:group={role} value="teacher" /><span>Lehrer/in</span></label>
-                <label><input type="radio" name="roles" bind:group={role} value="parent" /><span>Elternteil</span></label>
+                <label><input type="radio" name="roles" bind:group={role} value="student" required /><span>{$_('register.roles.student')}</span></label>
+                <label><input type="radio" name="roles" bind:group={role} value="teacher" /><span>{$_('register.roles.teacher')}</span></label>
+                <label><input type="radio" name="roles" bind:group={role} value="parent" /><span>{$_('register.roles.parent')}</span></label>
             </div>
         </div>
 
         {#if role === 'student'}
             <div class="extra-field">
-                <label for="class-select">Deine Klasse:</label>
+                <label for="class-select">{$_('register.class_label')}</label>
                 <select id="class-select" bind:value={selectedClassId} required>
-                    <option value="" disabled selected>-- Bitte Klasse wählen --</option>
+                    <option value="" disabled selected>{$_('register.class_placeholder')}</option>
                     {#each availableClasses as schulklasse}
                         <option value={schulklasse.id}>{schulklasse.name}</option>
                     {/each}
@@ -262,18 +262,18 @@
         <div class="terms">
             <label>
                 <input type="checkbox" bind:checked={termsAccepted} required />
-                <span>Ich akzeptiere die <a href="/agb">AGB</a>...</span>
+                <span> {$_('register.terms.accept')} <a href="/agb">AGB</a>...</span>
             </label>
         </div>
 
-        <button type="submit" class="submit-btn">Registrieren</button>
+        <button type="submit" class="submit-btn">{$_('register.actions.register')}</button>
     </form>
 
     {#if message}
         <p style="color: #fff; margin-top: 1rem; font-weight: bold;">{message}</p>
     {/if}
 
-    <a href="/login_page_id2" class="login-link">Schon registriert? Hier einloggen</a>
+    <a href="/" class="login-link">{$_('register.actions.login')}</a>
 </div>
 
 <style>
