@@ -63,6 +63,10 @@
 		goto(`/materials_content_page_16/${id}`);
 	}
 
+    function goToLogin() {
+        goto(`/`);
+    }
+
 	async function handleLogout() {
 		const { error } = await data.supabase.auth.signOut();
 		if (!error) window.location.href = '/';
@@ -130,7 +134,7 @@
 				/>
 			{/if}
 			<button class="search" on:click={toggleSearch}>
-				<img src={searchIcon} />
+				<img alt="Suche" src={searchIcon} />
 			</button>
 
 			{#if searchOpen && searchResults.length > 0}
@@ -148,15 +152,13 @@
 			{/if}
 		</div>
 
-		<button class="q_mark"><img src={q_mark} /></button>
-
 		{#if data.session}
-			<button class="login" on:click={handleLogout}><img src={login} /></button>
+			<button class="login" on:click={handleLogout}><img alt="Logout" src={login} /></button>
 		{:else}
-			<button class="login" style="cursor: default;"><img src={login} /></button>
+			<button class="login" on:click={goToLogin} style="cursor: default;"><img src={login} alt="Login" /></button>
 		{/if}
 
-		<button class="menu" on:click={toggleMenu}><img src={menu} /></button>
+		<button class="menu" on:click={toggleMenu}><img src={menu} alt="Menü" /></button>
 	</div>
 	<!-- Dropdown Menu -->
 	{#if isMenuOpen}
