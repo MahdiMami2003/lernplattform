@@ -90,6 +90,7 @@
     function hasEditingRights() {
         return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
     }
+
     function getTitle(item) {
         return $locale === 'en'
             ? item.title_en || item.title
@@ -101,10 +102,9 @@
             ? item.content_en || item.content
             : item.content;
     }
-
 </script>
 
-<div id="placeholder">
+<div id="placeholder" class="main_container">
     <div class="header">
         <h1>{$_('appointment.title')}</h1>
         {#if hasEditingRights()}
@@ -113,7 +113,7 @@
     </div>
 
     {#await getAppointments()}
-        <p>{$_('appointment.loading')}</p>
+        <p class="loading">{$_('appointment.loading')}</p>
     {:then appointments}
         {#if appointments && appointments.length > 0}
             <div class="appointments-list">
@@ -141,44 +141,63 @@
             <p class="empty-message">{$_('appointment.empty')}</p>
         {/if}
     {:catch error}
-        <p style="color: red;">Fehler beim Laden</p>
+        <p class="error-message">Fehler beim Laden</p>
     {/await}
 </div>
 
 <style>
+    /* ============ MAIN CONTAINER ============ */
     #placeholder {
         margin: 0;
         padding: 20px;
         min-height: 100vh;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
+    /* ============ HEADER ============ */
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     h1 {
-        color: #333;
+        color: var(--text-primary);
         margin: 0;
         font-size: 2rem;
+        transition: color 0.3s ease;
     }
 
     .add-button {
-        background: #548db9;
-        color: white;
+        background: var(--button-bg);
+        color: var(--text-primary);
         padding: 12px 24px;
         border-radius: 5px;
         text-decoration: none;
         font-weight: bold;
-        transition: background 0.3s ease;
+        transition: all 0.3s ease;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--button-border);
     }
 
     .add-button:hover {
-        background: #66a5e5;
+        background: var(--button-hover);
+        transform: translateY(-2px);
     }
 
+    .add-button:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
+
+    /* ============ APPOINTMENTS LIST ============ */
     .appointments-list {
         display: flex;
         flex-direction: column;
@@ -188,17 +207,26 @@
     .appointment-card {
         border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
     }
 
+    .appointment-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+
+    /* ============ CARD HEADER ============ */
     .card-header {
-        background: rgba(201, 120, 12, 0.59);
-        color: white;
+        background: var(--border-accent);
+        color: var(--text-primary);
         padding: 15px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        transition: background-color 0.3s ease;
     }
 
     .header-content {
@@ -213,6 +241,8 @@
         margin: 0;
         font-size: 1.3rem;
         font-weight: 600;
+        color: var(--text-primary);
+        transition: color 0.3s ease;
     }
 
     .date-badge {
@@ -222,64 +252,100 @@
         font-size: 0.9rem;
         font-weight: 500;
         white-space: nowrap;
+        backdrop-filter: blur(10px);
     }
 
+    /* ============ DELETE BUTTON ============ */
     .delete-btn {
         padding: 8px 14px;
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--delete-btn);
         color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid transparent;
         border-radius: 5px;
         cursor: pointer;
         font-size: 14px;
         transition: all 0.3s ease;
         margin-left: 15px;
+        min-height: 44px;
+        min-width: 44px;
     }
 
     .delete-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--delete-hover);
+        transform: translateY(-2px);
     }
 
+    .delete-btn:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 2px;
+    }
+
+    /* ============ CARD BODY ============ */
     .card-body {
-        background: #F5F5DC;
+        background: var(--bg-card);
         padding: 20px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid var(--border-color);
         border-top: none;
+        transition: background-color 0.3s ease;
     }
 
     .card-body p {
         margin: 0;
-        color: #333;
+        color: var(--text-primary);
         line-height: 1.6;
+        transition: color 0.3s ease;
     }
 
+    /* ============ BOTTOM BUTTON ============ */
     .bottom-btn {
         display: block;
         margin-top: 20px;
         padding: 15px;
-        background: rgba(52, 85, 108, 0.71);
-        color: white;
+        background: var(--button-bg);
+        color: var(--text-primary);
         text-align: center;
         text-decoration: none;
         border-radius: 8px;
         font-size: 16px;
         font-weight: bold;
-        transition: background 0.3s ease;
+        transition: all 0.3s ease;
+        border: 1px solid var(--button-border);
+        min-height: 44px;
     }
 
     .bottom-btn:hover {
-        background: #3d7bb8;
+        background: var(--button-hover);
+        transform: translateY(-2px);
     }
 
+    .bottom-btn:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
+
+    /* ============ MESSAGES ============ */
+    .loading,
     .empty-message {
         text-align: center;
-        color: #999;
+        color: var(--text-muted);
         font-style: italic;
         padding: 40px;
+        transition: color 0.3s ease;
     }
 
-    /* Responsive */
+    .error-message {
+        color: var(--error-color);
+        text-align: center;
+        padding: 40px;
+        transition: color 0.3s ease;
+    }
+
+    /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
+        #placeholder {
+            padding: 1rem;
+        }
+
         .header {
             flex-direction: column;
             gap: 15px;
@@ -288,6 +354,7 @@
 
         .add-button {
             text-align: center;
+            justify-content: center;
         }
 
         .header-content {
@@ -309,6 +376,14 @@
 
         .date-badge {
             align-self: flex-start;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.1rem;
         }
     }
 </style>

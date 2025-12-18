@@ -169,30 +169,33 @@
 
     a {
         text-decoration: none;
-        color: #44546a;
-        transition: color 0.2s;
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
         display: flex;
         align-items: center;
         white-space: nowrap;
     }
 
-    a:hover {
-        color: #000;
+    a:hover:not(.current) {
+        color: var(--text-primary);
         text-decoration: underline;
+        background-color: var(--bg-hover);
     }
 
     /* Aktive Seite (letztes Element) */
     a.current {
         font-weight: bold;
-        color: #222;
+        color: var(--text-primary);
         pointer-events: none;
+        cursor: default;
         text-decoration: none;
         cursor: default;
     }
 
+    /* ============ SEPARATOR ============ */
     .separator {
         margin: 0 0.5rem;
-        color: #888;
+        color: var(--text-muted);
         font-size: 0.7rem;
         display: flex;
         align-items: center;
