@@ -61,8 +61,14 @@
             )
             .limit(10); // Limit results for performance
 
-        if (!error) searchResults = rows ?? [];
+    function goToLogin() {
+        goto(`/`);
     }
+
+	async function handleLogout() {
+		const { error } = await data.supabase.auth.signOut();
+		if (!error) window.location.href = '/';
+	}
 
     function goToMaterial(id: number) {
         searchOpen = false;
@@ -123,45 +129,53 @@
 </script>
 
 <nav class="header-root">
-    <a style="text-decoration: none" href="/">
-        <div class="signature">
-            <img class="logo" src={logo} alt="HSGG Logo" />
-            <p>HSGG-Lernwelt</p>
-        </div>
-    </a>
+	<a style="text-decoration: none" href="/">
+		<div class="signature">
+			<img class="logo" src={logo} alt="Logo" />
+			<p>HSGG-Lernwelt</p>
+		</div>
+	</a>
 
-    <!-- Only show user info if search is closed on small screens, or always on large -->
-    {#if !searchOpen || innerW > 600}
-        <div class="user-info">
-            {#if data.session}
-                <p>Hallo, {data.session.user.email}</p>
-            {:else}
-                <p>Du bist nicht eingeloggt.</p>
-            {/if}
-        </div>
-    {/if}
+	<!-- Only show user info if search is closed on small screens, or always on large -->
+	{#if !searchOpen || innerW > 600}
+                <div class="user-info">
+                    {#if data.session?.user}
+                        <p>
+                            Hallo,
+                            <!-- 1. Name anzeigen oder Fallback auf Email -->
+                            {data.session.user.user_metadata?.full_name || data.session.user.email}
 
-    <div class="icon-container">
-        <!-- Search Input Section -->
-        <div class="search-wrapper {searchOpen ? 'active' : ''}">
-            {#if searchOpen}
-                <input
-                        bind:this={searchInputRef}
-                        type="text"
-                        placeholder="Suchen..."
-                        bind:value={searchQuery}
-                        oninput={runSearch}
-                        aria-label="Materialien suchen"
-                />
-            {/if}
-            <button
-                    class="search"
-                    onclick={toggleSearch}
-                    aria-label={searchOpen ? 'Suche schließen' : 'Suche öffnen'}
-                    aria-expanded={searchOpen}
-            >
-                <img src={searchIcon} alt="" />
-            </button>
+                            <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
+                            {#if data.session.user.user_metadata?.role === 'student'}
+                                (Schüler:in)
+                            {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
+                                (Admin)
+                            {:else if data.session.user.user_metadata?.role === 'teacher'}
+                                (Lehrperson)
+                            {:else if data.session.user.user_metadata?.role === 'parent'}
+                                (Elternteil)
+                            {/if}
+                        </p>
+                    {:else}
+                        <p>Du bist nicht eingeloggt.</p>
+                    {/if}
+                </div>
+	{/if}
+	<div class="icon-container">
+		<!-- Search Input Section -->
+		<div class="search-wrapper {searchOpen ? 'active' : ''}">
+			{#if searchOpen}
+				<input
+					bind:this={searchInputRef}
+					type="text"
+					placeholder="Suchen..."
+					bind:value={searchQuery}
+					oninput={runSearch}
+				/>
+			{/if}
+			<button class="search" on:click={toggleSearch}>
+				<img alt="Suche" src={searchIcon} />
+			</button>
 
             {#if searchOpen && searchResults.length > 0}
                 <div class="search-dropdown" role="listbox">
@@ -184,27 +198,39 @@
             {/if}
         </div>
 
-        <button class="q_mark" aria-label="Hilfe"><img src={q_mark} alt="" /></button>
+		{#if data.session}
+			<button class="login" on:click={handleLogout}><img alt="Logout" src={login} /></button>
+		{:else}
+			<button class="login" on:click={goToLogin} style="cursor: default;"><img src={login} alt="Login" /></button>
+		{/if}
 
-        {#if data.session}
-            <button class="login" onclick={handleLogout} aria-label="Abmelden">
-                <img src={login} alt="" />
-            </button>
-        {:else}
-            <button class="login" style="cursor: default;" aria-label="Nicht angemeldet">
-                <img src={login} alt="" />
-            </button>
-        {/if}
-
-        <button
-                class="menu"
-                onclick={toggleMenu}
-                aria-label={isMenuOpen ? 'Menü schließen' : 'Menü öffnen'}
-                aria-expanded={isMenuOpen}
-        >
-            <img src={menu} alt="" />
-        </button>
-    </div>
+		<button class="menu" on:click={toggleMenu}><img src={menu} alt="Menü" /></button>
+	</div>
+	<!-- Dropdown Menu -->
+	{#if isMenuOpen}
+		<div class="dd-menu-container">
+			<ul>
+				<li>
+					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />Home</a>
+				</li>
+				<li>
+					<a href="/material_page_id14" on:click={toggleMenu}
+						><img alt="Material" src={searchIcon} />Materialien</a
+					>
+				</li>
+                <li>
+                    <a href="/" on:click={handleLogout}><img alt="logout" src={login} />Logout</a>
+                </li>
+				{#if !data.session}
+					<li>
+						<a href="/register_page_id3" onclick={toggleMenu}
+							><img alt="Register" src={register} />Registrierung</a
+						>
+					</li>
+				{/if}
+			</ul>
+		</div>
+	{/if}
 
     <!-- Dropdown Menu -->
     {#if isMenuOpen}

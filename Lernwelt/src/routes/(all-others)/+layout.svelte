@@ -56,10 +56,9 @@
 
     .main_container {
         grid-area: main;
-
         padding: var(--main-padding);
         border-radius: var(--main-radius);
-        margin-top: min(1rem, 10dvh);
+        margin-top: 10dvh;
         margin-bottom: 2rem;
 
         font-family: Arial, Helvetica, sans-serif;
