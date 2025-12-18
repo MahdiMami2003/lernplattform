@@ -166,10 +166,13 @@
 					<a href="/" on:click={toggleMenu}><img alt="Home" src={logo} />Home</a>
 				</li>
 				<li>
-					<a href="/materials_page" on:click={toggleMenu}
+					<a href="/material_page_id14" on:click={toggleMenu}
 						><img alt="Material" src={searchIcon} />Materialien</a
 					>
 				</li>
+                <li>
+                    <a href="/" on:click={handleLogout}><img alt="logout" src={login} />Logout</a>
+                </li>
 				{#if !data.session}
 					<li>
 						<a href="/register_page_id3" on:click={toggleMenu}
