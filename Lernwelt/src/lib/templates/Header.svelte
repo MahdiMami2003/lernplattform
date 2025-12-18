@@ -53,6 +53,7 @@
             return;
         }
 
+
         const {data: rows, error} = await supabase
             .from('materials')
             .select('*')
@@ -60,7 +61,18 @@
                 `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,subject.ilike.%${searchQuery}%,school_class.ilike.%${searchQuery}%`
             )
             .limit(10); // Limit results for performance
+
+
+        if (!error) {
+            searchResults = rows ?? [];
+        } else {
+            console.error("Suchfehler:", error);
+            searchResults = [];
+        }
+
     }
+
+
         function goToLogin() {
             goto(`/`);
         }
