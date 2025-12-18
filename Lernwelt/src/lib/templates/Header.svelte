@@ -87,7 +87,7 @@
 <nav class="header-root">
 	<a style="text-decoration: none" href="/">
 		<div class="signature">
-			<img class="logo" src={logo} />
+			<img class="logo" src={logo} alt="Logo" />
 			<p>HSGG-Lernwelt</p>
 		</div>
 	</a>
