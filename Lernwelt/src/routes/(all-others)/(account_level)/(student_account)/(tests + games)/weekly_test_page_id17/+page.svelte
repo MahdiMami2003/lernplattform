@@ -2,12 +2,10 @@
     import { onMount } from 'svelte';
 
     let { data } = $props();
-
     let { supabase, session } = data;
 
-
-    /** @type {string | null} */
-    let userRole = null;
+    let userRole = $state(null);
+    let editingRight = $state(null);
 
     onMount(async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -15,15 +13,20 @@
         if (user) {
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('role, editing_right')
                 .eq('id', user.id)
                 .single();
 
             if (profile) {
                 userRole = profile.role;
+                editingRight = profile.editing_right;
             }
         }
     });
+
+    function hasEditingRights() {
+        return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
+    }
 
     async function getTests() {
         const { data, error } = await supabase
@@ -39,9 +42,6 @@
         return data || [];
     }
 
-    /**
-     * @param {number} id
-     */
     async function deleteTest(id) {
         if (!confirm('Wirklich löschen?')) return;
 
@@ -62,7 +62,7 @@
 <div id="placeholder">
     <div class="header">
         <h1>Wöchentliche Tests</h1>
-        {#if userRole === 'admin' || userRole === 'teacher'}
+        {#if hasEditingRights()}
             <a href="/form_for_adding_weekly_test" class="add-button">➕ Test hinzufügen</a>
         {/if}
     </div>
@@ -78,7 +78,7 @@
                             {test.title}
                         </a>
 
-                        {#if userRole === 'admin' || userRole === 'teacher'}
+                        {#if hasEditingRights()}
                             <button class="delete-btn" on:click={() => deleteTest(test.id)}>
                                 🗑️ Löschen
                             </button>
@@ -87,7 +87,7 @@
                 {/each}
             </ul>
 
-            {#if userRole === 'admin' || userRole === 'teacher'}
+            {#if hasEditingRights()}
                 <a href="/form_for_adding_weekly_test" class="bottom-btn">➕ Neuen Test hinzufügen</a>
             {/if}
         {:else}
@@ -97,7 +97,6 @@
         <p style="color: red;">Fehler beim Laden</p>
     {/await}
 </div>
-
 <style>
     #placeholder {
         margin: 0;
