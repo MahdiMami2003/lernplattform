@@ -64,6 +64,10 @@
 		goto(`/materials_content_page_16/${id}`);
 	}
 
+    function goToLogin() {
+        goto(`/`);
+    }
+
 	async function handleLogout() {
 		const { error } = await data.supabase.auth.signOut();
 		if (!error) window.location.href = '/';
@@ -100,22 +104,36 @@
 <nav class="header-root">
 	<a style="text-decoration: none" href="/">
 		<div class="signature">
-			<img class="logo" src={logo} />
+			<img class="logo" src={logo} alt="Logo" />
 			<p>HSGG-Lernwelt</p>
 		</div>
 	</a>
 
 	<!-- Only show user info if search is closed on small screens, or always on large -->
 	{#if !searchOpen || innerW > 600}
-		<div class="user-info">
-			{#if data.session}
-				<p>Hallo, {data.session.user.email}</p>
-			{:else}
-				<p>Du bist nicht eingeloggt.</p>
-			{/if}
-		</div>
-	{/if}
+                <div class="user-info">
+                    {#if data.session?.user}
+                        <p>
+                            Hallo,
+                            <!-- 1. Name anzeigen oder Fallback auf Email -->
+                            {data.session.user.user_metadata?.full_name || data.session.user.email}
 
+                            <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
+                            {#if data.session.user.user_metadata?.role === 'student'}
+                                (Schüler:in)
+                            {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
+                                (Admin)
+                            {:else if data.session.user.user_metadata?.role === 'teacher'}
+                                (Lehrperson)
+                            {:else if data.session.user.user_metadata?.role === 'parent'}
+                                (Elternteil)
+                            {/if}
+                        </p>
+                    {:else}
+                        <p>Du bist nicht eingeloggt.</p>
+                    {/if}
+                </div>
+	{/if}
 	<div class="icon-container">
 		<!-- Search Input Section -->
 		<div class="search-wrapper {searchOpen ? 'active' : ''}">
@@ -128,8 +146,8 @@
 					oninput={runSearch}
 				/>
 			{/if}
-			<button class="search" onclick={toggleSearch}>
-				<img src={searchIcon} />
+			<button class="search" on:click={toggleSearch}>
+				<img alt="Suche" src={searchIcon} />
 			</button>
 
 			{#if searchOpen && searchResults.length > 0}
@@ -147,15 +165,13 @@
 			{/if}
 		</div>
 
-		<button class="q_mark"><img src={q_mark} /></button>
-
 		{#if data.session}
-			<button class="login" onclick={handleLogout}><img src={login} /></button>
+			<button class="login" on:click={handleLogout}><img alt="Logout" src={login} /></button>
 		{:else}
-			<button class="login" style="cursor: default;"><img src={login} /></button>
+			<button class="login" on:click={goToLogin} style="cursor: default;"><img src={login} alt="Login" /></button>
 		{/if}
 
-		<button class="menu" onclick={toggleMenu}><img src={menu} /></button>
+		<button class="menu" on:click={toggleMenu}><img src={menu} alt="Menü" /></button>
 	</div>
 	<!-- Dropdown Menu -->
 	{#if isMenuOpen}
@@ -165,10 +181,13 @@
 					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />Home</a>
 				</li>
 				<li>
-					<a href="/materials_page" onclick={toggleMenu}
+					<a href="/material_page_id14" on:click={toggleMenu}
 						><img alt="Material" src={searchIcon} />Materialien</a
 					>
 				</li>
+                <li>
+                    <a href="/" on:click={handleLogout}><img alt="logout" src={login} />Logout</a>
+                </li>
 				{#if !data.session}
 					<li>
 						<a href="/register_page_id3" onclick={toggleMenu}
