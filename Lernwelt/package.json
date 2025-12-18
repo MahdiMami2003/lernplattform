@@ -35,7 +35,7 @@
 	},
 	"dependencies": {
 		"@supabase/ssr": "^0.8.0",
-		"@supabase/supabase-js": "^2.86.2",
+		"@supabase/supabase-js": "^2.88.0",
 		"@sveltejs/kit": "^2.0.0",
 		"svelte": "^5.0.0",
 		"svelte-i18n": "^4.0.1"
