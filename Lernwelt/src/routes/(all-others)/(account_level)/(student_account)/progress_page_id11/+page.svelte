@@ -146,7 +146,7 @@
     function getBarColor(p, c) { return c ? '#4caf50' : (p > 0 ? '#f3be6a' : '#ddd'); }
 </script>
 
-<div class="page-container">
+<div class="page-container main_container">
 
     {#if loading}
         <div class="msg">🚀 {$_('progress.loading')}</div>
@@ -178,7 +178,7 @@
             </div>
 
             <br />
-            <a href="/parents_landing_page_id4" style="color:#666;">
+            <a href="/parents_landing_page_id4" class="back-to-dash">
                 {$_('progress.back_to_dashboard')}
             </a>
         </div>
@@ -259,54 +259,398 @@
 </div>
 
 <style>
-    .page-container { max-width: 800px; margin: 0 auto; padding: 2rem; font-family: sans-serif; }
+    /* ============ MAIN CONTAINER ============ */
+    .page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        font-family: sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        min-height: 100vh;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-    /* --- Styles für die Kind-Auswahl --- */
-    .selection-screen { text-align: center; margin-top: 2rem; }
-    .child-grid { display: flex; justify-content: center; gap: 1.5rem; margin-top: 2rem; flex-wrap: wrap; }
+    /* ============ TYPOGRAPHY ============ */
+    h1 {
+        color: var(--text-primary);
+        transition: color 0.3s ease;
+    }
+
+    h2 {
+        color: var(--text-primary);
+        transition: color 0.3s ease;
+    }
+
+    h3 {
+        color: var(--text-primary);
+        margin: 0;
+        font-size: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    p {
+        color: var(--text-secondary);
+        transition: color 0.3s ease;
+    }
+
+    /* ============ KIND-AUSWAHL SCREEN ============ */
+    .selection-screen {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .child-grid {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
     .child-card {
-        background: white; border: 1px solid #ddd; border-radius: 12px;
-        padding: 1.5rem; width: 160px; cursor: pointer; transition: transform 0.2s;
-        display: flex; flex-direction: column; align-items: center; gap: 1rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        width: 160px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        min-height: 44px;
     }
-    .child-card:hover { transform: translateY(-5px); border-color: #236c93; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .child-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-    .child-card span { font-weight: bold; color: #333; }
 
-    /* --- Banners --- */
+    .child-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--button-bg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: var(--bg-hover);
+    }
+
+    .child-card:focus-visible {
+        outline: 2px solid var(--button-bg);
+        outline-offset: 2px;
+    }
+
+    .child-card img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--border-accent);
+    }
+
+    .child-card span {
+        font-weight: bold;
+        color: var(--text-primary);
+        transition: color 0.3s ease;
+    }
+
+    .back-to-dash {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .back-to-dash:hover {
+        color: var(--button-hover);
+    }
+
+    /* ============ INFO BANNERS ============ */
     .info-banner {
-        padding: 1rem; border-radius: 8px; margin-bottom: 2rem;
-        display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        transition: all 0.3s ease;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
-    /* Lehrer Style (Gelb) */
-    .info-banner.teacher { background: #fff3cd; color: #856404; border-color: #ffeeba; }
-    .back-btn { background: white; border: 1px solid #ddd; padding: 0.3rem 0.8rem; cursor: pointer; border-radius: 4px; }
+    .info-banner.teacher {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--border-accent);
+    }
 
-    /* Eltern Style (Blau) */
-    .info-banner.parent { background: #e3f2fd; color: #0d47a1; border-color: #bbdefb; }
-    .banner-actions { display: flex; gap: 1rem; align-items: center; }
-    .switch-btn { background: white; border: 1px solid #90caf9; padding: 0.3rem 0.8rem; border-radius: 20px; cursor: pointer; font-size: 0.85rem; color: #1565c0; }
-    .back-link { color: #0d47a1; text-decoration: none; font-size: 0.9rem; font-weight: bold; }
+    .info-banner.parent {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--button-bg);
+    }
 
-    /* --- Standard Profil Styles --- */
-    .profile-header { display: flex; gap: 1.5rem; align-items: center; background: white; padding: 2rem; border-radius: 12px; border: 1px solid #eee; margin-bottom: 2rem; }
-    .avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid #f3be6a; }
-    .info h1 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
-    .stats { display: flex; gap: 2rem; }
-    .stat { display: flex; flex-direction: column; }
-    .stat span { font-size: 0.8rem; text-transform: uppercase; color: #888; font-weight: bold; }
-    .stat strong { font-size: 1.2rem; color: #236c93; }
+    .banner-text {
+        flex: 1;
+    }
 
-    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .card { background: white; padding: 1rem; border-radius: 8px; border: 1px solid #eee; }
-    .card.done { background: #f1f8e9; border-color: #81c784; }
-    .head { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-    .xp { background: #fff8e1; color: #f57f17; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
-    .track { height: 8px; background: #eee; border-radius: 4px; margin: 10px 0 5px; overflow: hidden; }
-    .fill { height: 100%; transition: width 0.5s; }
+    .banner-text strong {
+        color: var(--button-bg);
+    }
 
-    .msg { text-align: center; margin-top: 3rem; color: #666; }
-    .error { color: red; background: #ffebee; padding: 1rem; border-radius: 8px; }
-    .empty { text-align: center; color: #888; font-style: italic; padding: 2rem; background: #f9f9f9; border-radius: 8px; }
+    .banner-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .back-btn,
+    .switch-btn {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s;
+        color: var(--text-primary);
+        min-height: 44px;
+    }
+
+    .back-btn:hover,
+    .switch-btn:hover {
+        background: var(--bg-hover);
+        border-color: var(--button-bg);
+    }
+
+    .back-btn:focus-visible,
+    .switch-btn:focus-visible {
+        outline: 2px solid var(--button-bg);
+        outline-offset: 2px;
+    }
+
+    .switch-btn {
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+
+    .back-link {
+        color: var(--button-bg);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--button-hover);
+    }
+
+    /* ============ PROFILE HEADER ============ */
+    .profile-header {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        background: var(--bg-card);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--border-accent);
+    }
+
+    .info h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+    }
+
+    .stats {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat span {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-weight: bold;
+        transition: color 0.3s ease;
+    }
+
+    .stat strong {
+        font-size: 1.2rem;
+        color: var(--button-bg);
+        transition: color 0.3s ease;
+    }
+
+    /* ============ MISSIONS SECTION ============ */
+    .missions {
+        margin-top: 2rem;
+    }
+
+    .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .card {
+        background: var(--bg-card);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .card.done {
+        background: var(--bg-card);
+        border-color: var(--success-color);
+        position: relative;
+    }
+
+    .card.done::before {
+        content: '✓';
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        color: var(--success-color);
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .xp {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        border: 1px solid var(--border-accent);
+        transition: all 0.3s ease;
+    }
+
+    .track {
+        height: 8px;
+        background: var(--bg-hover);
+        border-radius: 4px;
+        margin: 10px 0 5px;
+        overflow: hidden;
+    }
+
+    .fill {
+        height: 100%;
+        transition: width 0.5s;
+    }
+
+    small {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        transition: color 0.3s ease;
+    }
+
+    /* ============ MESSAGES ============ */
+    .msg {
+        text-align: center;
+        margin-top: 3rem;
+        color: var(--text-muted);
+        padding: 2rem;
+        transition: color 0.3s ease;
+    }
+
+    .error {
+        color: var(--error-color);
+        background: var(--bg-card);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 2px solid var(--error-color);
+    }
+
+    .error button {
+        background: var(--button-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--button-border);
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-height: 44px;
+    }
+
+    .error button:hover {
+        background: var(--button-hover);
+    }
+
+    .empty {
+        text-align: center;
+        color: var(--text-muted);
+        font-style: italic;
+        padding: 2rem;
+        background: var(--bg-card);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+        .page-container {
+            padding: 1rem;
+        }
+
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .stats {
+            justify-content: center;
+        }
+
+        .info-banner {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .banner-actions {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .child-grid {
+            gap: 1rem;
+        }
+
+        .child-card {
+            width: 140px;
+            padding: 1rem;
+        }
+
+        .grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
