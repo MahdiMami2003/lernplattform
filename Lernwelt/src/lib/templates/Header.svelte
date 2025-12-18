@@ -53,79 +53,75 @@
             return;
         }
 
-        const { data: rows, error } = await supabase
+        const {data: rows, error} = await supabase
             .from('materials')
             .select('*')
             .or(
                 `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,subject.ilike.%${searchQuery}%,school_class.ilike.%${searchQuery}%`
             )
             .limit(10); // Limit results for performance
-
-    function goToLogin() {
-        goto(`/`);
     }
-
-	async function handleLogout() {
-		const { error } = await data.supabase.auth.signOut();
-		if (!error) window.location.href = '/';
-	}
-
-    function goToMaterial(id: number) {
-        searchOpen = false;
-        goto(`/materials_content_page_16/${id}`);
-    }
-
-    async function handleLogout() {
-        const { error } = await data.supabase.auth.signOut();
-        if (!error) window.location.href = '/';
-    }
-
-    function going_dark(e: MouseEvent) {
-        e.preventDefault();
-        isDark = !isDark;
-
-        // Toggle auf HTML-Element für globale CSS-Variablen
-        if (isDark) {
-            document.documentElement.classList.add('darkmode');
-            if (browser) localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('darkmode');
-            if (browser) localStorage.setItem('theme', 'light');
+        function goToLogin() {
+            goto(`/`);
         }
-    }
 
-    function toggle_slide_left(e?: MouseEvent) {
-        if (e) e.preventDefault();
-        showMainSidebar = !showMainSidebar;
-    }
+        function goToMaterial(id: number) {
+            searchOpen = false;
+            goto(`/materials_content_page_16/${id}`);
+        }
 
-    function toggleMenu() {
-        isMenuOpen = !isMenuOpen;
-    }
+        async function handleLogout() {
+            const {error} = await data.supabase.auth.signOut();
+            if (!error) window.location.href = '/';
+        }
 
-    let showLangMenu = $state(false);
+        function going_dark(e: MouseEvent) {
+            e.preventDefault();
+            isDark = !isDark;
 
-    function toggleLangMenu(e?: MouseEvent) {
-        e?.preventDefault();
-        showLangMenu = !showLangMenu;
-    }
-
-    function setLang(l: 'de' | 'en') {
-        locale.set(l);
-        if (browser) localStorage.setItem('lang', l);
-        showLangMenu = false;
-    }
-
-    onMount(() => {
-        // Theme aus localStorage laden
-        if (browser) {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                isDark = true;
+            // Toggle auf HTML-Element für globale CSS-Variablen
+            if (isDark) {
                 document.documentElement.classList.add('darkmode');
+                if (browser) localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('darkmode');
+                if (browser) localStorage.setItem('theme', 'light');
             }
         }
-    });
+
+        function toggle_slide_left(e?: MouseEvent) {
+            if (e) e.preventDefault();
+            showMainSidebar = !showMainSidebar;
+        }
+
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+        }
+
+        let showLangMenu = $state(false);
+
+        function toggleLangMenu(e?: MouseEvent) {
+            e?.preventDefault();
+            showLangMenu = !showLangMenu;
+        }
+
+        function setLang(l: 'de' | 'en') {
+            locale.set(l);
+            if (browser) localStorage.setItem('lang', l);
+            showLangMenu = false;
+        }
+
+        onMount(() => {
+            // Theme aus localStorage laden
+            if (browser) {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    isDark = true;
+                    document.documentElement.classList.add('darkmode');
+                }
+            }
+        });
+
 </script>
 
 <nav class="header-root">
@@ -173,7 +169,7 @@
 					oninput={runSearch}
 				/>
 			{/if}
-			<button class="search" on:click={toggleSearch}>
+			<button class="search" onclick={toggleSearch}>
 				<img alt="Suche" src={searchIcon} />
 			</button>
 
@@ -199,12 +195,12 @@
         </div>
 
 		{#if data.session}
-			<button class="login" on:click={handleLogout}><img alt="Logout" src={login} /></button>
+			<button class="login" onclick={handleLogout}><img alt="Logout" src={login} /></button>
 		{:else}
-			<button class="login" on:click={goToLogin} style="cursor: default;"><img src={login} alt="Login" /></button>
+			<button class="login" onclick={goToLogin} style="cursor: default;"><img src={login} alt="Login" /></button>
 		{/if}
 
-		<button class="menu" on:click={toggleMenu}><img src={menu} alt="Menü" /></button>
+		<button class="menu" onclick={toggleMenu}><img src={menu} alt="Menü" /></button>
 	</div>
 	<!-- Dropdown Menu -->
 	{#if isMenuOpen}
@@ -214,15 +210,20 @@
 					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />Home</a>
 				</li>
 				<li>
-					<a href="/material_page_id14" on:click={toggleMenu}
+					<a href="/material_page_id14" onclick={toggleMenu}
 						><img alt="Material" src={searchIcon} />Materialien</a
 					>
 				</li>
+                {#if data.session}
                 <li>
-                    <a href="/" on:click={handleLogout}><img alt="logout" src={login} />Logout</a>
+                    <a href="/" onclick={handleLogout}><img alt="logout" src={login} />Logout</a>
                 </li>
+                {/if}
 				{#if !data.session}
-					<li>
+                    <li>
+                        <a href="/" onclick={goToLogin}><img alt="login" src={login} />Login</a>
+                    </li>
+                    <li>
 						<a href="/register_page_id3" onclick={toggleMenu}
 							><img alt="Register" src={register} />Registrierung</a
 						>
@@ -230,29 +231,6 @@
 				{/if}
 			</ul>
 		</div>
-	{/if}
-
-    <!-- Dropdown Menu -->
-    {#if isMenuOpen}
-        <div class="dd-menu-container">
-            <ul>
-                <li>
-                    <a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />Home</a>
-                </li>
-                <li>
-                    <a href="/materials_page" onclick={toggleMenu}
-                    ><img alt="Material" src={searchIcon} />Materialien</a
-                    >
-                </li>
-                {#if !data.session}
-                    <li>
-                        <a href="/register_page_id3" onclick={toggleMenu}
-                        ><img alt="Register" src={register} />Registrierung</a
-                        >
-                    </li>
-                {/if}
-            </ul>
-        </div>
     {/if}
 
     <!-- Sidebar Overlay/Container -->
@@ -272,7 +250,7 @@
                     <li class="nav__items" id="sub">
                         <a href="/material_page_id14">
                             <img alt="Fächer" src={subject} />
-                            <span class="nav-text">Lernmaterialien</span>
+                            <span class="nav-text">Lerninhalte</span>
                         </a>
                     </li>
 
