@@ -1,6 +1,8 @@
 <script>
     import { onMount } from 'svelte';
 
+    import {locale} from "svelte-i18n";
+    import { _ } from 'svelte-i18n';
     let { data } = $props();
 
     let { supabase, session } = data;
@@ -97,35 +99,53 @@
     function hasEditingRights() {
         return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
     }
+
+
+    function getTitle(material) {
+        return $locale === 'en'
+            ? material.title_en || material.title
+            : material.title;
+    }
+    function getDescription(material) {
+        return $locale === 'en'
+            ? material.description_en || material.description
+            : material.description;
+    }
+
+    function getSubject(material) {
+        return $locale === 'en'
+            ? material.subject_en || material.subject
+            : material.subject;
+    }
 </script>
 
 <div id="placeholder">
     <div class="header">
-        <h1>Übersicht Lerninhalte</h1>
+        <h1>{$_('materials.title')}</h1>
         {#if hasEditingRights()}
-            <a href="/form_for_adding_content" class="add-button">➕ Aufgabe hinzufügen</a>
+            <a href="/form_for_adding_content" class="add-button">➕ {$_('materials.add')}</a>
         {/if}
     </div>
 
     {#await getMaterials()}
-        <p class="loading">Lade Materialien...</p>
+        <p class="loading">{$_('materials.loading')}...</p>
     {:then materials}
         {#if materials && materials.length > 0}
             {@const groupedMaterials = groupBySubject(materials)}
 
             {#each Object.entries(groupedMaterials) as [subject, items]}
                 <section class="subject-section">
-                    <h2>{subject}</h2>
+                    <h2> {subject}</h2>
                     <ul>
                         {#each items as material}
                             <li class="material-item">
                                 <a href="/materials_content_page_16/{material.id}" class="material-link">
-                                    {material.title}
+                                    {getTitle(material)}
                                 </a>
 
                                 {#if hasEditingRights()}
                                     <button class="delete-btn" on:click={() => deleteMaterial(material.id)}>
-                                        🗑️ Löschen
+                                        🗑️ {$_('materials.delete')}
                                     </button>
                                 {/if}
                             </li>
@@ -134,10 +154,10 @@
                 </section>
             {/each}
         {:else}
-            <p class="no-materials">Keine Materialien für deine Klasse gefunden.</p>
+            <p class="no-materials">{$_('materials.empty')}</p>
         {/if}
     {:catch error}
-        <p class="error">Fehler beim Laden: {error.message}</p>
+        <p class="error">{$_('materials.load_error')} {error?.message ?? ''}</p>
     {/await}
 </div>
 

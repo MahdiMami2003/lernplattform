@@ -1,6 +1,8 @@
 <script>
     import { page } from '$app/stores';
 
+    import {locale} from "svelte-i18n";
+    import { _ } from 'svelte-i18n';
     let { data } = $props();
 
     let { supabase, session } = data;
@@ -28,6 +30,23 @@
 
         return data;
     }
+    function getTitle(tip) {
+        return $locale === 'en'
+            ? tip.title_en || tip.title
+            : tip.title;
+    }
+
+    function getDescription(tip) {
+        return $locale === 'en'
+            ? tip.description_en || tip.description
+            : tip.description;
+    }
+
+    function getContent(tip) {
+        return $locale === 'en'
+            ? tip.content_en || tip.content
+            : tip.content;
+    }
 </script>
 
 <div id="content-container">
@@ -36,33 +55,37 @@
     {:then tip}
         {#if tip}
             <div class="tip-detail">
-                <h1>{tip.title}</h1>
+                <h1>{getTitle(tip)}</h1>
 
                 {#if tip.description}
-                    <p class="description-text">{@html tip.description.replace(/\n/g, '<br>')}</p>
+                    <p class="description-text">{@html getDescription(tip).replace(/\n/g, '<br>')}</p>
                     <hr class="divider">
                 {/if}
 
                 {#if tip.content}
-                    <div class="content-text">{@html tip.content.replace(/\n/g, '<br>')}</div>
+                    <div class="content-text">{@html getContent(tip).replace(/\n/g, '<br>')}</div>
                 {:else}
                     <p class="no-content">Kein Inhalt verfügbar</p>
                 {/if}
 
-                <a href="/pedagogy_page_id10" class="back-link">← Zurück zur Übersicht</a>
+                <a href="/pedagogy_page_id10" class="back-link">← {$_('pedagogy.errors.back_link')}</a>
             </div>
         {:else}
             <div class="error">
-                <h1>Tipp nicht gefunden</h1>
-                <p>Der angeforderte Tipp existiert nicht.</p>
-                <a href="/pedagogy_page_id10">← Zurück zur Übersicht</a>
+                <h1>{$_('pedagogy.errors.not_found_title')}</h1>
+                <p>{$_('pedagogy.errors.not_found_text')}</p>
+                <a href="/pedagogy_page_id10">
+                    {$_('pedagogy.errors.back_link')}
+                </a>
             </div>
         {/if}
     {:catch error}
         <div class="error">
-            <h1>Fehler beim Laden</h1>
-            <p>Es gab ein Problem beim Laden des Tipps.</p>
-            <a href="/pedagogy_page_id10">← Zurück zur Übersicht</a>
+            <h1>{$_('pedagogy.errors.load_error_title')}</h1>
+            <p>{$_('pedagogy.errors.load_error_text')}</p>
+            <a href="/pedagogy_page_id10">
+                {$_('pedagogy.errors.back_link')}
+            </a>
         </div>
     {/await}
 </div>

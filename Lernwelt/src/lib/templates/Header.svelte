@@ -10,12 +10,13 @@
 	import progress from '$lib/assets/icons/prog.png';
 	import subject from '$lib/assets/icons/sub.png';
 	import task from '$lib/assets/icons/tasks.png';
-    import Breadcrumbs from '$lib/Breadcrumbs.svelte';
+	import Breadcrumbs from '$lib/Breadcrumbs.svelte';
 	import { fly } from 'svelte/transition';
 
 	import { goto } from '$app/navigation';
 	import { supabase } from '$lib/supabaseClient';
-
+	import { browser } from '$app/environment';
+	import { locale, _ } from '$lib/i18n/config';
 	let { data } = $props();
 
 	// SIDEBAR STATES
@@ -86,6 +87,18 @@
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen;
 	}
+	let showLangMenu = $state(false);
+
+	function toggleLangMenu(e?: MouseEvent) {
+		e?.preventDefault();
+		showLangMenu = !showLangMenu;
+	}
+
+	function setLang(l: 'de' | 'en') {
+		locale.set(l);
+		if (browser) localStorage.setItem('lang', l);
+		showLangMenu = false;
+	}
 </script>
 
 <nav class="header-root">
@@ -130,7 +143,7 @@
 					type="text"
 					placeholder="Suchen..."
 					bind:value={searchQuery}
-					on:input={runSearch}
+					oninput={runSearch}
 				/>
 			{/if}
 			<button class="search" on:click={toggleSearch}>
@@ -140,7 +153,7 @@
 			{#if searchOpen && searchResults.length > 0}
 				<div class="search-dropdown">
 					{#each searchResults as item (item.id)}
-						<div class="search-item" on:click={() => goToMaterial(item.id)}>
+						<div class="search-item" onclick={() => goToMaterial(item.id)}>
 							<strong>{item.title}</strong>
 							<span class="search-meta">{item.subject}</span>
 						</div>
@@ -165,7 +178,7 @@
 		<div class="dd-menu-container">
 			<ul>
 				<li>
-					<a href="/" on:click={toggleMenu}><img alt="Home" src={logo} />Home</a>
+					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />Home</a>
 				</li>
 				<li>
 					<a href="/material_page_id14" on:click={toggleMenu}
@@ -177,7 +190,7 @@
                 </li>
 				{#if !data.session}
 					<li>
-						<a href="/register_page_id3" on:click={toggleMenu}
+						<a href="/register_page_id3" onclick={toggleMenu}
 							><img alt="Register" src={register} />Registrierung</a
 						>
 					</li>
@@ -185,8 +198,6 @@
 			</ul>
 		</div>
 	{/if}
-
-
 
 	<!-- Sidebar Overlay/Container -->
 	{#if innerW > 1000}
@@ -210,10 +221,25 @@
 					</li>
 
 					<li class="nav__items" id="task">
-						<a href="game_page_id12">
-							<img alt="Aufgaben" src={task} />
-							<span class="nav-text">Aufgaben</span>
-						</a>
+						{#if data.session}
+							<a href="/game_page_id12">
+								<img alt="Aufgaben" src={task} />
+								<span class="nav-text">Aufgaben</span>
+							</a>
+						{:else}
+							<div class="nav__items_disabled_wrapper" style="cursor: not-allowed;">
+								<a
+									href="#"
+									class="disabled-link"
+									title="Bitte zuerst einloggen!"
+									onclick={(e) => e.preventDefault()}
+									style="pointer-events: none;"
+								>
+									<img alt="Aufgaben" src={task} />
+									<span class="nav-text">Aufgaben 🔒</span>
+								</a>
+							</div>
+						{/if}
 					</li>
 
 					{#if testlogin}
@@ -232,7 +258,7 @@
 					{/if}
 
 					<li class="nav__items" id="access">
-						<a on:click={toggle_slide_left} href="#">
+						<a onclick={toggle_slide_left} href="#">
 							<img alt="Barrierefreiheit" src={access} />
 							<span class="nav-text">Barrierefrei</span>
 						</a>
@@ -243,7 +269,7 @@
 			<div class="nav__cont" transition:fly={{ x: -200, duration: 1000, opacity: 0 }}>
 				<ul class="nav">
 					<li class="nav__items" id="reg">
-						<a href="#" on:click={going_dark}>
+						<a href="#" onclick={going_dark}>
 							<span class="nav-text">Darkmode</span>
 						</a>
 					</li>
@@ -253,14 +279,20 @@
 						</a>
 					</li>
 					<li class="nav__items" id="task">
-						<a href="#">
-							<span class="nav-text">Sprache ändern</span>
+						<a href="#" onclick={toggleLangMenu}>
+							<span class="nav-text">{$_('header.change_language')}</span>
 						</a>
+
+						{#if showLangMenu}
+							<div class="lang-submenu">
+								<button class:selected={$locale === 'de'} onclick={() => setLang('de')}>DE</button>
+
+								<button class:selected={$locale === 'en'} onclick={() => setLang('en')}>EN</button>
+							</div>
+						{/if}
 					</li>
 					<li class="nav__items" id="access">
-						<a on:click={toggle_slide_left} href="#">
-							<span class="nav-text">Zurück</span>
-						</a>
+						<a onclick={toggle_slide_left} href="#"> <span class="nav-text">Zurück</span> </a>
 					</li>
 				</ul>
 			</div>
@@ -268,7 +300,7 @@
 	{/if}
 </nav>
 <div class="bread-bar">
-    <Breadcrumbs />
+	<Breadcrumbs />
 </div>
 <svelte:window bind:innerWidth={innerW} />
 
@@ -302,7 +334,7 @@
 
 	.signature {
 		display: flex;
-        height: var(--header-height);
+		height: var(--header-height);
 		flex-basis: auto;
 		align-items: center;
 		justify-content: start;
@@ -481,54 +513,53 @@
 		border-radius: 1rem;
 	}
 
-    /* --- NEUE BREADCRUMB BAR --- */
-    .bread-bar {
-        position: fixed;
-        top: var(--header-height); /* Beginnt direkt unter dem Header */
-        left: 0;
-        width: 100%;
-        height: var(--bread-height);
-        background-color: #f1af69; /* Helleres Beige passend zum Header */
-        border-bottom: 1px solid #e0cdb0;
-        display: flex;
-        align-items: center;
-        padding: 0 1rem; /* Gleiches Padding wie Header für Ausrichtung */
-        box-sizing: border-box;
-        z-index: 990; /* Unter Header (1000) und Mobile Menu (999) */
-        font-size: 0.85rem;
-        color: #44546a;
-    }
+	/* --- NEUE BREADCRUMB BAR --- */
+	.bread-bar {
+		position: fixed;
+		top: var(--header-height); /* Beginnt direkt unter dem Header */
+		left: 0;
+		width: 100%;
+		height: var(--bread-height);
+		background-color: #f1af69; /* Helleres Beige passend zum Header */
+		border-bottom: 1px solid #e0cdb0;
+		display: flex;
+		align-items: center;
+		padding: 0 1rem; /* Gleiches Padding wie Header für Ausrichtung */
+		box-sizing: border-box;
+		z-index: 990; /* Unter Header (1000) und Mobile Menu (999) */
+		font-size: 0.85rem;
+		color: #44546a;
+	}
 
-    .bread-bar a {
-        text-decoration: none;
-        color: #44546a;
-        transition: color 0.2s;
-        display: flex;
-        align-items: center;
-    }
+	.bread-bar a {
+		text-decoration: none;
+		color: #44546a;
+		transition: color 0.2s;
+		display: flex;
+		align-items: center;
+	}
 
-    .bread-bar a:hover {
-        color: #000;
-        text-decoration: underline;
-    }
+	.bread-bar a:hover {
+		color: #000;
+		text-decoration: underline;
+	}
 
-    .bread-bar .separator {
-        margin: 0 0.5rem;
-        color: #888;
-        font-size: 0.7rem; /* Kleinerer Pfeil */
-    }
+	.bread-bar .separator {
+		margin: 0 0.5rem;
+		color: #888;
+		font-size: 0.7rem; /* Kleinerer Pfeil */
+	}
 
-    .bread-bar .current {
-        font-weight: bold;
-        color: #222;
-        cursor: default;
-    }
+	.bread-bar .current {
+		font-weight: bold;
+		color: #222;
+		cursor: default;
+	}
 
 	@media (max-width: 1000px) {
-
-        .signature p{
-            display: none;
-        }
+		.signature p {
+			display: none;
+		}
 		.q_mark,
 		.login {
 			display: none; /* Hide others to make room for search on mobile? User didn't specify, but safer */
@@ -711,5 +742,36 @@
 		display: initial;
 		opacity: 1;
 		transition-delay: 0.2s;
+	}
+
+	.nav__items a.disabled-link {
+		cursor: not-allowed;
+		opacity: 0.5;
+		background-color: rgba(0, 0, 0, 0.1);
+	}
+
+	.nav__items a.disabled-link:hover {
+		background-color: rgba(0, 0, 0, 0.1);
+		filter: none;
+	}
+	.lang-submenu {
+		margin-left: 1rem;
+		margin-top: 0.4rem;
+		display: flex;
+		gap: 0.4rem;
+	}
+
+	.lang-submenu button {
+		border: 1px solid #ccc;
+		background: white;
+		padding: 0.25rem 0.5rem;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 0.85rem;
+	}
+
+	.lang-submenu button.selected {
+		font-weight: 700;
+		text-decoration: underline;
 	}
 </style>

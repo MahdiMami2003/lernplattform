@@ -1,0 +1,331 @@
+{
+  "login": {
+    "title": "Willkommen in der\nHSGG-Lernwelt",
+    "subtitle": "Deine digitale Umgebung zum Lernen, Üben und Begleiten.",
+    "cta": "Melde dich an und leg los!",
+    "email_placeholder": "E-Mail Adresse",
+    "password_placeholder": "Passwort",
+    "login_button": "Einloggen",
+    "register_button": "Noch keine Nutzerdaten? Hier gehts zur Registrierung",
+    "or": "oder",
+    "guest_button": "Ohne Login fortfahren",
+    "quick_links": "Quick-Links für das Sprint-Meeting:",
+    "role_student": "Schüler*in",
+    "role_teacher": "Lehrperson",
+    "role_parent": "Elternteil",
+    "logging_in": "Melde an...",
+    "success_redirect": "Anmeldung erfolgreich! Leite weiter...",
+    "no_valid_role": "Keine gültige Rolle gefunden",
+    "failed": "Anmeldung fehlgeschlagen"
+  },
+  "teacher": {
+    "title": "Lehrpersonen-Dashboard",
+    "subtitle": "Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten",
+    "pedagogical_tips": "Pädagogische Tipps",
+    "edit_tips": "Tipps bearbeiten",
+    "general_admin": "Allgemeine Verwaltung",
+    "minigames": "Minispiele",
+    "minigames_desc": "Fragen für die Minispiele erstellen und bearbeiten.",
+    "manage_questions": "Fragen verwalten",
+    "manage_classes": "Meine Klassen verwalten",
+    "manage_classes_hint": "Klicken Sie auf die Klassen, die Sie unterrichten, um sie unten anzuzeigen.",
+    "class_overview": "Ihre Klassen Übersicht",
+    "no_classes_selected": "Sie haben noch keine Klassen ausgewählt. Bitte klicken Sie oben auf Ihre Klassen.",
+    "view_progress": "Lernfortschritt der Klasse einsehen",
+    "view_level": "Lernstand ansehen",
+    "edit_materials": "Unterrichtsmaterial bearbeiten",
+    "manage_materials": "Materialien verwalten",
+    "edit_appointments": "Termine und Aktuelles bearbeiten",
+    "manage_appointments": "Termine bearbeiten",
+    "edit_tests": "Wochentests und spielerische Fragen bearbeiten",
+    "manage_tests": "Wochentests bearbeiten"
+  },
+  "student": {
+    "title": "Hallo liebe:r Schüler:in",
+    "welcome": "Herzlich willkommen auf der Website der HSGG Lernwelt",
+    "choose_topic": "Bitte klicke auf das Thema das dich interessiert.",
+    "game_title": "Game Page",
+    "game_desc": "Aufgaben & Gamification!",
+    "weekly_title": "Weekly Tests",
+    "weekly_desc": "Wöchentliche Kompetenzchecks",
+    "progress_title": "Fortschritt",
+    "progress_desc": "Deine Lernstatistiken im Überblick",
+    "materials_title": "Lernunterlagen",
+    "materials_desc": "Materialien für dein Lernen",
+    "welcome_back": "Willkommen zurück, {name} 👋",
+    "learning_journey": "Deine Lernreise geht weiter.",
+    "choose_subject": "Wähle ein Fach",
+    "level_up": "🎉 Level Up! Level {level}!",
+    "level_xp": "Level {level} · {xp}% XP",
+    "avatar_choose": "Wähle deinen Avatar",
+    "choose_topic_for": "Thema wählen für {subject}",
+    "loading_topics": "Lade Themen...",
+    "shuffle_all": "🎲 Alles mischen",
+    "cancel": "Abbrechen"
+  },
+  "subjects": {
+      "math": "Mathe",
+      "physics": "Physik",
+      "german": "Deutsch",
+      "english": "Englisch"
+  },
+  "header": {
+    "change_language": "Sprache ändern"
+  },
+  "common": {
+    "back": "Zurück"
+  },
+  "progress": {
+    "loading": "Lade Daten...",
+    "select_title": "Wen möchtest du sehen?",
+    "select_subtitle": "Bitte wähle eines deiner Kinder aus:",
+    "back_to_dashboard": "Zurück zum Dashboard",
+    "parent_viewing": "Du siehst:",
+    "other_child": "Anderes Kind",
+    "dashboard": "Dashboard",
+    "teacher_view": "Schüler-Ansicht:",
+    "back_to_list": "Zurück zur Liste",
+    "avatar_alt": "Avatar",
+    "level": "Level",
+    "xp": "XP",
+    "hearts": "Herzen",
+    "learning_progress": "Lernfortschritt",
+    "no_missions": "Noch keine Aufgaben gestartet.",
+    "xp_short": "XP",
+    "done": "Fertig!"
+  },
+  "game": {
+    "loading": "Spiel wird geladen…",
+    "reload": "Neu laden",
+    "no_questions": "Für diese Kategorie sind aktuell keine Fragen vorhanden.",
+    "dashboard": "Dashboard",
+    "level_reached": "🎉 Level erreicht!",
+    "question_count": "Frage",
+    "no_hearts": "😥 Keine Herzen mehr",
+    "well_done": "🎉 Super gemacht!",
+    "correct_answers": "Richtige Antworten",
+    "level": "Level",
+    "done": "Fertig!",
+    "badges_title": "Freigeschaltete Badges:",
+    "badge_perfect": "Perfekte Runde 🏅",
+    "badge_streak": "Streak-Meister 🔥",
+    "badge_math_hero": "Mathe-Held 📘",
+    "badge_phy_hero": "Physik-Profi ⚛",
+    "play_again": "Nochmal spielen"
+  },
+  "parent": {
+    "title": "Hallo liebes Elternteil.",
+    "welcome": "Herzlich willkommen auf der Website der HSGG Lernwelt",
+    "instruction": "Bitte klicken Sie auf das Thema, das Sie interessiert.",
+
+    "sections": {
+      "appointments_title": "Termine und Aktuelles",
+      "appointments_desc": "Hier finden Sie aktuelle Informationen, die Sie nicht verpassen sollten.",
+
+      "progress_title": "Fortschritt meines Kindes",
+      "progress_desc": "Falls Sie sehen wollen, auf welchem Lernstand Ihr Kind ist, klicken Sie hier.",
+
+      "tips_title": "Pädagogische Tipps",
+      "tips_desc": "Wenn Sie herausfinden wollen, wie Sie Ihr Kind beim Lernen unterstützen können, klicken Sie hier.",
+
+      "materials_title": "Lernunterlagen meines Kindes",
+      "materials_desc": "Hier finden Sie die Lernunterlagen, die Ihrem Kind zur Verfügung gestellt werden."
+    }
+  },
+  "appointment": {
+    "title": "Neuigkeiten & Termine",
+    "loading": "Lade Termine...",
+    "empty": "Aktuell stehen keine Termine an.",
+    "add": "Neuen Termin hinzufügen"
+  },
+  "pedagogy": {
+    "errors": {
+      "not_found_title": "Tipp nicht gefunden",
+      "not_found_text": "Der angeforderte Tipp existiert nicht.",
+      "load_error_title": "Fehler beim Laden",
+      "load_error_text": "Es gab ein Problem beim Laden des Tipps.",
+      "back_link": "Zurück zur Übersicht"
+    },
+    "add": "Neuen Termin hinzufügen"
+  },
+  "materials": {
+    "title": "Übersicht Lerninhalte",
+    "loading": "Lade Materialien...",
+    "empty": "Keine Materialien für deine Klasse gefunden.",
+    "add": "Aufgabe hinzufügen",
+    "delete": "Löschen",
+    "confirm_delete": "Wirklich löschen?",
+    "delete_error": "Fehler beim Löschen!",
+    "load_error": "Fehler beim Laden:",
+    "download_pdf": "PDF herunterladen",
+    "no_pdf": "Kein PDF verfügbar",
+    "not_found_title": "Material nicht gefunden",
+    "not_found_text": "Die angeforderte Material-ID existiert nicht.",
+    "loading_m": "Lade Material..."
+  },
+  "teacher_class": {
+    "loading": "⏳ Lade Klasse...",
+    "title": "Klasse:",
+    "subtitle": "Übersicht aller Schülerinnen und Schüler",
+    "empty": "📭 Keine Schüler in dieser Klasse.",
+    "table": {
+      "avatar": "Avatar",
+      "name": "Name",
+      "level": "Level",
+      "action": "Aktion"
+    },
+    "button": {
+      "progress": "Fortschritt ansehen"
+    }
+  },
+  "imprint": {
+    "title": "Impressum",
+    "subtitle": "Diese Website ist ein schulisches Projekt der HSGG-Lernwelt. Die Inhalte dienen ausschließlich zu Demonstrations- und Lernzwecken.",
+    "responsible_title": "Verantwortlich gemäß § 5 TMG",
+    "contact_title": "Kontakt",
+    "disclaimer_title": "Haftungsausschluss",
+    "disclaimer_text": "Diese Website dient als Demonstrations- und Schulungsprojekt. Keine Inhalte entsprechen einem realen Unternehmensangebot.",
+    "copyright_title": "Urheberrecht",
+    "copyright_text": "Texte, Code und Gestaltung sind Teil eines Lernprojekts und dürfen nur im Rahmen der Schulnutzung oder mit Zustimmung weiterverwendet werden."
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "intro": "Diese Website ist ein schulisches Lernprojekt. Die Verarbeitung personenbezogener Daten erfolgt ausschließlich zu Demonstrations- und Lernzwecken im Rahmen des Unterrichts.",
+    "section1": {
+      "title": "1. Verantwortliche Stelle",
+      "line1": "HSGG-Lernwelt Schulprojekt",
+      "line2": "Musterstraße 12",
+      "line3": "12345 Musterstadt",
+      "line4": "Deutschland",
+      "line5": "E-Mail: beispiel@example.com"
+    },
+    "section2": {
+      "title": "2. Welche Daten verarbeiten wir?",
+      "text": "Wir verarbeiten personenbezogene Daten, die Sie im Rahmen Ihrer Registrierung oder Nutzung angeben:",
+      "list": {
+        "name": "Vor- und Nachname (falls eingegeben)",
+        "email": "E-Mail-Adresse",
+        "role": "Berechtigungsrolle (z. B. Schüler, Elternteil, Lehrperson)",
+        "session": "Anmeldestatus / Sitzungsinformationen"
+      }
+    },
+    "section3": {
+      "title": "3. Zweck der Datenverarbeitung",
+      "text": "Die Daten werden ausschließlich genutzt, um den Zugang zur Lernwelt zu ermöglichen, Benutzerrollen zu verwalten und Funktionen innerhalb des Projektes bereitzustellen."
+    },
+    "section4": {
+      "title": "4. Speicherung Ihrer Daten (Supabase)",
+      "text1": "Die Benutzerkonten und Anmeldedaten werden über den Dienst ",
+      "supabase": "Supabase",
+      "text2": " verarbeitet und gespeichert. Supabase ist ein cloudbasierter Datenbankdienst, der zur Nutzerverwaltung und Authentifizierung eingesetzt wird.",
+      "text3": "Die Speicherung erfolgt auf Servern außerhalb unserer Schule. Ein Zugriff durch Lehrer und Projektverantwortliche ist möglich, jedoch nur zu Lern- und Verwaltungszwecken."
+    },
+    "section5": {
+      "title": "5. Weitergabe von Daten",
+      "text": "Es erfolgt keine Weitergabe der Daten an Dritte außerhalb dieses Projekts."
+    },
+    "section6": {
+      "title": "6. Ihre Rechte",
+      "text": "Sie haben das Recht:",
+      "list": {
+        "access": "Auskunft über Ihre gespeicherten Daten zu erhalten,",
+        "correct_delete": "eine Berichtigung oder Löschung zu verlangen,",
+        "object": "der Nutzung Ihrer Daten zu widersprechen."
+      }
+    },
+    "section7": {
+      "title": "7. Kontakt bei Datenschutzfragen",
+      "text": "Bei Fragen oder Anliegen können Sie uns über die im Impressum angegebene E-Mail-Adresse kontaktieren."
+    }
+  },
+  "access": {
+    "title": "Barrierefreiheit",
+    "intro": "Die HSGG-Lernwelt soll für alle nutzbar sein – unabhängig von individuellen Einschränkungen. Auf dieser Seite erklären wir, welche Einstellungen zur Barrierefreiheit es gibt und wie du sie verwenden kannst.",
+
+    "s1_title": "Darstellungs-Einstellungen",
+    "s1_intro_a": "Über das Menü",
+    "s1_intro_b": "\"Barrierefrei\"",
+    "s1_intro_c": "in der linken Seitenleiste kannst du folgende Optionen aktivieren:",
+    "s1_li1_bold": "Darkmode",
+    "s1_li1_text": "– reduziert Helligkeit für augenschonendes Arbeiten.",
+    "s1_li2_bold": "Kontrastmodus",
+    "s1_li2_text": "– erhöht den Kontrast für eine bessere Lesbarkeit.",
+    "s1_li3_bold": "Sprache ändern",
+    "s1_li3_text": "– (geplant) Anzeige in einer anderen Sprache.",
+
+    "s2_title": "Geltungsbereich der Einstellungen",
+    "s2_p1": "Die ausgewählten Einstellungen gelten für alle Seiten der Lernwelt, solange du sie nicht wieder deaktivierst. Ziel ist es, dass du nicht auf jeder Seite erneut etwas umstellen musst.",
+    "s2_note": "Hinweis: In der finalen Version können diese Einstellungen pro Benutzerkonto gespeichert werden, sodass sie auch nach einem erneuten Login erhalten bleiben.",
+
+    "s3_title": "Bekannte Einschränkungen",
+    "s3_p1": "Da es sich um ein Schul- und Lernprojekt handelt, ist die Barrierefreiheit noch nicht vollständig umgesetzt. Einige Bereiche können noch verbessert werden, zum Beispiel:",
+    "s3_li1": "Konsistente Kontraste in allen Unterseiten",
+    "s3_li2": "Alternativtexte für alle Bilder und Icons",
+    "s3_li3": "Tastatur-Navigation und Screenreader-Unterstützung",
+
+    "s4_title": "Feedback",
+    "s4_p1": "Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast, wende dich bitte an die im Impressum genannte Kontaktadresse."
+  },
+  "register": {
+    "page_title": "Willkommen bei HSG-Lernwelt",
+    "title": "Konto erstellen",
+    "subtitle": "Registriere dich, um deine Lernfortschritte zu speichern.",
+
+    "fields": {
+      "first_name": "Vorname",
+      "last_name": "Nachname",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "confirm_password": "Passwort bestätigen"
+    },
+
+    "role_title": "Du willst registrieren als:",
+    "roles": {
+      "student": "Schüler/in",
+      "teacher": "Lehrer/in",
+      "parent": "Elternteil"
+    },
+
+    "class_label": "Deine Klasse:",
+    "class_placeholder": "-- Bitte Klasse wählen --",
+
+    "parent": {
+      "select_class": "Klasse wählen:",
+      "select_child": "Kind auswählen:",
+      "child_placeholder": "-- Bitte Schüler auswählen --",
+      "add_child": "Kind hinzufügen",
+      "added_children": "Hinzugefügte Kinder",
+      "remove_child": "Entfernen",
+      "already_added": "Dieses Kind hast du schon hinzugefügt!"
+    },
+
+    "terms": {
+      "accept": "Ich akzeptiere die AGB",
+      "link_text": "AGB"
+    },
+
+    "actions": {
+      "register": "Registrieren",
+      "login": "Schon registriert? Hier einloggen"
+    },
+
+    "messages": {
+      "success_redirect": "Registrierung erfolgreich! Leite weiter...",
+      "success_confirm_email": "Registrierung erfolgreich! Bitte bestätige deine E-Mail.",
+      "failed": "Registrierung fehlgeschlagen:"
+    },
+
+    "errors": {
+      "password_mismatch": "Die Passwörter stimmen nicht überein.",
+      "accept_terms": "Bitte akzeptiere die AGB.",
+      "select_class_student": "Bitte wähle deine Klasse aus.",
+      "add_child_parent": "Bitte füge mindestens ein Kind hinzu."
+    },
+
+    "loading": {
+      "classes": "Klassen werden geladen..."
+    }
+  }
+}
+
+

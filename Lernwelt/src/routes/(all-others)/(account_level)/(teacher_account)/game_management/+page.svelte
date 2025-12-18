@@ -24,6 +24,8 @@
 	let draft = $state({
 		id: null,
 		subject: 'Mathe',
+		category: '', // NEU
+		type: 'mc', // 'mc' or 'cloze'
 		question: '',
 		a1: '',
 		a2: '',
@@ -33,8 +35,12 @@
 		xp_reward: 10
 	});
 
-	// Valid Subjects (can be extended)
-	// Valid Subjects (can be extended)
+	// Kategorie Logik
+	let availableCategories = $state([]); // Liste der geladenen Kategorien
+	let isNewCategoryMode = $state(false); // Zeigt das Textfeld an
+	let newCategoryInput = $state(''); // Inhalt des Textfelds
+
+	// Valid Subjects
 	const SUBJECTS = [
 		'Mathe',
 		'Englisch_EASY',
@@ -59,12 +65,9 @@
 
 			if (subjectFilter !== 'Alle') {
 				if (subjectFilter.includes('Englisch')) {
-					// General fix: also look for "English" variant
-					// e.g. "Englisch_HARD" -> matches "Englisch_HARD" OR "English_HARD"
 					const englishVariant = subjectFilter.replace('Englisch', 'English');
 					query = query.or(`subject.ilike.%${subjectFilter}%,subject.ilike.%${englishVariant}%`);
 				} else {
-					// partial match for flexibility (e.g. 'Mathe' matches 'Mathe_EASY')
 					query = query.ilike('subject', `%${subjectFilter}%`);
 				}
 			}
@@ -80,14 +83,62 @@
 		}
 	}
 
+	// --- CATEGORY LOGIC ---
+	// Lädt alle Kategorien, die es für das gewählte Fach bereits gibt
+	async function fetchCategoriesForSubject(subject) {
+		if (!subject) return;
+
+		// Wir suchen breit nach dem Fach (z.B. "Deutsch" findet auch "Deutsch_EASY")
+		const searchTerm = subject.split('_')[0];
+
+		const { data, error } = await supabase
+			.from('questions')
+			.select('category')
+			.ilike('subject', `${searchTerm}%`)
+			.not('category', 'is', null);
+
+		if (!error && data) {
+			// Duplikate entfernen und sortieren
+			availableCategories = [...new Set(data.map((d) => d.category))].sort();
+		} else {
+			availableCategories = [];
+		}
+	}
+
+	// Wenn sich das Fach im Draft ändert, laden wir die Kategorien neu
+	function handleSubjectChange() {
+		fetchCategoriesForSubject(draft.subject);
+		// Reset category selection on subject change
+		if (!isEditing) {
+			draft.category = '';
+			isNewCategoryMode = false;
+		}
+	}
+
+	// Handle Dropdown Change
+	function handleCategorySelect(event) {
+		const val = event.target.value;
+		if (val === '___NEW___') {
+			isNewCategoryMode = true;
+			newCategoryInput = '';
+			draft.category = ''; // Clear draft category, we use input
+		} else {
+			isNewCategoryMode = false;
+			draft.category = val;
+		}
+	}
+
 	// --- ACTIONS ---
 
-	function openAddModal() {
+	async function openAddModal() {
 		isEditing = false;
-		// Reset form
+		isNewCategoryMode = false;
+		newCategoryInput = '';
+
 		draft = {
 			id: null,
 			subject: 'Mathe',
+			category: '',
 			question: '',
 			a1: '',
 			a2: '',
@@ -96,14 +147,32 @@
 			correct_index: 0,
 			xp_reward: 10
 		};
+
+		// Kategorien für Default-Fach laden
+		await fetchCategoriesForSubject(draft.subject);
+
 		showModal = true;
 		successMessage = '';
 	}
 
-	function openEditModal(q) {
+	async function openEditModal(q) {
 		isEditing = true;
-		// copy data
+		isNewCategoryMode = false;
+		newCategoryInput = '';
+
 		draft = { ...q };
+
+		// Kategorien laden
+		await fetchCategoriesForSubject(draft.subject);
+
+		// Infer type if not present
+		const isCloze = !q.a1 && !q.a2;
+		draft.type = q.type || (isCloze ? 'cloze' : 'mc');
+
+		// Prüfen, ob die aktuelle Kategorie in der Liste ist.
+		// Falls nicht (oder null), setzen wir es einfach.
+		if (!draft.category) draft.category = '';
+
 		showModal = true;
 		successMessage = '';
 	}
@@ -114,59 +183,71 @@
 
 	async function saveQuestion() {
 		// Validation
-		if (!draft.question || !draft.a1 || !draft.a2) {
-			errorMessage = 'Bitte mindestens Frage und 2 Antworten angeben.';
-			return;
+		if (draft.type === 'mc') {
+			if (!draft.question || !draft.a1 || !draft.a2) {
+				errorMessage = 'Bitte mindestens Frage und 2 Antworten angeben.';
+				return;
+			}
+		} else {
+			// Cloze Validation
+			if (!draft.question) {
+				errorMessage = 'Bitte eine Frage/Text eingeben.';
+				return;
+			}
+			if (!draft.question.includes('[') || !draft.question.includes(']')) {
+				errorMessage = 'Der Text muss mindestens eine Lücke enthalten (z.B. [Wort]).';
+				return;
+			}
+		}
+
+		// Kategorie bestimmen
+		let finalCategory = draft.category;
+		if (isNewCategoryMode) {
+			if (!newCategoryInput.trim()) {
+				errorMessage = 'Bitte einen Namen für die neue Kategorie eingeben.';
+				return;
+			}
+			finalCategory = newCategoryInput.trim();
 		}
 
 		saving = true;
 		errorMessage = '';
 
 		try {
+			// Payload construction
+			const payload = {
+				subject: draft.subject,
+				category: finalCategory,
+				question: draft.question,
+				xp_reward: draft.xp_reward,
+				// If Cloze, we clear answers to keep DB clean (or leave them if you prefer)
+				// We assume DB columns a1..a4 are nullable
+				a1: draft.type === 'mc' ? draft.a1 : null,
+				a2: draft.type === 'mc' ? draft.a2 : null,
+				a3: draft.type === 'mc' ? draft.a3 : null,
+				a4: draft.type === 'mc' ? draft.a4 : null,
+				correct_index: draft.type === 'mc' ? draft.correct_index : 0
+			};
+
 			if (isEditing) {
-				// UPDATE
-				const { error } = await supabase
-					.from('questions')
-					.update({
-						subject: draft.subject,
-						question: draft.question,
-						a1: draft.a1,
-						a2: draft.a2,
-						a3: draft.a3,
-						a4: draft.a4,
-						correct_index: draft.correct_index,
-						xp_reward: draft.xp_reward
-					})
-					.eq('id', draft.id);
+				const { error } = await supabase.from('questions').update(payload).eq('id', draft.id);
 
 				if (error) throw error;
 				successMessage = 'Frage erfolgreich aktualisiert!';
 			} else {
-				// INSERT
-				const { error } = await supabase.from('questions').insert({
-					// ID is mostly auto-increment, but verify db schema. assuming auto.
-					subject: draft.subject,
-					question: draft.question,
-					a1: draft.a1,
-					a2: draft.a2,
-					a3: draft.a3,
-					a4: draft.a4,
-					correct_index: draft.correct_index,
-					xp_reward: draft.xp_reward
-				});
+				const { error } = await supabase.from('questions').insert(payload);
 
 				if (error) throw error;
 				successMessage = 'Neue Frage hinzugefügt!';
 			}
 
 			closeModal();
-			await loadQuestions(); // Refresh list
+			await loadQuestions();
 		} catch (err) {
 			console.error(err);
 			errorMessage = 'Fehler beim Speichern: ' + err.message;
 		} finally {
 			saving = false;
-			// Clear success message after 3 seconds
 			setTimeout(() => {
 				successMessage = '';
 			}, 3000);
@@ -190,7 +271,6 @@
 
 	// Effect: Reload when filter changes
 	$effect(() => {
-		// Triggers whenever subjectFilter changes
 		loadQuestions();
 	});
 </script>
@@ -214,7 +294,6 @@
 		</div>
 	{/if}
 
-	<!-- Toolbar -->
 	<div class="card">
 		<div class="toolbar">
 			<div style="display: flex; align-items: center; gap: 1rem;">
@@ -244,7 +323,6 @@
 			<button class="btn-primary" onclick={openAddModal}> + Neue Frage </button>
 		</div>
 
-		<!-- Table -->
 		<div class="table-wrapper">
 			{#if loading}
 				<div class="loading">Lade Fragen...</div>
@@ -254,12 +332,12 @@
 				<table>
 					<thead>
 						<tr>
-							<th width="60">ID</th>
-							<th width="140">Fach</th>
-							<th>Frage</th>
+							<th width="50">ID</th>
+							<th width="130">Fach</th>
+							<th width="130">Kategorie</th> <th>Frage</th>
 							<th width="180">Antworten (Vorschau)</th>
 							<th width="60" title="XP Belohnung">XP</th>
-							<th width="120" style="text-align: right;">Aktionen</th>
+							<th width="100" style="text-align: right;">Aktionen</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -267,6 +345,13 @@
 							<tr>
 								<td><small style="color: #94a3b8;">#{q.id}</small></td>
 								<td><span class="badge">{q.subject}</span></td>
+								<td>
+									{#if q.category}
+										<span class="cat-badge">{q.category}</span>
+									{:else}
+										<span style="color: #cbd5e1;">—</span>
+									{/if}
+								</td>
 								<td><div class="question-text" title={q.question}>{q.question}</div></td>
 								<td class="answers-preview">
 									<small style="color: #64748b;">
@@ -326,60 +411,104 @@
 		</div>
 	</div>
 
-	<!-- MODAL -->
 	{#if showModal}
 		<div class="modal-backdrop" transition:fade={{ duration: 150 }}>
 			<div class="modal" transition:scale={{ duration: 200, easing: quintOut, start: 0.95 }}>
 				<h2>{isEditing ? 'Frage bearbeiten' : 'Neue Frage erstellen'}</h2>
 
 				<div class="form-body">
-					<!-- Row 1 -->
 					<div class="form-row">
 						<div class="form-group">
 							<label>Fach / Subject</label>
-							<select bind:value={draft.subject}>
+							<select bind:value={draft.subject} onchange={handleSubjectChange}>
 								{#each SUBJECTS as sub}
 									<option value={sub}>{sub}</option>
 								{/each}
 							</select>
 						</div>
+
 						<div class="form-group">
-							<label>XP Belohnung</label>
-							<input type="number" bind:value={draft.xp_reward} min="1" max="100" />
-						</div>
-					</div>
-
-					<!-- Question -->
-					<div class="form-group">
-						<label>Fragestellung</label>
-						<textarea rows="3" bind:value={draft.question} placeholder="z.B. Was ist 2 + 2?"
-						></textarea>
-					</div>
-
-					<!-- Answers -->
-					<div class="form-group">
-						<label>Antwortmöglichkeiten (Wähle die richtige Antwort aus)</label>
-						<div class="answers-grid">
-							{#each [0, 1, 2, 3] as idx}
-								<div class="answer-row">
-									<label class="radio-label">
-										<input
-											type="radio"
-											name="correct"
-											checked={draft.correct_index === idx}
-											onchange={() => (draft.correct_index = idx)}
-										/>
-										<span>{idx + 1}.</span>
-									</label>
+							<label>Kategorie</label>
+							{#if !isNewCategoryMode}
+								<select value={draft.category || ''} onchange={handleCategorySelect}>
+									<option value="">-- Keine / Wählen --</option>
+									{#each availableCategories as cat}
+										<option value={cat}>{cat}</option>
+									{/each}
+									<option disabled>──────────</option>
+									<option value="___NEW___">➕ Neue Kategorie erstellen...</option>
+								</select>
+							{:else}
+								<div class="input-group">
 									<input
 										type="text"
-										placeholder={`Antwort ${idx + 1}`}
-										bind:value={draft[`a${idx + 1}`]}
+										bind:value={newCategoryInput}
+										placeholder="Name der Kategorie (z.B. Geometrie)"
+										autofocus
 									/>
+									<button
+										class="btn-small"
+										onclick={() => (isNewCategoryMode = false)}
+										title="Zurück zur Liste">✕</button
+									>
 								</div>
-							{/each}
+							{/if}
 						</div>
 					</div>
+					<div class="form-group">
+						<label>Fragetyp</label>
+						<select bind:value={draft.type}>
+							<option value="mc">Multiple Choice</option>
+							<option value="cloze">Lückentext</option>
+						</select>
+					</div>
+
+					<div class="form-group" style="max-width: 150px;">
+						<label>XP Belohnung</label>
+						<input type="number" bind:value={draft.xp_reward} min="1" max="100" />
+					</div>
+
+					<div class="form-group">
+						<label
+							>Fragestellung {#if draft.type === 'cloze'}(Nutze [...] für Lücken){/if}</label
+						>
+						<textarea
+							rows="3"
+							bind:value={draft.question}
+							placeholder={draft.type === 'mc'
+								? 'z.B. Was ist 2 + 2?'
+								: 'z.B. Berlin ist die Hauptstadt von [Deutschland].'}
+						></textarea>
+						{#if draft.type === 'cloze'}
+							<small style="color: #64748b;">Beispiel: "Die Sonne ist ein [Stern]."</small>
+						{/if}
+					</div>
+
+					{#if draft.type === 'mc'}
+						<div class="form-group">
+							<label>Antwortmöglichkeiten (Markiere die Richtige)</label>
+							<div class="answers-grid">
+								{#each [0, 1, 2, 3] as idx}
+									<div class="answer-row">
+										<label class="radio-label">
+											<input
+												type="radio"
+												name="correct"
+												checked={draft.correct_index === idx}
+												onchange={() => (draft.correct_index = idx)}
+											/>
+											<span>{idx + 1}.</span>
+										</label>
+										<input
+											type="text"
+											placeholder={`Antwort ${idx + 1}`}
+											bind:value={draft[`a${idx + 1}`]}
+										/>
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/if}
 				</div>
 
 				<div class="modal-actions">
@@ -398,11 +527,7 @@
 	:global(body) {
 		background-color: #f8fafc;
 		color: #1e293b;
-		font-family:
-			'Inter',
-			system-ui,
-			-apple-system,
-			sans-serif;
+		font-family: 'Inter', system-ui, sans-serif;
 	}
 
 	.page-container {
@@ -422,22 +547,17 @@
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		margin-bottom: 0.5rem;
-		letter-spacing: -0.02em;
 	}
 	.page-header p {
 		color: #64748b;
 		font-size: 1.1rem;
-		max-width: 600px;
-		margin: 0 auto;
 	}
 
 	/* CARDS */
 	.card {
 		background: #ffffff;
 		border-radius: 16px;
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -4px rgba(0, 0, 0, 0.05);
+		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 		border: 1px solid #e2e8f0;
 		overflow: hidden;
 		margin-bottom: 2rem;
@@ -450,7 +570,6 @@
 		justify-content: space-between;
 		align-items: center;
 		background: rgba(255, 255, 255, 0.8);
-		backdrop-filter: blur(8px);
 		border-bottom: 1px solid #f1f5f9;
 	}
 	.filter-group {
@@ -461,7 +580,6 @@
 	.filter-group label {
 		font-weight: 600;
 		color: #475569;
-		font-size: 0.9rem;
 	}
 	.filter-group select {
 		padding: 0.6rem 1rem;
@@ -469,17 +587,7 @@
 		border: 1px solid #cbd5e1;
 		background-color: #f8fafc;
 		color: #334155;
-		font-size: 0.9rem;
-		transition: all 0.2s;
 		cursor: pointer;
-	}
-	.filter-group select:hover {
-		border-color: #94a3b8;
-	}
-	.filter-group select:focus {
-		outline: none;
-		border-color: #6366f1;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 	}
 
 	/* TABLE */
@@ -499,7 +607,6 @@
 		font-size: 0.75rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
 		color: #64748b;
 		border-bottom: 1px solid #e2e8f0;
 	}
@@ -509,9 +616,6 @@
 		color: #334155;
 		font-size: 0.95rem;
 		vertical-align: middle;
-	}
-	tr:last-child td {
-		border-bottom: none;
 	}
 	tr:hover td {
 		background-color: #f8fafc;
@@ -535,6 +639,16 @@
 		background: #e0e7ff;
 		color: #4338ca;
 	}
+	.cat-badge {
+		display: inline-flex;
+		padding: 0.25rem 0.6rem;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		background: #f1f5f9;
+		color: #475569;
+		border: 1px solid #e2e8f0;
+	}
 
 	/* BUTTONS */
 	.btn-primary {
@@ -544,21 +658,9 @@
 		padding: 0.75rem 1.5rem;
 		border-radius: 9999px;
 		font-weight: 600;
-		font-size: 0.9rem;
 		cursor: pointer;
 		box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
-		transition: all 0.2s ease;
 	}
-	.btn-primary:hover:not(:disabled) {
-		transform: translateY(-1px);
-		box-shadow: 0 6px 10px -1px rgba(79, 70, 229, 0.3);
-	}
-	.btn-primary:disabled {
-		opacity: 0.7;
-		cursor: not-allowed;
-		transform: none;
-	}
-
 	.btn-secondary {
 		background: #fff;
 		color: #64748b;
@@ -566,16 +668,17 @@
 		padding: 0.75rem 1.5rem;
 		border-radius: 9999px;
 		font-weight: 600;
-		font-size: 0.9rem;
 		cursor: pointer;
-		transition: all 0.2s;
 	}
-	.btn-secondary:hover {
-		background: #f8fafc;
-		color: #334155;
-		border-color: #cbd5e1;
+	.btn-small {
+		padding: 0 0.8rem;
+		border: 1px solid #cbd5e1;
+		background: white;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: bold;
+		color: #ef4444;
 	}
-
 	.btn-icon {
 		width: 36px;
 		height: 36px;
@@ -587,11 +690,9 @@
 		background: transparent;
 		color: #64748b;
 		cursor: pointer;
-		transition: all 0.2s;
 	}
 	.btn-icon:hover {
 		background: #f1f5f9;
-		color: #334155;
 	}
 	.btn-icon.delete:hover {
 		background: #fef2f2;
@@ -633,7 +734,7 @@
 	.modal {
 		background: white;
 		width: 100%;
-		max-width: 600px;
+		max-width: 650px;
 		border-radius: 20px;
 		padding: 2.5rem;
 		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -643,12 +744,11 @@
 	.modal h2 {
 		margin: 0 0 2rem 0;
 		font-size: 1.5rem;
-		font-weight: 700;
 		color: #1e293b;
 		text-align: center;
 	}
 
-	/* FORM ELEMENTS */
+	/* FORM */
 	.form-group {
 		margin-bottom: 1.5rem;
 	}
@@ -669,21 +769,16 @@
 		border-radius: 10px;
 		font-size: 0.95rem;
 		color: #1e293b;
-		transition: all 0.2s;
 		background: #f8fafc;
-	}
-	.form-group input:focus,
-	.form-group textarea:focus,
-	.form-group select:focus {
-		outline: none;
-		border-color: #6366f1;
-		background: #fff;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 	}
 	.form-row {
 		display: grid;
-		grid-template-columns: 2fr 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: 1.5rem;
+	}
+	.input-group {
+		display: flex;
+		gap: 0.5rem;
 	}
 
 	.answers-grid {
@@ -706,7 +801,7 @@
 		gap: 0.5rem;
 		font-size: 0.9rem;
 		color: #475569;
-		min-width: 80px;
+		min-width: 50px;
 		cursor: pointer;
 	}
 	.radio-label input[type='radio'] {
@@ -729,6 +824,5 @@
 		text-align: center;
 		padding: 4rem 2rem;
 		color: #94a3b8;
-		font-size: 1.1rem;
 	}
 </style>

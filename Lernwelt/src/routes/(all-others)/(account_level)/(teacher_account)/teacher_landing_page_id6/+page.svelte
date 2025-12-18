@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-
+    import { _ } from '$lib/i18n/config';
     let { data } = $props();
     let { supabase, session } = data;
 
@@ -97,35 +97,35 @@
 </script>
 
 <div id="placeholder">
-    <h1 class="überschrift">Lehrpersonen-Dashboard</h1>
+    <h1 class="überschrift">{$_('teacher.title')}</h1>
     <p class="untertitel">
-        Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten
+        {$_('teacher.subtitle')}
     </p>
 
     <div class="tipps">
-        <h2>Pädagogische Tipps</h2>
+        <h2>{$_('teacher.pedagogical_tips')}</h2>
         <div class="tipps-grid">
             <p>
                 Lernstrategien zur Unterstützung Ihrer Schüler
-                <a href="/pedagogy_page_id10"><button class="small-btn">Tipps bearbeiten</button></a>
+                <a href="/pedagogy_page_id10"><button class="small-btn">{$_('teacher.edit_tips')}</button></a>
             </p>
         </div>
     </div>
 
     <div class="general-section">
-        <h2>Allgemeine Verwaltung</h2>
+        <h2>{$_('teacher.general_admin')}</h2>
         <div class="general-grid">
             <div class="card">
-                <h3>🎮 Minispiele</h3>
-                <p>Fragen für die Minispiele erstellen und bearbeiten.</p>
-                <a href="/game_management"><button class="small-btn">Fragen verwalten</button></a>
+                <h3>🎮 {$_('teacher.minigames')}</h3>
+                <p>{$_('teacher.minigames_desc')}</p>
+                <a href="/game_management"><button class="small-btn">{$_('teacher.manage_questions')}</button></a>
             </div>
         </div>
     </div>
 
     <section class="class-manager-section">
-        <h2>🏫 Meine Klassen verwalten</h2>
-        <p class="hint-text">Klicken Sie auf die Klassen, die Sie unterrichten, um sie unten anzuzeigen.</p>
+        <h2>🏫 {$_('teacher.manage_classes')}</h2>
+        <p class="hint-text">{$_('teacher.manage_classes_hint')}</p>
 
         <div class="manager-tags">
             {#each classes as schoolClass}
@@ -142,11 +142,11 @@
     </section>
 
     <section class="classes-section">
-        <h2>Ihre Klassen Übersicht</h2>
+        <h2>{$_('teacher.class_overview')}</h2>
 
         {#if myClassIds.length === 0}
             <div class="empty-hint">
-                <p>Sie haben noch keine Klassen ausgewählt. Bitte klicken Sie oben auf Ihre Klassen.</p>
+                <p>{$_('teacher.no_classes_selected')}</p>
             </div>
         {:else}
             <div class="class-grid">
@@ -154,21 +154,21 @@
                     <article class="class-card">
                         <h3>{schoolClass.name}</h3>
                         <div class="class-actions">
-                            <p>📌Lernfortschritt der Klasse einsehen</p>
+                            <p>📌 {$_('teacher.view_progress')}</p>
                             <a href={'/class_page_id9/' + schoolClass.id}
-                            ><button class="small-btn">Lernstand ansehen</button></a
+                            ><button class="small-btn">{$_('teacher.view_level')}</button></a
                             >
-                            <p>📚Unterrichtsmaterial bearbeiten</p>
+                            <p>📚 {$_('teacher.edit_materials')}</p>
                             <a href={'/material_page_id14?classId=' + schoolClass.id}
-                            ><button class="small-btn">Materialien verwalten</button></a
+                            ><button class="small-btn">{$_('teacher.manage_materials')}</button></a
                             >
-                            <p>📅Termine und Aktuelles bearbeiten</p>
+                            <p>📅 {$_('teacher.edit_appointments')}</p>
                             <a href={'/create_appointments_page?classId=' + schoolClass.id}
-                            ><button class="small-btn">Termine bearbeiten</button></a
+                            ><button class="small-btn">{$_('teacher.manage_appointments')}</button></a
                             >
-                            <p>📝Wochentests und spielerische Fragen bearbeiten</p>
+                            <p>📝 {$_('teacher.edit_tests')}</p>
                             <a href={'/form_for_adding_weekly_test?classId=' + schoolClass.id}
-                            ><button class="small-btn">Wochentests bearbeiten</button></a
+                            ><button class="small-btn">{$_('teacher.manage_tests')}</button></a
                             >
                         </div>
                     </article>

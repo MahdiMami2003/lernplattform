@@ -1,0 +1,326 @@
+{
+  "login": {
+    "title": "Welcome to the\nHSGG Learning World",
+    "subtitle": "Your digital space to learn, practice and get support.",
+    "cta": "Sign in and get started!",
+    "email_placeholder": "Email address",
+    "password_placeholder": "Password",
+    "login_button": "Sign in",
+    "register_button": "No account yet? Go to registration",
+    "or": "or",
+    "guest_button": "Continue without login",
+    "quick_links": "Quick links for the sprint meeting:",
+    "role_student": "Student",
+    "role_teacher": "Teacher",
+    "role_parent": "Parent",
+    "logging_in": "Signing in...",
+    "success_redirect": "Login successful! Redirecting...",
+    "no_valid_role": "No valid role found",
+    "failed": "Login failed"
+  },
+  "teacher": {
+    "title": "Teacher Dashboard",
+    "subtitle": "Here you can see your classes and manage learning materials",
+    "pedagogical_tips": "Pedagogical tips",
+    "edit_tips": "Edit tips",
+    "general_admin": "General administration",
+    "minigames": "Mini games",
+    "minigames_desc": "Create and manage questions for the mini games.",
+    "manage_questions": "Manage questions",
+    "manage_classes": "Manage my classes",
+    "manage_classes_hint": "Click the classes you teach to show them below.",
+    "class_overview": "Your class overview",
+    "no_classes_selected": "You have not selected any classes yet. Please click on your classes above.",
+    "view_progress": "View class learning progress",
+    "view_level": "View learning level",
+    "edit_materials": "Edit teaching materials",
+    "manage_materials": "Manage materials",
+    "edit_appointments": "Edit appointments and updates",
+    "manage_appointments": "Manage appointments",
+    "edit_tests": "Edit weekly tests and interactive questions",
+    "manage_tests": "Manage weekly tests"
+  },
+  "student": {
+    "title": "Hello dear student",
+    "welcome": "Welcome to the HSGG Learning World website",
+    "choose_topic": "Please click on the topic that interests you.",
+    "game_title": "Game Page",
+    "game_desc": "Tasks & gamification!",
+    "weekly_title": "Weekly Tests",
+    "weekly_desc": "Weekly skill checks",
+    "progress_title": "Progress",
+    "progress_desc": "Your learning statistics at a glance",
+    "materials_title": "Learning materials",
+    "materials_desc": "Materials for your learning",
+    "welcome_back": "Welcome back, {name} 👋",
+    "learning_journey": "Your learning journey continues.",
+    "choose_subject": "Choose a subject",
+    "level_up": "🎉 Level up! Level {level}!",
+    "level_xp": "Level {level} · {xp}% XP",
+    "avatar_choose": "Choose your avatar",
+    "choose_topic_for": "Choose a topic for {subject}",
+    "loading_topics": "Loading topics...",
+    "shuffle_all": "🎲 Shuffle all",
+    "cancel": "Cancel"
+  },
+  "subjects": {
+    "math": "Math",
+    "physics": "Physics",
+    "german": "German",
+    "english": "English"
+  },
+  "header": {
+    "change_language": "Change language"
+  },
+  "common": {
+    "back": "Back"
+  },
+  "progress": {
+    "loading": "Loading data...",
+    "select_title": "Who would you like to view?",
+    "select_subtitle": "Please select one of your children:",
+    "back_to_dashboard": "Back to dashboard",
+    "parent_viewing": "You are viewing:",
+    "other_child": "Other child",
+    "dashboard": "Dashboard",
+    "teacher_view": "Student view:",
+    "back_to_list": "Back to list",
+    "avatar_alt": "Avatar",
+    "level": "Level",
+    "xp": "XP",
+    "hearts": "Hearts",
+    "learning_progress": "Learning progress",
+    "no_missions": "No tasks started yet.",
+    "xp_short": "XP",
+    "done": "Done!"
+  },
+  "game": {
+    "loading": "Loading game…",
+    "reload": "Reload",
+    "no_questions": "There are currently no questions for this category.",
+    "dashboard": "Dashboard",
+    "level_reached": "🎉 Reached level ",
+    "question_count": "Question",
+    "no_hearts": "😥 No hearts left",
+    "well_done": "🎉 Well done!",
+    "correct_answers": "Correct answers",
+    "level": "Level",
+    "done": "Done!",
+    "badges_title": "Unlocked badges:",
+    "badge_perfect": "Perfect round 🏅",
+    "badge_streak": "Streak master 🔥",
+    "badge_math_hero": "Math hero 📘",
+    "badge_phy_hero": "Physics-expert ⚛",
+    "play_again": "Play again"
+  },
+  "parent": {
+    "title": "Hello dear parent.",
+    "welcome": "Welcome to the HSGG Learning World website",
+    "instruction": "Please click on the topic you are interested in.",
+    "sections": {
+      "appointments_title": "Appointments and News",
+      "appointments_desc": "Here you can find important information you should not miss.",
+      "progress_title": "My child’s progress",
+      "progress_desc": "Click here to see your child’s current learning progress.",
+      "tips_title": "Educational tips",
+      "tips_desc": "Click here to learn how you can support your child’s learning.",
+      "materials_title": "My child’s learning materials",
+      "materials_desc": "Here you can find the learning materials provided to your child."
+    }
+  },
+  "appointment": {
+    "title": "News & Events",
+    "loading": "Loading events...",
+    "empty": "There are currently no upcoming events.",
+    "add": "Add new event"
+  },
+  "pedagogy": {
+    "errors": {
+      "not_found_title": "Tip not found",
+      "not_found_text": "The requested tip does not exist.",
+      "load_error_title": "Loading error",
+      "load_error_text": "There was a problem loading the tip.",
+      "back_link": "Back to overview"
+    },
+    "add": "Add new Tip"
+  },
+  "materials": {
+    "title": "Learning materials overview",
+    "loading": "Loading materials...",
+    "empty": "No materials found for your class.",
+    "add": "Add content",
+    "delete": "Delete",
+    "confirm_delete": "Delete this item?",
+    "delete_error": "Error while deleting!",
+    "load_error": "Loading error:",
+    "download_pdf": "Download PDF",
+    "no_pdf": "No PDF available",
+    "not_found_title": "Material not found",
+    "not_found_text": "The requested material ID does not exist.",
+    "loading_m": "Loading material..."
+  },
+  "teacher_class": {
+    "loading": "⏳ Loading class...",
+    "title": "Class:",
+    "subtitle": "Overview of all students",
+    "empty": "📭 No students in this class.",
+    "table": {
+      "avatar": "Avatar",
+      "name": "Name",
+      "level": "Level",
+      "action": "Action"
+    },
+    "button": {
+      "progress": "View progress"
+    }
+  },
+  "imprint": {
+    "title": "Legal notice",
+    "subtitle": "This website is a school project of the HSGG learning platform. The content is for demonstration and learning purposes only.",
+    "responsible_title": "Responsible according to § 5 TMG",
+    "contact_title": "Contact",
+    "disclaimer_title": "Disclaimer",
+    "disclaimer_text": "This website is a demonstration and educational project. None of the content represents a real business offering.",
+    "copyright_title": "Copyright",
+    "copyright_text": "Texts, code and design are part of a learning project and may only be reused within school use or with permission."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "This website is a school learning project. Personal data is processed exclusively for demonstration and learning purposes within the scope of class activities.",
+    "section1": {
+      "title": "1. Data Controller",
+      "line1": "HSGG-Lernwelt school project",
+      "line2": "Musterstraße 12",
+      "line3": "12345 Musterstadt",
+      "line4": "Germany",
+      "line5": "Email: beispiel@example.com"
+    },
+    "section2": {
+      "title": "2. What data do we process?",
+      "text": "We process personal data that you provide during registration or use of the platform:",
+      "list": {
+        "name": "First and last name (if provided)",
+        "email": "Email address",
+        "role": "User role (e.g., student, parent, teacher)",
+        "session": "Login status / session information"
+      }
+    },
+    "section3": {
+      "title": "3. Purpose of processing",
+      "text": "The data is used exclusively to enable access to the learning platform, manage user roles, and provide features within the project."
+    },
+    "section4": {
+      "title": "4. Storage of your data (Supabase)",
+      "text1": "User accounts and login data are processed and stored using ",
+      "supabase": "Supabase",
+      "text2": ". Supabase is a cloud-based database service used for user management and authentication.",
+      "text3": "Data is stored on servers outside our school. Access by teachers and project administrators is possible, but only for learning and administrative purposes."
+    },
+    "section5": {
+      "title": "5. Data sharing",
+      "text": "No data is shared with third parties outside of this project."
+    },
+    "section6": {
+      "title": "6. Your rights",
+      "text": "You have the right to:",
+      "list": {
+        "access": "request information about your stored data,",
+        "correct_delete": "request correction or deletion,",
+        "object": "object to the use of your data."
+      }
+    },
+    "section7": {
+      "title": "7. Contact for privacy questions",
+      "text": "If you have questions or concerns, you can contact us via the email address provided in the imprint."
+    }
+  },
+  "access": {
+    "title": "Accessibility",
+    "intro": "The HSGG learning world should be usable for everyone—regardless of individual limitations. On this page we explain which accessibility settings are available and how to use them.",
+
+    "s1_title": "Display settings",
+    "s1_intro_a": "Via the menu",
+    "s1_intro_b": "\"Accessible\"",
+    "s1_intro_c": "in the left sidebar you can enable the following options:",
+    "s1_li1_bold": "Dark mode",
+    "s1_li1_text": "– reduces brightness for more comfortable viewing.",
+    "s1_li2_bold": "High contrast mode",
+    "s1_li2_text": "– increases contrast for better readability.",
+    "s1_li3_bold": "Change language",
+    "s1_li3_text": "– (planned) display in another language.",
+
+    "s2_title": "Scope of settings",
+    "s2_p1": "The selected settings apply to all pages of the learning world until you disable them again. The goal is that you don’t have to change settings on every page.",
+    "s2_note": "Note: In the final version, these settings can be saved per user account so they remain active after logging in again.",
+
+    "s3_title": "Known limitations",
+    "s3_p1": "Since this is a school learning project, accessibility is not fully implemented yet. Some areas can still be improved, for example:",
+    "s3_li1": "Consistent contrast across all subpages",
+    "s3_li2": "Alt texts for all images and icons",
+    "s3_li3": "Keyboard navigation and screen reader support",
+
+    "s4_title": "Feedback",
+    "s4_p1": "If you notice barriers or have ideas for improvement, please contact the address listed in the imprint."
+  },
+  "register": {
+    "page_title": "Welcome to HSG-Lernwelt",
+    "title": "Create an account",
+    "subtitle": "Register to save your learning progress.",
+
+    "fields": {
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "confirm_password": "Confirm password"
+    },
+
+    "role_title": "You want to register as:",
+    "roles": {
+      "student": "Student",
+      "teacher": "Teacher",
+      "parent": "Parent"
+    },
+
+    "class_label": "Your class:",
+    "class_placeholder": "-- Please select a class --",
+
+    "parent": {
+      "select_class": "Select class:",
+      "select_child": "Select child:",
+      "child_placeholder": "-- Please select a student --",
+      "add_child": "Add child",
+      "added_children": "Added children",
+      "remove_child": "Remove",
+      "already_added": "You already added this child!"
+    },
+
+    "terms": {
+      "accept": "I accept the Terms and Conditions",
+      "link_text": "Terms and Conditions"
+    },
+
+    "actions": {
+      "register": "Register",
+      "login": "Already registered? Log in here"
+    },
+
+    "messages": {
+      "success_redirect": "Registration successful! Redirecting...",
+      "success_confirm_email": "Registration successful! Please confirm your email.",
+      "failed": "Registration failed:"
+    },
+
+    "errors": {
+      "password_mismatch": "Passwords do not match.",
+      "accept_terms": "Please accept the Terms and Conditions.",
+      "select_class_student": "Please select your class.",
+      "add_child_parent": "Please add at least one child."
+    },
+
+    "loading": {
+      "classes": "Loading classes..."
+    }
+  }
+}
+
