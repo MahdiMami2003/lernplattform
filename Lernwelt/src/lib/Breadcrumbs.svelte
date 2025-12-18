@@ -18,22 +18,22 @@
         '/no_login_page_id7': 'Gastzugang',
 
         //parent_account
-            //pedagogic_tipps
-            '/pedagogic_content': 'Tipp',
-            '/pedagogic_form': 'Tipp erstellen',
-            '/pedagogy_page_id10': 'Pädagogische Tipps',
+        //pedagogic_tipps
+        '/pedagogic_content': 'Tipp',
+        '/pedagogic_form': 'Tipp erstellen',
+        '/pedagogy_page_id10': 'Pädagogische Tipps',
         '/appointments_page_id8': 'Termine',
         '/create_appointments_page': 'Termin erstellen',
         '/parents_landing_page_id4': 'Eltern-Dashboard',
 
         //student_account
-            //tests + games
-            '/game_page_id12': 'Lernspiele',
-            '/deutsch_game' : 'Spiel: Deutsch',
-            '/mathe_game' : 'Spiel: Mathe',
-            '/englisch_game' : 'Spiel: Englisch',
-            '/physik_game' : 'Spiel: Physik',
-            '/weekly_test_page_id17' : 'Wochentests',
+        //tests + games
+        '/game_page_id12': 'Lernspiele',
+        '/deutsch_game' : 'Spiel: Deutsch',
+        '/mathe_game' : 'Spiel: Mathe',
+        '/englisch_game' : 'Spiel: Englisch',
+        '/physik_game' : 'Spiel: Physik',
+        '/weekly_test_page_id17' : 'Wochentests',
         '/progress_page_id11': 'Lernfortschritt',
         '/student_landing_page_id5': 'SuS-Dashboard',
 
@@ -126,31 +126,26 @@
 
             <!-- Separator (nicht nach dem letzten Element) -->
             {#if index < breadService.crumbs.length - 1}
-                <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
+                <span class="separator" aria-hidden="true">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </span>
             {/if}
         {/each}
     </div>
 {/if}
+
 <style>
-    /* Definiere die Höhe der Breadcrumb-Leiste hier als Variable,
-       damit du sie leicht ändern kannst.
-    */
-    :root {
-        --bread-height: 32px;
-    }
-
-
-
+    /* ============ BREADCRUMB BAR ============ */
     .bread-bar {
         position: fixed;
         font-family: Arial, Helvetica, sans-serif;
         top: var(--header-height, 80px);
         left: 0;
         width: 100%;
-        height: var(--bread-height);
+        height: var(--bread-height, 32px);
 
-        background-color: #faeacc;
-        border-bottom: 1px solid #e0cdb0;
+        background-color: var(--header-bg, #faeacc);
+        border-bottom: 1px solid var(--border-color, #e0cdb0);
 
         /* Flexbox erzwingt, dass die Elemente NEBENEINANDER stehen */
         display: flex;
@@ -165,44 +160,71 @@
 
         overflow-x: auto; /* Scrollbar, falls Pfad zu lang */
         white-space: nowrap;
+
+        transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
+    /* ============ BREADCRUMB LINKS ============ */
     a {
         text-decoration: none;
-        color: var(--text-secondary);
-        transition: color 0.2s ease;
+        color: var(--text-secondary, #44546a);
+        transition: all 0.2s ease;
         display: flex;
         align-items: center;
         white-space: nowrap;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        gap: 0.25rem;
     }
 
     a:hover:not(.current) {
-        color: var(--text-primary);
+        color: var(--text-primary, #1a1a1a);
         text-decoration: underline;
-        background-color: var(--bg-hover);
+        background-color: var(--bg-hover, #f0f0f0);
     }
 
-    /* Aktive Seite (letztes Element) */
+    a:focus-visible {
+        outline: 2px solid var(--text-primary, #1a1a1a);
+        outline-offset: 2px;
+    }
+
+    /* ============ AKTUELLE SEITE ============ */
     a.current {
         font-weight: bold;
-        color: var(--text-primary);
+        color: var(--text-primary, #1a1a1a);
         pointer-events: none;
         cursor: default;
         text-decoration: none;
-        cursor: default;
+        transition: color 0.3s ease;
     }
 
     /* ============ SEPARATOR ============ */
     .separator {
         margin: 0 0.5rem;
-        color: var(--text-muted);
+        color: var(--text-muted, #6a6a6a);
         font-size: 0.7rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: color 0.3s ease;
     }
 
-    /* Hilfsklasse für Screenreader (für das Home-Icon) */
+    .separator i {
+        color: var(--text-muted, #6a6a6a);
+    }
+
+    /* ============ HOME ICON ============ */
+    a i.fa-house {
+        font-size: 0.9rem;
+        color: var(--text-secondary, #44546a);
+        transition: color 0.2s ease;
+    }
+
+    a:hover:not(.current) i.fa-house {
+        color: var(--text-primary, #1a1a1a);
+    }
+
+    /* ============ SCREENREADER ONLY ============ */
     .sr-only {
         position: absolute;
         width: 1px;
@@ -212,5 +234,40 @@
         overflow: hidden;
         clip: rect(0, 0, 0, 0);
         border: 0;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+        .bread-bar {
+            font-size: 0.8rem;
+            padding: 0 0.5rem;
+        }
+
+        a {
+            padding: 0.2rem 0.4rem;
+        }
+
+        .separator {
+            margin: 0 0.3rem;
+            font-size: 0.6rem;
+        }
+    }
+
+    /* ============ SCROLLBAR STYLING (optional) ============ */
+    .bread-bar::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .bread-bar::-webkit-scrollbar-track {
+        background: var(--bg-hover, #f0f0f0);
+    }
+
+    .bread-bar::-webkit-scrollbar-thumb {
+        background: var(--border-color, #e0cdb0);
+        border-radius: 2px;
+    }
+
+    .bread-bar::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted, #6a6a6a);
     }
 </style>
