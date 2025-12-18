@@ -94,15 +94,29 @@
 
 	<!-- Only show user info if search is closed on small screens, or always on large -->
 	{#if !searchOpen || innerW > 600}
-		<div class="user-info">
-			{#if data.session}
-				<p>Hallo, {data.session.user.email}</p>
-			{:else}
-				<p>Du bist nicht eingeloggt.</p>
-			{/if}
-		</div>
-	{/if}
+                <div class="user-info">
+                    {#if data.session?.user}
+                        <p>
+                            Hallo,
+                            <!-- 1. Name anzeigen oder Fallback auf Email -->
+                            {data.session.user.user_metadata?.full_name || data.session.user.email}
 
+                            <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
+                            {#if data.session.user.user_metadata?.role === 'student'}
+                                (Schüler:in)
+                            {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
+                                (Admin)
+                            {:else if data.session.user.user_metadata?.role === 'teacher'}
+                                (Lehrperson)
+                            {:else if data.session.user.user_metadata?.role === 'parent'}
+                                (Elternteil)
+                            {/if}
+                        </p>
+                    {:else}
+                        <p>Du bist nicht eingeloggt.</p>
+                    {/if}
+                </div>
+	{/if}
 	<div class="icon-container">
 		<!-- Search Input Section -->
 		<div class="search-wrapper {searchOpen ? 'active' : ''}">
