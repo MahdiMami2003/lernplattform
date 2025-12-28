@@ -12,7 +12,6 @@
     import task from '$lib/assets/icons/tasks.png';
     import Breadcrumbs from '$lib/Breadcrumbs.svelte';
     import { fly } from 'svelte/transition';
-
     import { goto } from '$app/navigation';
     import { supabase } from '$lib/supabaseClient';
     import { browser } from '$app/environment';
@@ -140,7 +139,7 @@
 	<a style="text-decoration: none" href="/">
 		<div class="signature">
 			<img class="logo" src={logo} alt="Logo" />
-			<p>HSGG-Lernwelt</p>
+            <p>HSGG-Lernwelt</p>
 		</div>
 	</a>
 
@@ -149,23 +148,23 @@
                 <div class="user-info">
                     {#if data.session?.user}
                         <p>
-                            Hallo,
+                            {$_('header.greeting')}
                             <!-- 1. Name anzeigen oder Fallback auf Email -->
                             {data.session.user.user_metadata?.full_name || data.session.user.email}
 
                             <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
                             {#if data.session.user.user_metadata?.role === 'student'}
-                                (Schüler:in)
+                                {$_('header.role_student')}
                             {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
                                 (Admin)
                             {:else if data.session.user.user_metadata?.role === 'teacher'}
-                                (Lehrperson)
+                                {$_('header.role_teacher')}
                             {:else if data.session.user.user_metadata?.role === 'parent'}
-                                (Elternteil)
+                                {$_('header.role_parent')}
                             {/if}
                         </p>
                     {:else}
-                        <p>Du bist nicht eingeloggt.</p>
+                        <p>{$_('header.not_logged_in')}</p>
                     {/if}
                 </div>
 	{/if}
@@ -176,7 +175,7 @@
 				<input
 					bind:this={searchInputRef}
 					type="text"
-					placeholder="Suchen..."
+					placeholder="{$_('header.search_placeholder')}..."
 					bind:value={searchQuery}
 					oninput={runSearch}
 				/>
@@ -200,7 +199,7 @@
                         </div>
                     {/each}
                     {#if searchResults.length === 0 && searchQuery.length > 1}
-                        <div class="search-item no-results">Keine Ergebnisse</div>
+                        <div class="search-item no-results">{$_('header.search_no_results')}</div>
                     {/if}
                 </div>
             {/if}
@@ -219,25 +218,25 @@
 		<div class="dd-menu-container">
 			<ul>
 				<li>
-					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />Home</a>
+					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />{$_('header.menu_home')}</a>
 				</li>
 				<li>
 					<a href="/material_page_id14" onclick={toggleMenu}
-						><img alt="Material" src={searchIcon} />Materialien</a
+						><img alt="Material" src={searchIcon} />{$_('header.menu_materials')}</a
 					>
 				</li>
                 {#if data.session}
                 <li>
-                    <a href="/" onclick={handleLogout}><img alt="logout" src={login} />Logout</a>
+                    <a href="/" onclick={handleLogout}><img alt="logout" src={login} />{$_('header.menu_logout')}</a>
                 </li>
                 {/if}
 				{#if !data.session}
                     <li>
-                        <a href="/" onclick={goToLogin}><img alt="login" src={login} />Login</a>
+                        <a href="/" onclick={goToLogin}><img alt="login" src={login} />{$_('header.menu_login')}</a>
                     </li>
                     <li>
 						<a href="/register_page_id3" onclick={toggleMenu}
-							><img alt="Register" src={register} />Registrierung</a
+							><img alt="Register" src={register} />{$_('header.menu_register')}</a
 						>
 					</li>
 				{/if}
@@ -262,7 +261,7 @@
                     <li class="nav__items" id="sub">
                         <a href="/material_page_id14">
                             <img alt="Fächer" src={subject} />
-                            <span class="nav-text">Lerninhalte</span>
+                            <span class="nav-text">{$_('header.nav_learning_content')}</span>
                         </a>
                     </li>
 
@@ -270,11 +269,11 @@
                         <a
                                 href={data.session ? '/game_page_id12' : '#'}
                                 class={!data.session ? 'disabled-link' : ''}
-                                title={!data.session ? 'Bitte einloggen' : ''}
+                                title={!data.session ? $_('header.tooltip_login_required') : ''}
                                 onclick={!data.session ? (e) => e.preventDefault() : undefined}
                         >
                             <img alt="Aufgaben" src={task} />
-                            <span class="nav-text">Aufgaben {!data.session ? '🔒' : ''}</span>
+                            <span class="nav-text">{$_('header.nav_tasks')} {!data.session ? '🔒' : ''}</span>
                         </a>
                     </li>
 
@@ -282,13 +281,13 @@
                         <li class="nav__items" id="prog">
                             <a href="#">
                                 <img alt="Fortschritt" src={progress} />
-                                <span class="nav-text">Fortschritt</span>
+                                <span class="nav-text">{$_('header.nav_progress')}</span>
                             </a>
                         </li>
                         <li class="nav__items" id="classroom">
                             <a href="#">
                                 <img alt="Klassenzimmer" src={classroom} />
-                                <span class="nav-text">Klasse</span>
+                                <span class="nav-text">{$_('header.nav_class')}</span>
                             </a>
                         </li>
                     {/if}
@@ -297,10 +296,10 @@
                         <a
                                 onclick={toggle_slide_left}
                                 href="#"
-                                aria-label="Barrierefreiheit-Einstellungen öffnen"
+                                aria-label="{$_('header.aria_accessibility_open')}"
                         >
                             <img alt="Barrierefreiheit" src={access} />
-                            <span class="nav-text">Barrierefrei</span>
+                            <span class="nav-text">{$_('header.nav_accessibility')}</span>
                         </a>
                     </li>
                 </ul>
@@ -312,21 +311,17 @@
                         <a
                                 href="#"
                                 onclick={going_dark}
-                                aria-label={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
+                                aria-label={isDark ? $_('header.aria_switch_light') : $_('header.aria_switch_dark')}
                                 aria-pressed={isDark}
                         >
 							<span class="nav-text">
-								{#if isDark}
-									☀️ Hell
-								{:else}
-									🌙 Dunkel
-								{/if}
+								{isDark ? $_('header.mode_light') : $_('header.mode_dark')}
 							</span>
                         </a>
                     </li>
                     <li class="nav__items" id="sub">
                         <a href="#">
-                            <span class="nav-text">Kontrastmodus</span>
+                            <span class="nav-text">{$_('header.nav_contrast')}</span>
                         </a>
                     </li>
                     <li class="nav__items" id="task">
@@ -354,9 +349,9 @@
                         <a
                                 onclick={toggle_slide_left}
                                 href="#"
-                                aria-label="Zurück zur Hauptnavigation"
+                                aria-label="{$_('header.aria_back_nav')}"
                         >
-                            <span class="nav-text">Zurück</span>
+                            <span class="nav-text">{$_('header.nav_back')}</span>
                         </a>
                     </li>
                 </ul>
