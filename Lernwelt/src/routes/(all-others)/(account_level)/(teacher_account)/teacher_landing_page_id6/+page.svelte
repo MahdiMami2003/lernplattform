@@ -94,6 +94,7 @@
             }
         }
     }
+    let edit_content = $state("");
 </script>
 
 <div id="placeholder" class="main_container">
@@ -126,9 +127,18 @@
         <h2>{$_('teacher.general_admin')}</h2>
         <div class="general-grid">
             <div class="card">
-                <h3>🎮 {$_('teacher.minigames')}</h3>
-                <p>{$_('teacher.minigames_desc')}</p>
-                <a href="/game_management"><button class="small-btn">{$_('teacher.manage_questions')}</button></a>
+                <h3>🖋️ {$_('teacher.content_creation')}</h3>
+                <form action={edit_content}>
+                    <label for="content">Ich möchte eine:n </label>
+                    <select id="content" bind:value={edit_content}>
+                        <option value="/game_management"> Spielfrage </option>
+                        <option value="/form_for_adding_content"> Lerninhalt </option>
+                        <option value="/form_for_adding_weekly_test"> Wochentest </option>
+                        <option value="/create_appointments_page"> Termin </option>
+                        <option value="/pedagogic_form"> pädagogischen Tipp </option>
+                    </select>
+                    <button class="small-btn" type="submit">erstellen</button>
+                </form>
             </div>
         </div>
     </div>
