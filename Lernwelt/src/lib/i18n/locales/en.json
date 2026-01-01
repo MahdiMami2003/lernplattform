@@ -81,6 +81,10 @@
     "role_teacher": "(Teacher)",
     "role_parent": "(Parent)",
     "role_admin": "(Admin)",
+    "dashboard_student": "Go to Student Dashboard",
+    "dashboard_teacher": "Go to Teacher Dashboard",
+    "dashboard_parent": "Go to Parents Dashboard",
+    "dashboard_admin": "Go to Admin Dashboard",
     "not_logged_in": "You are not logged in.",
     "change_language": "Change Language",
     "search_placeholder": "Search...",
@@ -389,4 +393,3 @@
     }
   }
 }
-
