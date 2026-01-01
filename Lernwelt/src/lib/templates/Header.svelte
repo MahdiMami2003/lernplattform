@@ -1,3 +1,4 @@
+<!--Lernwelt/src/lib/templates/Header.svelte-->
 <script lang="ts">
     import logo from '$lib/assets/icons/Logo.png';
     import login from '$lib/assets/icons/Login.png';

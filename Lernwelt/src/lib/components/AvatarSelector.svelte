@@ -1,3 +1,4 @@
+<!--Lernwelt/src/lib/components/AvatarSelector.svelte-->
 <script>
     import { onMount } from 'svelte';
     import { supabase } from '$lib/supabaseClient.js';
