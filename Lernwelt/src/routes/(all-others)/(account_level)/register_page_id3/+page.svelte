@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/register_page_id3/+page.svelte-->
 <script>
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';

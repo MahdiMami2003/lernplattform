@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(student_account)/(tests + games)/weekly_tests_content_page/[id]/+page.svelte-->
 <script>
     import { page } from '$app/stores';
 

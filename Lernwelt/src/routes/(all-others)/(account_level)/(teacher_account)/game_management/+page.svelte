@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/game_management/+page.svelte-->
 <script>
 	import { onMount } from 'svelte';
 	import { fade, scale } from 'svelte/transition';

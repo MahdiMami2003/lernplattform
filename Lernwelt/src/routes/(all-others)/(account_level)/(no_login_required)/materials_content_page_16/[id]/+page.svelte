@@ -1,3 +1,4 @@
+<!-- (Lernwelt/src/routes/(all-others)/(account_level)/(no_login_required)/materials_content_page_16/[id]/+page.svelte -->
 <script>
     import { page } from '$app/stores';
 

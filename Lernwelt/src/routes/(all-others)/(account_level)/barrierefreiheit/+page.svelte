@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/barrierefreiheit/+page.svelte-->
 <script>
     import { _ } from 'svelte-i18n';
 </script>

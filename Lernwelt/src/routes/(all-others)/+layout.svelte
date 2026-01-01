@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/+layout.svelte-->
 <script lang="ts">
     import Header from "$lib/templates/Header.svelte";
     import Footer from "$lib/templates/Footer.svelte";

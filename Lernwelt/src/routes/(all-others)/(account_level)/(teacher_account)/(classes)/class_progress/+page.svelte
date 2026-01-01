@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/(classes)/class_progress/+page.svelte-->
 <script>
 
 

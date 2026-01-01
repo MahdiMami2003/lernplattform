@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/(classes)/class_page_id9/[class_id]/+page.svelte-->
 <script>
     import { page } from '$app/stores';
     import { onMount } from "svelte";

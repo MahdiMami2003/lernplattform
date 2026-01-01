@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/form_for_adding_content/+page.svelte-->
 <script>
     import { goto } from '$app/navigation';
 
