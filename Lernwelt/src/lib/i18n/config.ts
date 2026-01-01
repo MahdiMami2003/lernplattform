@@ -1,3 +1,4 @@
+//Lernwelt/src/lib/i18n/config.ts
 import { browser } from '$app/environment';
 import { register, init, getLocaleFromNavigator, locale, _ } from 'svelte-i18n';
 
