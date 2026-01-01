@@ -1,15 +1,17 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    //import { onMount } from "svelte";
 
     let { data } = $props();
 
     let { supabase, session } = data;
 
     import { _ } from '$lib/i18n/config';
+
+    let user = session?.user.user_metadata.full_name || $_('student.generic_name');
 </script>
 
 <div id="placeholder" class="main_container">
-    <h1>{$_('student.title')}</h1>
+    <h1>{$_('student.title')}{user}</h1>
     <div class="subtitle">{$_('student.welcome')}</div>
     <div class="subtitle">{$_('student.choose_topic')}</div>
     <br />
