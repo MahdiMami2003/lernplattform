@@ -154,13 +154,13 @@
 
                             <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
                             {#if data.session.user.user_metadata?.role === 'student'}
-                                {$_('header.role_student')}
+                                <a id="student" href="/student_landing_page_id5" style="color: var(--text-primary)">{$_('header.role_student')}</a>
                             {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
-                                (Admin)
+                                <a id="admin" href="/admin_landing_page" style="color: var(--text-primary)">(Admin)</a>
                             {:else if data.session.user.user_metadata?.role === 'teacher'}
-                                {$_('header.role_teacher')}
+                                <a id="teacher" href="/teacher_landing_page_id6" style="color: var(--text-primary)">{$_('header.role_teacher')}</a>
                             {:else if data.session.user.user_metadata?.role === 'parent'}
-                                {$_('header.role_parent')}
+                                <a id="parent" href="/parents_landing_page_id4" style="color: var(--text-primary)">{$_('header.role_parent')}</a>
                             {/if}
                         </p>
                     {:else}

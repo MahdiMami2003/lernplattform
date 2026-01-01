@@ -235,7 +235,8 @@
 <div class="admin-layout">
     <header>
         <h1>🛡️ Admin Dashboard</h1>
-        <p>Verwalte Nutzer, Rechte und Klassen.</p>
+        <p>Verwalte Nutzer, Rechte und Klassen.</p> <br>
+        <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">Hier geht's zum Lehrpersonen-Dashboard</a>
     </header>
 
     {#if loading}
