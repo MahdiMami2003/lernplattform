@@ -101,17 +101,27 @@
     <p class="untertitel">
         {$_('teacher.subtitle')}
     </p>
-
-    <div class="tipps">
+    <!-- ============ OVERVIEW ============ -->
+    <div class="overview">
         <h2>{$_('teacher.pedagogical_tips')}</h2>
-        <div class="tipps-grid">
-            <p>
-                Lernstrategien zur Unterstützung Ihrer Schüler
-                <a href="/pedagogy_page_id10"><button class="small-btn">{$_('teacher.edit_tips')}</button></a>
-            </p>
+        <div class="card">
+            <div class="manager-tags">
+                <p>
+                    <a href="/weekly_test_page_id17"><button class="small-btn">📝 {$_('teacher.nametag_weekly')}</button></a>
+                </p>
+                <p>
+                    <a href="/material_page_id14"><button class="small-btn">📖 {$_('teacher.nametag_materials')}</button></a>
+                </p>
+                <p>
+                    <a href="/pedagogy_page_id10"><button class="small-btn">🗣 {$_('teacher.nametag_tips')}</button></a>
+                </p>
+                <p>
+                    <a href="/appointments_page_id8"><button class="small-btn">📅 {$_('teacher.nametag_appointments')}</button></a>
+                </p>
+            </div>
         </div>
     </div>
-
+    <!-- ============ ADD CONTENT ============ -->
     <div class="general-section">
         <h2>{$_('teacher.general_admin')}</h2>
         <div class="general-grid">
@@ -240,11 +250,13 @@
     }
 
     /* ============ TIPPS SECTION ============ */
-    .tipps-grid {
+    .overview-grid {
         background-color: var(--bg-card);
         border-radius: 1.2rem;
         border: 1px solid var(--border-color);
         padding: 1rem 1.2rem;
+        display: inline-flex;
+        gap: 1rem;
         font-size: clamp(0.9rem, 1.8vw, 1rem);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
         transition: all 0.3s ease;
@@ -284,6 +296,11 @@
         padding: 1.5rem;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
+    }
+
+    .class-manager-section:hover {
+        background-color: var(--bg-hover);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
     }
 
     .hint-text {
