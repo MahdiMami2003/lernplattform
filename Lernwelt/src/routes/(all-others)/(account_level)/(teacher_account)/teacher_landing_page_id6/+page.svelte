@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/teacher_landing_page_id6/+page.svelte-->
 <script>
     import { onMount } from 'svelte';
     import { _ } from '$lib/i18n/config';

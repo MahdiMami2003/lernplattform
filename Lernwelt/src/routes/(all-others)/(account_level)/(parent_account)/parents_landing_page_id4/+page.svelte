@@ -1,3 +1,4 @@
+<!-- Lernwelt/src/routes/(all-others)/(account_level)/(parent_account)/parents_landing_page_id4/+page.svelte-->
 <script>
     let { data } = $props();
 

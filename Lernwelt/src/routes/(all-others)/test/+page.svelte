@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/test/+page.svelte-->
 <script>
     // 1. Importiere den Client und onMount
     import { onMount } from 'svelte';

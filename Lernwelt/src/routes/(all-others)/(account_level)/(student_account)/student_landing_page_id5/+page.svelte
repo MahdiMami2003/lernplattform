@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(student_account)/student_landing_page_id5/+page.svelte-->
 <script lang="ts">
     //import { onMount } from "svelte";
 

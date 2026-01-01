@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/imprint_page_id15/+page.svelte-->
 <script lang="ts">
     import { onMount } from 'svelte';
 

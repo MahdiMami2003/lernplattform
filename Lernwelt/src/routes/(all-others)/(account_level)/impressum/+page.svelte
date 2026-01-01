@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/impressum/+page.svelte-->
 <script>
     import { _ } from '$lib/i18n/config';
 </script>

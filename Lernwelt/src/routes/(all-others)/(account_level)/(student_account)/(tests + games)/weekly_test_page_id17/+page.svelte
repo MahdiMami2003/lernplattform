@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/(all-others)/(account_level)/(student_account)/(tests + games)/weekly_test_page_id17/+page.svelte-->
 <script>
     import { onMount } from 'svelte';
 
