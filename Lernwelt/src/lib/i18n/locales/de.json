@@ -41,9 +41,10 @@
     "manage_tests": "Wochentests bearbeiten"
   },
   "student": {
-    "title": "Hallo liebe:r Schüler:in",
+    "title": "Hallo liebe:r ",
     "welcome": "Herzlich willkommen auf der Website der HSGG Lernwelt",
     "choose_topic": "Bitte klicke auf das Thema das dich interessiert.",
+    "generic_name": "Schüler:in",
     "game_title": "Game Page",
     "game_desc": "Aufgaben & Gamification!",
     "weekly_title": "Weekly Tests",
