@@ -1,3 +1,4 @@
+<!-- Lernwelt/src/routes/(all-others)/(account_level)/(no_login_required)/no_login_page_id7/+page.svelte -->
 <script>
 	let { data } = $props();
 

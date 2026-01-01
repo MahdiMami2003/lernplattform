@@ -1,3 +1,4 @@
+<!-- (account_level) -> (admin_account) -> admin_landing_page -->
 <script lang="ts">
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";

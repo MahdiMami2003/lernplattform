@@ -1,3 +1,4 @@
+<!--Lernwelt/src/routes/+layout.svelte-->
 <script lang="ts">
     import '../app.css'; // ← Globale Dark Mode Styles
     import favicon from '$lib/assets/favicon.svg';

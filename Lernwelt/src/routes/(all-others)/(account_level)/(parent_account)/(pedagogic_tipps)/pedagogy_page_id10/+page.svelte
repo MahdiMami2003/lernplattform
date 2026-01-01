@@ -1,3 +1,4 @@
+<!-- Lernwelt/src/routes/(all-others)/(account_level)/(parent_account)/(pedagogic_tipps)/pedagogy_page_id10/+page.svelte-->
 <script>
     import { onMount } from 'svelte';
 
