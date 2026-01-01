@@ -1,3 +1,4 @@
+//Lernwelt/src/app.d.ts
 // src/app.d.ts
 import { SupabaseClient, Session } from '@supabase/supabase-js'
 

@@ -1,3 +1,4 @@
+<!--Lernwelt/src/lib/Breadcrumbs.svelte-->
 <script lang="ts">
     import { page } from '$app/stores';
     import { breadService } from '$lib/breadService.svelte';

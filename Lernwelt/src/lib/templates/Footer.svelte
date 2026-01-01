@@ -1,3 +1,4 @@
+<!--Lernwelt/src/lib/templates/Footer.svelte-->
 <footer>
     <div class="footer-content">
         <span class="copyright">© 2025 HSG-Lernwelt</span>
