@@ -120,7 +120,11 @@
 			}
 
 			/* 2️⃣ FRAGEN LADEN (MIT KATEGORIE FILTER) */
-			let query = supabase.from('questions').select('*').ilike('subject', 'Mathe%'); // Nur Mathe Fragen
+			let query = supabase
+				.from('questions')
+				.select('*')
+				.ilike('subject', 'Mathe%')
+				.neq('type', 'cloze'); // Nur Mathe Fragen (kein Lückentext)
 
 			// Falls eine Kategorie gewählt wurde, filtern wir danach
 			if (category) {
