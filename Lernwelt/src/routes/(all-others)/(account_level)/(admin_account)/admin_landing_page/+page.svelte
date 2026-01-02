@@ -439,13 +439,8 @@
     th { text-align: left; padding: 1rem; background: #f8fafc; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
     td { padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 
-    tr.pending { background-color: #fff7ed; }
+    /* row-specific and user table styles moved to UserTable.svelte */
 
-    .user-info { display: flex; flex-direction: column; }
-    .uuid { color: #94a3b8; font-family: monospace; font-size: 0.8rem; }
-
-    .status-ok { color: #16a34a; font-weight: 600; font-size: 0.85rem; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 99px; }
-    .status-no { color: #dc2626; font-weight: 600; font-size: 0.85rem; background: #fee2e2; padding: 0.2rem 0.6rem; border-radius: 99px; }
     .badge.gray { background: #f1f5f9; color: #475569; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
 
     .actions {
@@ -459,7 +454,6 @@
     /* BUTTONS */
     .btn-small { border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.2s; white-space: nowrap;}
     .btn-small.grant { background: #22c55e; color: white; }
-    .btn-small.revoke { background: #f59e0b; color: white; }
     .btn-small.secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     .btn-small.danger { background: #fee2e2; color: #dc2626; }
     .btn-small:hover { opacity: 0.9; }
@@ -469,7 +463,6 @@
     }
     .btn-add:hover { background: #2563eb; }
 
-    .me-badge { color: #94a3b8; font-style: italic; font-size: 0.85rem; }
     .loading, .empty { padding: 2rem; text-align: center; color: #94a3b8; font-style: italic;}
 
 
