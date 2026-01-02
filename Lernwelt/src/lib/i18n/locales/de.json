@@ -388,7 +388,18 @@
     "loading": {
       "classes": "Klassen werden geladen..."
     }
+  },
+  "admin": {
+    "grant_rights": "Rechte geben",
+    "revoke_rights": "Rechte nehmen",
+    "change_role_button": "Rolle ändern",
+    "role_modal_title": "Rolle ändern",
+    "role_modal_label": "Wähle eine Rolle:",
+    "role_option_student": "Schüler/in",
+    "role_option_teacher": "Lehrer/in",
+    "role_option_parent": "Elternteil",
+    "role_option_admin": "Administrator/in",
+    "role_modal_cancel": "Abbrechen",
+    "role_modal_confirm": "Rolle ändern"
   }
 }
-
-
