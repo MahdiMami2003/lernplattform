@@ -21,10 +21,15 @@
   "teacher": {
     "title": "Lehrpersonen-Dashboard",
     "subtitle": "Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten",
-    "pedagogical_tips": "Pädagogische Tipps",
+    "pedagogical_tips": "Allgemeine Übersicht",
+    "nametag_weekly": "Wochentests",
+    "nametag_materials": "Lernmaterialien",
+    "nametag_tips": "Pädagogische Tipps",
+    "nametag_appointments": "Termine & Aktuelles",
+    "nametag_classes": "Meine Klassen",
     "edit_tips": "Tipps bearbeiten",
-    "general_admin": "Allgemeine Verwaltung",
-    "minigames": "Minispiele",
+    "general_admin": "Verwaltung & Inhalte bearbeiten",
+    "content_creation": "Neue Inhalte erstellen",
     "minigames_desc": "Fragen für die Minispiele erstellen und bearbeiten.",
     "manage_questions": "Fragen verwalten",
     "manage_classes": "Meine Klassen verwalten",
@@ -77,6 +82,10 @@
     "role_teacher": "(Lehrperson)",
     "role_parent": "(Elternteil)",
     "role_admin": "(Admin)",
+    "dashboard_student": "Zum Schüler:in Dashboard",
+    "dashboard_teacher": "Zum Lehrpersonen-Dashboard",
+    "dashboard_parent": "Zum Eltern-Dashboard",
+    "dashboard_admin": "Zum Admin-Dashboard",
     "not_logged_in": "Du bist nicht eingeloggt.",
     "change_language": "Sprache ändern",
     "search_placeholder": "Suchen...",
@@ -390,5 +399,3 @@
     }
   }
 }
-
-
