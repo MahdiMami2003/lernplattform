@@ -19,6 +19,25 @@
 	import { locale, _ } from '$lib/i18n/config';
 	let { data } = $props();
 
+	// USER ROLE STATE
+	let userRole = $state<string | null>(null);
+
+	// Fetch user role on mount or when session changes
+	$effect(() => {
+		if (data.session?.user?.id) {
+			supabase
+				.from('profiles')
+				.select('role')
+				.eq('id', data.session.user.id)
+				.single()
+				.then(({ data: profile }) => {
+					userRole = profile?.role ?? null;
+				});
+		} else {
+			userRole = null;
+		}
+	});
+
 	// SIDEBAR STATES
 	let testlogin = $state(false);
 	let isMenuOpen = $state(false);
@@ -30,6 +49,86 @@
 	let searchQuery = $state('');
 	let searchResults = $state<any[]>([]);
 	let searchInputRef = $state<HTMLInputElement>();
+
+	const staticPages = [
+		{
+			title: 'Startseite',
+			url: '/',
+			keywords: 'home, start, index',
+			subject: 'Seite',
+			allowedRoles: null // null = Public
+		},
+		{
+			title: 'Materialien',
+			url: '/material_page_id14',
+			keywords: 'material, search, suche, lernmaterial',
+			subject: 'Seite',
+			allowedRoles: null
+		},
+		{
+			title: 'Registrierung',
+			url: '/register_page_id3',
+			keywords: 'register, anmelden, konto',
+			subject: 'Seite',
+			allowedRoles: null
+		},
+		{
+			title: 'Barrierefreiheit',
+			url: '/barrierefreiheit',
+			keywords: 'access, accessibility',
+			subject: 'Seite',
+			allowedRoles: null
+		},
+		{
+			title: 'Datenschutz',
+			url: '/datenschutz',
+			keywords: 'privacy, data',
+			subject: 'Seite',
+			allowedRoles: null
+		},
+		{
+			title: 'Impressum',
+			url: '/impressum',
+			keywords: 'imprint, legal',
+			subject: 'Seite',
+			allowedRoles: null
+		},
+		{
+			title: 'Schüler Übersicht',
+			url: '/student_landing_page_id5',
+			keywords: 'student, dashboard, schüler',
+			subject: 'Seite',
+			allowedRoles: ['student']
+		},
+		{
+			title: 'Lehrer Übersicht',
+			url: '/teacher_landing_page_id6',
+			keywords: 'teacher, dashboard, lehrer',
+			subject: 'Seite',
+			allowedRoles: ['teacher']
+		},
+		{
+			title: 'Eltern Übersicht',
+			url: '/parents_landing_page_id4',
+			keywords: 'parent, eltern, dashboard',
+			subject: 'Seite',
+			allowedRoles: ['parent']
+		},
+		{
+			title: 'Lernfortschritt',
+			url: '/progress_page_id11',
+			keywords: 'progress, stats, statistik',
+			subject: 'Seite',
+			allowedRoles: ['student', 'parent']
+		},
+		{
+			title: 'Aufgaben / Spiele',
+			url: '/game_page_id12',
+			keywords: 'games, tasks, aufgaben, spiele',
+			subject: 'Seite',
+			allowedRoles: ['student', 'admin']
+		}
+	];
 
 	function toggleSearch() {
 		searchOpen = !searchOpen;
@@ -48,20 +147,58 @@
 			return;
 		}
 
-		const { data: rows, error } = await supabase
+		const query = searchQuery.toLowerCase();
+		const isLoggedIn = !!data.session;
+
+		// 1. Local Search (Static Pages)
+		const pageResults = staticPages.filter((p) => {
+			if (p.allowedRoles !== null) {
+				if (!isLoggedIn || !userRole) return false;
+				if (!p.allowedRoles.includes(userRole) && userRole !== 'admin') return false;
+			}
+			return p.title.toLowerCase().includes(query) || p.keywords.includes(query);
+		});
+
+		// 2. Subject Search (NEW)
+		// Find subjects that match the query to provide direct section links
+		const { data: subjectRows } = await data.supabase
+			.from('materials')
+			.select('subject')
+			.ilike('subject', `%${query}%`);
+
+		const uniqueSubjects = [...new Set(subjectRows?.map((r) => r.subject) || [])].filter((s) => s); // Filter nulls
+		const subjectResults = uniqueSubjects.map((s) => ({
+			title: s,
+			url: `/material_page_id14#${s}`,
+			subject: 'Fachgebiet'
+		}));
+
+		// 3. DB Search (Materials)
+		const { data: rows, error } = await data.supabase
 			.from('materials')
 			.select('*')
 			.or(
-				`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,subject.ilike.%${searchQuery}%,school_class.ilike.%${searchQuery}%`
+				`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,subject.ilike.%${searchQuery}%`
 			)
-			.limit(10); // Limit results for performance
+			.limit(5); // Limit DB results to mix with pages
 
-		if (!error) searchResults = rows ?? [];
+		if (error) {
+			console.error('Search Error:', error);
+		}
+
+		const dbResults = rows ?? [];
+
+		// Combine results
+		searchResults = [...pageResults, ...subjectResults, ...dbResults];
 	}
 
-	function goToMaterial(id: number) {
+	function handleResultClick(item: any) {
 		searchOpen = false;
-		goto(`/materials_content_page_16/${id}`);
+		if (item.url) {
+			goto(item.url);
+		} else {
+			goto(`/materials_content_page_16/${item.id}`);
+		}
 	}
 
 	async function handleLogout() {
@@ -110,28 +247,52 @@
 
 	<!-- Only show user info if search is closed on small screens, or always on large -->
 	{#if !searchOpen || innerW > 600}
-                <div class="user-info">
-                    {#if data.session?.user}
-                        <p>
-                            {$_('header.greeting')}
-                            <!-- 1. Name anzeigen oder Fallback auf Email -->
-                            {data.session.user.user_metadata?.full_name || data.session.user.email}
+		<div class="user-info">
+			{#if data.session?.user}
+				<p>
+					{$_('header.greeting')}
+					<!-- 1. Name anzeigen oder Fallback auf Email -->
+					{data.session.user.user_metadata?.full_name || data.session.user.email}
 
-                            <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
-                            {#if data.session.user.user_metadata?.role === 'student'}
-                                <a id="student" href="/student_landing_page_id5" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_student')} aria-label={$_('header.dashboard_student')}>{$_('header.role_student')}</a>
-                            {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
-                                <a id="admin" href="/admin_landing_page" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_admin')} aria-label={$_('header.dashboard_admin')}>(Admin)</a>
-                            {:else if data.session.user.user_metadata?.role === 'teacher'}
-                                <a id="teacher" href="/teacher_landing_page_id6" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_teacher')} aria-label={$_('header.dashboard_teacher')}>{$_('header.role_teacher')}</a>
-                            {:else if data.session.user.user_metadata?.role === 'parent'}
-                                <a id="parent" href="/parents_landing_page_id4" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_parent')} aria-label={$_('header.dashboard_parent')}>{$_('header.role_parent')}</a>
-                            {/if}
-                        </p>
-                    {:else}
-                        <p>{$_('header.not_logged_in')}</p>
-                    {/if}
-                </div>
+					<!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
+					{#if data.session.user.user_metadata?.role === 'student'}
+						<a
+							id="student"
+							href="/student_landing_page_id5"
+							style="color: var(--text-primary); cursor: pointer"
+							title={$_('header.dashboard_student')}
+							aria-label={$_('header.dashboard_student')}>{$_('header.role_student')}</a
+						>
+					{:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
+						<a
+							id="admin"
+							href="/admin_landing_page"
+							style="color: var(--text-primary); cursor: pointer"
+							title={$_('header.dashboard_admin')}
+							aria-label={$_('header.dashboard_admin')}>(Admin)</a
+						>
+					{:else if data.session.user.user_metadata?.role === 'teacher'}
+						<a
+							id="teacher"
+							href="/teacher_landing_page_id6"
+							style="color: var(--text-primary); cursor: pointer"
+							title={$_('header.dashboard_teacher')}
+							aria-label={$_('header.dashboard_teacher')}>{$_('header.role_teacher')}</a
+						>
+					{:else if data.session.user.user_metadata?.role === 'parent'}
+						<a
+							id="parent"
+							href="/parents_landing_page_id4"
+							style="color: var(--text-primary); cursor: pointer"
+							title={$_('header.dashboard_parent')}
+							aria-label={$_('header.dashboard_parent')}>{$_('header.role_parent')}</a
+						>
+					{/if}
+				</p>
+			{:else}
+				<p>{$_('header.not_logged_in')}</p>
+			{/if}
+		</div>
 	{/if}
 
 	<div class="icon-container">
@@ -152,8 +313,8 @@
 
 			{#if searchOpen && searchResults.length > 0}
 				<div class="search-dropdown">
-					{#each searchResults as item (item.id)}
-						<div class="search-item" onclick={() => goToMaterial(item.id)}>
+					{#each searchResults as item (item.id || item.url)}
+						<div class="search-item" onclick={() => handleResultClick(item)}>
 							<strong>{item.title}</strong>
 							<span class="search-meta">{item.subject}</span>
 						</div>
@@ -220,7 +381,7 @@
 					</li>
 
 					<li class="nav__items" id="task">
-						{#if data.session}
+						{#if data.session && (userRole === 'student' || userRole === 'admin')}
 							<a href="/game_page_id12">
 								<img alt="Aufgaben" src={task} />
 								<span class="nav-text">Aufgaben</span>
@@ -230,7 +391,7 @@
 								<a
 									href="#"
 									class="disabled-link"
-									title="Bitte zuerst einloggen!"
+									title="Nur für Schüler verfügbar!"
 									onclick={(e) => e.preventDefault()}
 									style="pointer-events: none;"
 								>
