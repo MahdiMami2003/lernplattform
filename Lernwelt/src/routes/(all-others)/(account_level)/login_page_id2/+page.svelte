@@ -1,13 +1,38 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/login_page_id2/+page.svelte-->
 <script>
     import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
+    import { onMount } from 'svelte';
 
     let { data } = $props();
 
     let email = $state('');
     let password = $state('');
     let message = $state('');
+    let redirectTo = '';
 
+    /**
+     * sichere Prüfung, ob der Redirect interner Pfad ist
+     * @param {string} p
+     */
+    function isSafeInternalPath(p) {
+        return p && p.startsWith('/');
+    }
+
+    // Lese optionalen Query-Parameter über page store
+    onMount(() => {
+        const unsubscribe = page.subscribe(($page) => {
+            let r = $page.url.searchParams.get('redirectTo') ?? '';
+            try { r = r ? decodeURIComponent(r) : ''; } catch (e) {}
+            redirectTo = r;
+        });
+        return () => unsubscribe();
+    });
+
+    /**
+     * Handle login form submit
+     * @param {Event} e
+     */
     async function handleLogin(e) {
         e.preventDefault();
         try {
@@ -35,6 +60,12 @@
 
             message = 'Anmeldung erfolgreich! Leite weiter...';
 
+            // Wenn ein sicherer redirectTo gegeben ist, benutze diesen
+            if (redirectTo && isSafeInternalPath(redirectTo)) {
+                await goto(redirectTo);
+                return;
+            }
+
             // Leite basierend auf der Rolle weiter
             if (userData.role === 'student') {
                 await goto('/student_landing_page_id5');
@@ -47,9 +78,10 @@
                 throw new Error('Keine gültige Rolle gefunden');
             }
 
-        } catch (error) {
-            console.error(error);
-            message = `Anmeldung fehlgeschlagen: ${error.message}`;
+        } catch (err) {
+            console.error(err);
+            const errMsg = err instanceof Error ? err.message : String(err);
+            message = `Anmeldung fehlgeschlagen: ${errMsg}`;
             // Lösche nur das Passwort, behalte die E-Mail
             password = '';
         }

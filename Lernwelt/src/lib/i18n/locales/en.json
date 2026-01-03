@@ -134,7 +134,8 @@
     "weekly_test_generic": "Weekly Test",
     "classroom_generic": "Classroom",
     "page_generic": "Page",
-    "detail_prefix": "Detail"
+    "detail_prefix": "Detail",
+    "access_denied": "Access denied"
   },
   "progress": {
     "loading": "Loading data...",
@@ -303,6 +304,7 @@
     "s1_intro_a": "Via the menu",
     "s1_intro_b": "\"Accessible\"",
     "s1_intro_c": "in the left sidebar you can enable the following options:",
+
     "s1_li1_bold": "Dark mode",
     "s1_li1_text": "– reduces brightness for more comfortable viewing.",
     "s1_li2_bold": "High contrast mode",
@@ -316,12 +318,20 @@
 
     "s3_title": "Known limitations",
     "s3_p1": "Since this is a school learning project, accessibility is not fully implemented yet. Some areas can still be improved, for example:",
-    "s3_li1": "Consistent contrast across all subpages",
+    "s3_li1": "Consistent contrasts across all subpages",
     "s3_li2": "Alt texts for all images and icons",
     "s3_li3": "Keyboard navigation and screen reader support",
 
     "s4_title": "Feedback",
-    "s4_p1": "If you notice barriers or have ideas for improvement, please contact the address listed in the imprint."
+    "s4_p1": "If you notice barriers or have ideas for improvement, please contact the address listed in the imprint.",
+
+    "no_permission_title": "Access denied",
+    "no_permission_text": "Oh no — you don't have access to this page. Please sign in with the appropriate account (e.g. as student or parent). If you don't have an account yet, you can register.",
+    "link_to_login": "Go to Login",
+    "link_to_register": "Register",
+    "back_to_home": "Back to Home",
+    "go_to_appointments": "View appointments",
+    "go_to_materials": "View materials"
   },
   "register": {
     "page_title": "Welcome to HSG-Lernwelt",
@@ -384,4 +394,3 @@
     }
   }
 }
-

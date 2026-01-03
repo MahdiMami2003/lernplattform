@@ -136,7 +136,8 @@
     "weekly_test_generic": "Wochentest",
     "classroom_generic": "Klassenzimmer",
     "page_generic": "Seite",
-    "detail_prefix": "Detail"
+    "detail_prefix": "Detail",
+    "access_denied": "Zugriff verweigert"
   },
   "progress": {
     "loading": "Lade Daten...",
@@ -309,6 +310,7 @@
     "s1_intro_a": "Über das Menü",
     "s1_intro_b": "\"Barrierefrei\"",
     "s1_intro_c": "in der linken Seitenleiste kannst du folgende Optionen aktivieren:",
+
     "s1_li1_bold": "Darkmode",
     "s1_li1_text": "– reduziert Helligkeit für augenschonendes Arbeiten.",
     "s1_li2_bold": "Kontrastmodus",
@@ -327,7 +329,20 @@
     "s3_li3": "Tastatur-Navigation und Screenreader-Unterstützung",
 
     "s4_title": "Feedback",
-    "s4_p1": "Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast, wende dich bitte an die im Impressum genannte Kontaktadresse."
+    "s4_p1": "Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast, wende dich bitte an die im Impressum genannte Kontaktadresse.",
+
+    "no_permission_title": "Zugriff verweigert",
+    "no_permission_text": "Oh nein — du hast leider keinen Zugriff auf diese Seite. Bitte melde dich mit dem passenden Konto an (z. B. als Schüler:in oder Elternteil). Falls du noch kein Konto hast, kannst du dich registrieren.",
+    "need_role_parent_text": "Diese Seite ist nur für Eltern zugänglich. Bitte melde dich als Elternteil an, um auf das Eltern-Dashboard und persönliche Informationen zuzugreifen. Materialien und öffentliche Termine bleiben weiterhin zugänglich.",
+    "need_role_student_text": "Diese Seite erfordert ein Schüler*innen-Konto (z. B. für Spiele, Tests oder persönlichen Lernfortschritt). Bitte melde dich an, um fortzufahren.",
+    "need_role_teacher_text": "Diese Seite ist für Lehrpersonen reserviert. Bitte melde dich mit einem Lehraccount an, um Zugriff zu erhalten.",
+    "need_role_admin_text": "Diese Seite ist administrativen Benutzer:innen vorbehalten. Bitte melde dich mit einem Admin-Account an.",
+    "link_to_login": "Zum Login",
+    "link_to_register": "Registrieren",
+    "back_to_home": "Zur Startseite",
+    "go_to_appointments": "Termine ansehen",
+    "go_to_materials": "Lernmaterialien ansehen",
+    "attempted_path": "Angeforderter Pfad"
   },
   "register": {
     "page_title": "Willkommen bei HSG-Lernwelt",
@@ -390,5 +405,3 @@
     }
   }
 }
-
-
