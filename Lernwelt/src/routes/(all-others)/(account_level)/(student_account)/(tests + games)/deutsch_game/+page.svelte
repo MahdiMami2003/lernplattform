@@ -60,7 +60,9 @@
 	let confettiPieces = $state<ConfettiPiece[]>([]);
 
 	// Fortschritt & XP als derived
-	const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
+	const progress = $derived(
+		questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0
+	);
 	const xpProgress = $derived((xp / 100) * 100);
 
 	/* ========= HELPER ========= */
@@ -115,8 +117,12 @@
 			}
 
 			/* 2️⃣ DEUTSCH-FRAGEN LADEN */
-			// Basis-Abfrage für Deutsch
-			let query = supabase.from('questions').select('*').ilike('subject', 'Deutsch%'); // Nur Deutsch Fragen
+			// Basis-Abfrage für Deutsch (nur Multiple Choice)
+			let query = supabase
+				.from('questions')
+				.select('*')
+				.ilike('subject', 'Deutsch%')
+				.neq('type', 'cloze');
 
 			// Wenn eine Kategorie gewählt wurde, zusätzlich filtern
 			if (category) {

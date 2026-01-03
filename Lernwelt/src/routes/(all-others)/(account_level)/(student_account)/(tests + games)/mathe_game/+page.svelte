@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import { locale } from 'svelte-i18n';
 	import { _ } from '$lib/i18n/config';
+	import { checkAndAwardBadges } from '$lib/badgeService';
 
 	let { data } = $props();
 	let { supabase, session } = data;
@@ -59,9 +60,12 @@
 
 	let sessionXp = $state(0);
 	let confettiPieces = $state<ConfettiPiece[]>([]);
+	let newlyEarnedBadges = $state<string[]>([]);
 
 	// Fortschritt & XP als derived
-    const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
+	const progress = $derived(
+		questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0
+	);
 	const xpProgress = $derived((xp / 100) * 100);
 
 	/* ========= HELPER ========= */
@@ -116,7 +120,11 @@
 			}
 
 			/* 2️⃣ FRAGEN LADEN (MIT KATEGORIE FILTER) */
-			let query = supabase.from('questions').select('*').ilike('subject', 'Mathe%'); // Nur Mathe Fragen
+			let query = supabase
+				.from('questions')
+				.select('*')
+				.ilike('subject', 'Mathe%')
+				.neq('type', 'cloze'); // Nur Mathe Fragen (kein Lückentext)
 
 			// Falls eine Kategorie gewählt wurde, filtern wir danach
 			if (category) {
@@ -250,6 +258,24 @@
 			streak++;
 			await updateProfile({ streak });
 		}
+
+		// Check for Badges
+		if (profile?.id) {
+			try {
+				newlyEarnedBadges = await checkAndAwardBadges(supabase, profile.id, {
+					correctCount,
+					totalQuestions: questions.length,
+					streak,
+					subject: 'Mathe',
+					outOfHearts
+				});
+				if (newlyEarnedBadges.length > 0) {
+					console.log('🎉 New Badges:', newlyEarnedBadges);
+				}
+			} catch (e) {
+				console.error('Badge Service Error:', e);
+			}
+		}
 	}
 
 	async function restartLesson() {
@@ -369,7 +395,20 @@
 			</main>
 		{:else}
 			<section class="summary">
-				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
+				<!-- CUSTOM FEEDBACK LOGIC -->
+				{#if outOfHearts}
+					<h1>😥 Keine Herzen mehr</h1>
+					<p>Schade, versuch es gleich nochmal!</p>
+				{:else if correctCount === 0}
+					<h1>Viel Glück beim nächsten Mal! 🍀</h1>
+					<p>Lass den Kopf nicht hängen, Übung macht den Meister.</p>
+				{:else if correctCount === questions.length}
+					<h1>Fantastisch! Alles richtig! 🌟</h1>
+					<p>Besser geht es nicht.</p>
+				{:else}
+					<h1>🎉 Super gemacht!</h1>
+					<p>Du hast das Level erfolgreich gemeistert.</p>
+				{/if}
 
 				<div class="xp-chest">
 					<div class="chest-glow"></div>
@@ -392,20 +431,27 @@
 					<p class="xp-earned">+{sessionXp} XP</p>
 				{/if}
 
-				<div class="achievements">
-					<p>{$_('game.badges_title')}</p>
-					<div class="badge-row">
-						{#if correctCount === questions.length}
-							<span class="badge">{$_('game.badge_perfect')}</span>
-						{/if}
-						{#if streak >= 3}
-							<span class="badge">{$_('game.badge_streak')}</span>
-						{/if}
-						{#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
-							<span class="badge">{$_('game.badge_math_hero')}</span>
-						{/if}
+				<!-- BADGES DISPLAY -->
+				{#if newlyEarnedBadges.length > 0}
+					<div class="achievements">
+						<p>🎉 Neue Badges freigeschaltet:</p>
+						<div class="badge-row">
+							{#each newlyEarnedBadges as bId}
+								<span class="badge new-badge">
+									{#if bId === 'all_correct' || bId === 'perfect_round'}
+										🏅 {$_('game.badge_perfect')}
+									{:else if bId === 'streak_master'}
+										🔥 {$_('game.badge_streak')}
+									{:else if bId === 'math_hero'}
+										📘 {$_('game.badge_math_hero')}
+									{:else}
+										🏆 Badge
+									{/if}
+								</span>
+							{/each}
+						</div>
 					</div>
-				</div>
+				{/if}
 
 				<div class="summary-actions">
 					<button on:click={restartLesson}>{$_('game.play_again')}</button>

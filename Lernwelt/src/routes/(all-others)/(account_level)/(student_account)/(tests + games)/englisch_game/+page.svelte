@@ -60,7 +60,9 @@
 	let confettiPieces = $state<ConfettiPiece[]>([]);
 
 	// Fortschritt & XP als derived
-	const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
+	const progress = $derived(
+		questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0
+	);
 	const xpProgress = $derived((xp / 100) * 100);
 
 	/* ========= HELPER ========= */
@@ -123,7 +125,8 @@
 			let query = supabase
 				.from('questions')
 				.select('*')
-				.or('subject.ilike.English%,subject.ilike.Englisch%');
+				.or('subject.ilike.English%,subject.ilike.Englisch%')
+				.neq('type', 'cloze');
 
 			// Wenn eine Kategorie gewählt wurde, zusätzlich filtern
 			if (category) {

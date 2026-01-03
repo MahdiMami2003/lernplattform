@@ -22,7 +22,7 @@ export const load = async ({ fetch, data, depends }) => {
                 const cookies = parse(document.cookie)
                 return Object.keys(cookies).map((key) => ({
                     name: key,
-                    value: cookies[key]
+                    value: cookies[key] || ''
                 }))
             },
             // 2. setAll ist jetzt Pflicht
@@ -31,7 +31,9 @@ export const load = async ({ fetch, data, depends }) => {
                 if (!isBrowser()) return
 
                 cookiesToSet.forEach(({ name, value, options }) => {
-                    document.cookie = serialize(name, value, options)
+                    // Force session cookies by removing persistence options
+                    const { maxAge, expires, ...sessionOptions } = options;
+                    document.cookie = serialize(name, value, sessionOptions)
                 })
             }
         },
