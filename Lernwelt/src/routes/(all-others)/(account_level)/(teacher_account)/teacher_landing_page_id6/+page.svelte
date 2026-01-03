@@ -85,44 +85,62 @@
 				class_id: classId
 			});
 
-			if (!error) {
-				// UI sofort aktualisieren (ID hinzufügen)
-				myClassIds = [...myClassIds, classId];
-			} else {
-				console.error('Fehler beim Speichern:', error);
-			}
-		}
-	}
+            if (!error) {
+                // UI sofort aktualisieren (ID hinzufügen)
+                myClassIds = [...myClassIds, classId];
+            } else {
+                console.error("Fehler beim Speichern:", error);
+            }
+        }
+    }
+    let edit_content = $state("");
 </script>
 
 <div id="placeholder" class="main_container">
-	<h1 class="überschrift">{$_('teacher.title')}</h1>
-	<p class="untertitel">
-		{$_('teacher.subtitle')}
-	</p>
-
-	<div class="tipps">
-		<h2>{$_('teacher.pedagogical_tips')}</h2>
-		<div class="tipps-grid">
-			<p>
-				Lernstrategien zur Unterstützung Ihrer Schüler
-				<a href="/pedagogy_page_id10"
-					><button class="small-btn">{$_('teacher.edit_tips')}</button></a
-				>
-			</p>
-		</div>
-	</div>
-
-	<div class="general-section">
-		<h2>{$_('teacher.general_admin')}</h2>
-		<div class="general-grid">
-			<div class="card">
-				<h3>🎮 {$_('teacher.minigames')}</h3>
-				<p>{$_('teacher.minigames_desc')}</p>
-				<a href="/game_management"
-					><button class="small-btn">{$_('teacher.manage_questions')}</button></a
-				>
-			</div>
+    <h1 class="überschrift">{$_('teacher.title')}</h1>
+    <p class="untertitel">
+        {$_('teacher.subtitle')}
+    </p>
+    <!-- ============ OVERVIEW ============ -->
+    <div class="overview">
+        <h2>{$_('teacher.pedagogical_tips')}</h2>
+        <div class="card">
+            <div class="manager-tags">
+                <p>
+                    <a href="/weekly_test_page_id17"><button class="small-btn">📝 {$_('teacher.nametag_weekly')}</button></a>
+                </p>
+                <p>
+                    <a href="/material_page_id14"><button class="small-btn">📖 {$_('teacher.nametag_materials')}</button></a>
+                </p>
+                <p>
+                    <a href="/pedagogy_page_id10"><button class="small-btn">🗣 {$_('teacher.nametag_tips')}</button></a>
+                </p>
+                <p>
+                    <a href="/appointments_page_id8"><button class="small-btn">📅 {$_('teacher.nametag_appointments')}</button></a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- ============ ADD CONTENT ============ -->
+    <div class="general-section">
+        <h2>{$_('teacher.general_admin')}</h2>
+        <div class="general-grid">
+            <div class="card">
+                <h3>🖋️ {$_('teacher.content_creation')}</h3>
+                <form action={edit_content}>
+                    <label for="content">Ich möchte eine:n </label>
+                    <select id="content" bind:value={edit_content}>
+                        <option value="/game_management"> Spielfrage </option>
+                        <option value="/form_for_adding_content"> Lerninhalt </option>
+                        <option value="/form_for_adding_weekly_test"> Wochentest </option>
+                        <option value="/create_appointments_page"> Termin </option>
+                        <option value="/pedagogic_form"> pädagogischen Tipp </option>
+                    </select>
+                    <button class="small-btn" type="submit">erstellen</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
 			<div class="card">
 				<h3>🚀 Missionen</h3>
@@ -250,16 +268,18 @@
 		transition: color 0.3s ease;
 	}
 
-	/* ============ TIPPS SECTION ============ */
-	.tipps-grid {
-		background-color: var(--bg-card);
-		border-radius: 1.2rem;
-		border: 1px solid var(--border-color);
-		padding: 1rem 1.2rem;
-		font-size: clamp(0.9rem, 1.8vw, 1rem);
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-		transition: all 0.3s ease;
-	}
+    /* ============ TIPPS SECTION ============ */
+    .overview-grid {
+        background-color: var(--bg-card);
+        border-radius: 1.2rem;
+        border: 1px solid var(--border-color);
+        padding: 1rem 1.2rem;
+        display: inline-flex;
+        gap: 1rem;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
+    }
 
 	/* ============ GENERAL SECTION ============ */
 	.general-section {
@@ -297,12 +317,17 @@
 		transition: all 0.3s ease;
 	}
 
-	.hint-text {
-		margin-bottom: 1rem;
-		color: var(--text-muted);
-		font-style: italic;
-		transition: color 0.3s ease;
-	}
+    .class-manager-section:hover {
+        background-color: var(--bg-hover);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .hint-text {
+        margin-bottom: 1rem;
+        color: var(--text-muted);
+        font-style: italic;
+        transition: color 0.3s ease;
+    }
 
 	.manager-tags {
 		display: flex;

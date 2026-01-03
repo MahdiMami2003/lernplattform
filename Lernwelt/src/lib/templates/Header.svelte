@@ -110,13 +110,28 @@
 
 	<!-- Only show user info if search is closed on small screens, or always on large -->
 	{#if !searchOpen || innerW > 600}
-		<div class="user-info">
-			{#if data.session}
-				<p>Hallo, {data.session.user.user_metadata?.full_name || data.session.user.email}</p>
-			{:else}
-				<p>Du bist nicht eingeloggt.</p>
-			{/if}
-		</div>
+                <div class="user-info">
+                    {#if data.session?.user}
+                        <p>
+                            {$_('header.greeting')}
+                            <!-- 1. Name anzeigen oder Fallback auf Email -->
+                            {data.session.user.user_metadata?.full_name || data.session.user.email}
+
+                            <!-- 2. Rolle prüfen (alles in einer Zeile um Lücken zu vermeiden) -->
+                            {#if data.session.user.user_metadata?.role === 'student'}
+                                <a id="student" href="/student_landing_page_id5" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_student')} aria-label={$_('header.dashboard_student')}>{$_('header.role_student')}</a>
+                            {:else if data.session.user.user_metadata?.full_name === 'Günther Warnke'}
+                                <a id="admin" href="/admin_landing_page" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_admin')} aria-label={$_('header.dashboard_admin')}>(Admin)</a>
+                            {:else if data.session.user.user_metadata?.role === 'teacher'}
+                                <a id="teacher" href="/teacher_landing_page_id6" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_teacher')} aria-label={$_('header.dashboard_teacher')}>{$_('header.role_teacher')}</a>
+                            {:else if data.session.user.user_metadata?.role === 'parent'}
+                                <a id="parent" href="/parents_landing_page_id4" style="color: var(--text-primary); cursor: pointer" title={$_('header.dashboard_parent')} aria-label={$_('header.dashboard_parent')}>{$_('header.role_parent')}</a>
+                            {/if}
+                        </p>
+                    {:else}
+                        <p>{$_('header.not_logged_in')}</p>
+                    {/if}
+                </div>
 	{/if}
 
 	<div class="icon-container">
