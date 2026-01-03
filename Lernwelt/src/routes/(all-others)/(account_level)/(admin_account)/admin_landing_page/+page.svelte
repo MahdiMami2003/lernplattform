@@ -3,6 +3,16 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
     import { slide, fade } from "svelte/transition";
+    import { _ } from '$lib/i18n/config';
+    import { get } from 'svelte/store';
+    import UserTable from '$lib/components/UserTable.svelte';
+
+    // helper to call the i18n function stored in '_' safely from markup and code
+    function t(key: string, params?: any) {
+        const fn = get(_ as any);
+        if (typeof fn === 'function') return fn(key, params);
+        return '';
+    }
 
     let { data } = $props();
     let { supabase, session } = data;
@@ -43,6 +53,27 @@
     // Modal State für Klassen
     let showClassModal = $state(false);
     let newClass = $state({ name: '', grade: '' });
+
+    // --- NEW: Role modal state ---
+    let roleModalVisible = $state(false);
+    let roleModalUser = $state<any | null>(null);
+    let roleModalNewRole = $state('student');
+
+    function openRoleModal(user: any) {
+        roleModalUser = user;
+        roleModalNewRole = user.role;
+        roleModalVisible = true;
+    }
+    function closeRoleModal() {
+        roleModalVisible = false;
+        roleModalUser = null;
+    }
+    async function confirmRoleChange() {
+        if (!roleModalUser) return;
+        if (!confirm(`Rolle von "${roleModalUser.full_name || roleModalUser.id}" zu "${roleModalNewRole}" ändern?`)) return;
+        await changeRole(roleModalUser, roleModalNewRole);
+        closeRoleModal();
+    }
 
     // --- INIT ---
     async function init() {
@@ -99,7 +130,7 @@
     }
 
     async function changeRole(user: Profile, newRole: string) {
-        if (!confirm(`Rolle von "${user.full_name}" zu "${newRole}" ändern?`)) return;
+        // removed in-function confirm: confirmation happens in modal
 
         const updates: any = { role: newRole };
         if (newRole === 'student') updates.editing_right = false;
@@ -161,77 +192,6 @@
         else init();
     });
 </script>
-
-{#snippet userTable(groupUsers: Profile[], emptyText: string)}
-    {#if groupUsers.length === 0}
-        <div class="empty">{emptyText}</div>
-    {:else}
-        <div class="table-responsive">
-            <table>
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Rechte</th>
-                    <th style="text-align: right;">Aktionen</th>
-                </tr>
-                </thead>
-                <tbody>
-                {#each groupUsers as user (user.id)}
-                    {@const isMe = user.id === session.user.id}
-
-                    <tr class={(user.role !== 'admin' && !user.editing_right) ? 'pending' : ''}>
-                        <td>
-                            <div class="user-info">
-                                <strong>{user.full_name || 'Unbekannt'}</strong>
-                                <small class="uuid">{user.id.slice(0,8)}...</small>
-                            </div>
-                        </td>
-                        <td>
-                            {#if user.editing_right}
-                                <span class="status-ok">✅ Editierrechte</span>
-                            {:else}
-                                <span class="status-no">⛔ Nur Lesen</span>
-                            {/if}
-                        </td>
-                        <td style="overflow: visible;">
-                            <div class="actions">
-                                {#if !isMe}
-                                    <button
-                                            class="btn-small {user.editing_right ? 'revoke' : 'grant'}"
-                                            onclick={() => toggleRights(user)}
-                                    >
-                                        {user.editing_right ? 'Entziehen' : 'Erlauben'}
-                                    </button>
-
-                                    <div class="dropdown-wrapper">
-                                        <button class="btn-small secondary">Rolle ▼</button>
-                                        <div class="dropdown-content">
-                                            {#if user.role !== 'teacher'}
-                                                <button onclick={() => changeRole(user, 'teacher')}>zu Lehrer</button>
-                                            {/if}
-                                            {#if user.role !== 'parent'}
-                                                <button onclick={() => changeRole(user, 'parent')}>zu Eltern</button>
-                                            {/if}
-                                            {#if user.role !== 'admin'}
-                                                <button onclick={() => changeRole(user, 'admin')}>zu Admin</button>
-                                            {/if}
-                                            <div class="divider"></div>
-                                            <button class="danger" onclick={() => changeRole(user, 'student')}>zu Schüler</button>
-                                        </div>
-                                    </div>
-                                {:else}
-                                    <span class="me-badge">(Du)</span>
-                                {/if}
-                            </div>
-                        </td>
-                    </tr>
-                {/each}
-                </tbody>
-            </table>
-        </div>
-    {/if}
-{/snippet}
-
 
 <div class="admin-layout">
     <header>
@@ -313,7 +273,7 @@
 
             {#if isOpen.teachers}
                 <div class="section-content" transition:slide>
-                    {@render userTable(teachers, "Keine Lehrkräfte gefunden.")}
+                    <UserTable {session} groupUsers={teachers} emptyText={"Keine Lehrkräfte gefunden."} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
                 </div>
             {/if}
         </div>
@@ -335,7 +295,7 @@
 
             {#if isOpen.parents}
                 <div class="section-content" transition:slide>
-                    {@render userTable(parents, "Keine Eltern-Accounts gefunden.")}
+                    <UserTable {session} groupUsers={parents} emptyText={"Keine Eltern-Accounts gefunden."} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
                 </div>
             {/if}
         </div>
@@ -357,7 +317,7 @@
 
             {#if isOpen.admins}
                 <div class="section-content" transition:slide>
-                    {@render userTable(admins, "Keine weiteren Admins.")}
+                    <UserTable {session} groupUsers={admins} emptyText={"Keine weiteren Admins."} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
                 </div>
             {/if}
         </div>
@@ -369,16 +329,55 @@
             <div class="modal">
                 <h2>Neue Klasse erstellen</h2>
                 <div class="form-group">
-                    <label>Name der Klasse (z.B. 10a)</label>
-                    <input type="text" bind:value={newClass.name} placeholder="Klassenname..." autofocus />
+                    <label for="new-class-name">Name der Klasse (z.B. 10a)</label>
+                    <input id="new-class-name" type="text" bind:value={newClass.name} placeholder="Klassenname..." />
                 </div>
                 <div class="form-group">
-                    <label>Jahrgangsstufe (z.B. 10)</label>
-                    <input type="number" bind:value={newClass.grade} placeholder="Stufe..." />
+                    <label for="new-class-grade">Jahrgangsstufe (z.B. 10)</label>
+                    <input id="new-class-grade" type="number" bind:value={newClass.grade} placeholder="Stufe..." />
                 </div>
                 <div class="modal-actions">
                     <button class="btn-small secondary" onclick={() => showClassModal = false}>Abbrechen</button>
                     <button class="btn-small grant" onclick={createClass}>Erstellen</button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- ROLE MODAL -->
+    {#if roleModalVisible && roleModalUser}
+        <div class="modal-backdrop" transition:fade>
+            <div class="modal">
+                <h2>{t('admin.role_modal_title', { name: roleModalUser.full_name || roleModalUser.id.slice(0,8) })}</h2>
+                <div class="form-group">
+                    <fieldset class="form-group role-fieldset">
+                        <legend>{t('admin.role_modal_label')}</legend>
+                        <div class="role-options">
+                            <label class="role-option">
+                                <input type="radio" name="role" value="student" bind:group={roleModalNewRole} class="role-radio" />
+                                <span class="role-box"><span class="role-icon">🎓</span><span class="role-name">{t('admin.role_option_student')}</span></span>
+                            </label>
+
+                            <label class="role-option">
+                                <input type="radio" name="role" value="teacher" bind:group={roleModalNewRole} class="role-radio" />
+                                <span class="role-box"><span class="role-icon">👩‍🏫</span><span class="role-name">{t('admin.role_option_teacher')}</span></span>
+                            </label>
+
+                            <label class="role-option">
+                                <input type="radio" name="role" value="parent" bind:group={roleModalNewRole} class="role-radio" />
+                                <span class="role-box"><span class="role-icon">👪</span><span class="role-name">{t('admin.role_option_parent')}</span></span>
+                            </label>
+
+                            <label class="role-option">
+                                <input type="radio" name="role" value="admin" bind:group={roleModalNewRole} class="role-radio" />
+                                <span class="role-box"><span class="role-icon">🛡️</span><span class="role-name">{t('admin.role_option_admin')}</span></span>
+                            </label>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-small secondary" onclick={closeRoleModal}>{t('admin.role_modal_cancel')}</button>
+                    <button class="btn-small grant" onclick={confirmRoleChange}>{t('admin.role_modal_confirm')}</button>
                 </div>
             </div>
         </div>
@@ -441,13 +440,8 @@
     th { text-align: left; padding: 1rem; background: #f8fafc; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
     td { padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 
-    tr.pending { background-color: #fff7ed; }
+    /* row-specific and user table styles moved to UserTable.svelte */
 
-    .user-info { display: flex; flex-direction: column; }
-    .uuid { color: #94a3b8; font-family: monospace; font-size: 0.8rem; }
-
-    .status-ok { color: #16a34a; font-weight: 600; font-size: 0.85rem; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 99px; }
-    .status-no { color: #dc2626; font-weight: 600; font-size: 0.85rem; background: #fee2e2; padding: 0.2rem 0.6rem; border-radius: 99px; }
     .badge.gray { background: #f1f5f9; color: #475569; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
 
     .actions {
@@ -461,7 +455,6 @@
     /* BUTTONS */
     .btn-small { border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.2s; white-space: nowrap;}
     .btn-small.grant { background: #22c55e; color: white; }
-    .btn-small.revoke { background: #f59e0b; color: white; }
     .btn-small.secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     .btn-small.danger { background: #fee2e2; color: #dc2626; }
     .btn-small:hover { opacity: 0.9; }
@@ -471,27 +464,8 @@
     }
     .btn-add:hover { background: #2563eb; }
 
-    .me-badge { color: #94a3b8; font-style: italic; font-size: 0.85rem; }
     .loading, .empty { padding: 2rem; text-align: center; color: #94a3b8; font-style: italic;}
 
-    /* DROPDOWN */
-    .dropdown-wrapper { position: relative; display: inline-block; }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        top: 100%; right: 0; margin-top: 5px;
-        background-color: white; min-width: 140px;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-        z-index: 9999; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;
-    }
-    .dropdown-wrapper:hover .dropdown-content { display: block; }
-    .dropdown-content button {
-        color: #334155; padding: 10px 15px; text-decoration: none; display: block; width: 100%; text-align: left; border: none; background: none; cursor: pointer; font-size: 0.85rem;
-    }
-    .dropdown-content button:hover { background-color: #f1f5f9; }
-    .dropdown-content button.danger { color: #ef4444; }
-    .dropdown-content button.danger:hover { background-color: #fef2f2; }
-    .divider { height: 1px; background: #f1f5f9; margin: 0; }
 
     /* MODAL */
     .modal-backdrop {
@@ -505,4 +479,45 @@
     .form-group label { display: block; margin-bottom: 0.5rem; color: #475569; font-weight: 500; font-size: 0.9rem; }
     .form-group input { width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem; }
+
+    /* Role radio visual improvements */
+    .role-fieldset { border: 1px solid #e6edf8; padding: 0.75rem; border-radius: 8px; margin: 0; }
+    .role-fieldset legend { padding: 0 0.5rem; font-weight: 600; color: #334155; }
+    .role-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+    .role-option { display: block; }
+    /* make the actual radio cover the whole option so clicking anywhere toggles it */
+    .role-option { position: relative; }
+    .role-option .role-radio { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; }
+    .role-option .role-box {
+        display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid transparent; background: #fff; cursor: pointer; transition: all 0.15s ease-in-out;
+        position: relative; z-index: 1;
+    }
+    .role-option .role-icon { font-size: 1.15rem; }
+    .role-option .role-name { font-weight: 600; color: #0f172a; }
+
+    /* Hover/focus/checked states */
+    .role-option:hover .role-box { background: #f8fbff; border-color: #e6eefc; }
+    .role-option:focus-within .role-box { box-shadow: 0 0 0 3px rgba(59,130,246,0.12); border-color: #3b82f6; }
+    .role-option .role-radio:checked + .role-box { background: #eef2ff; border-color: #c7d2fe; box-shadow: inset 0 0 0 2px rgba(59,130,246,0.06); }
+    .role-option .role-radio:checked + .role-box::after {
+        content: '✓';
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #1e3a8a;
+        font-weight: 700;
+        font-size: 0.95rem;
+        z-index: 2;
+    }
+
+    /* Make the whole .role-box clickable (label handles it) */
+    /* .role-option already position: relative above */
+
+    /* For small screens stack options */
+    @media (max-width: 520px) {
+        .role-options { grid-template-columns: 1fr; }
+    }
+
+    /* end role styles */
 </style>
