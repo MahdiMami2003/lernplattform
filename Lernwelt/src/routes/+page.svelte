@@ -32,6 +32,9 @@
 		try {
 			message = $_('login.logging_in');
 
+			// Ensure previous session is cleared entirely
+			await supabase.auth.signOut();
+
 			const { data, error } = await supabase.auth.signInWithPassword({
 				email: email,
 				password: password
@@ -54,15 +57,15 @@
 
 			message = $_('login.success_redirect');
 
-			// ✅ UPDATE: Separate Weiterleitung für Admins
+			// ✅ UPDATE: Separate Weiterleitung für Admins mit Hard Reload (Session Safety)
 			if (userData.role === 'student') {
-				await goto('/student_landing_page_id5');
+				window.location.href = '/student_landing_page_id5';
 			} else if (userData.role === 'admin') {
-				await goto('/admin_landing_page'); // Hier geht's jetzt zur Admin-Seite
+				window.location.href = '/admin_landing_page';
 			} else if (userData.role === 'teacher') {
-				await goto('/teacher_landing_page_id6');
+				window.location.href = '/teacher_landing_page_id6';
 			} else if (userData.role === 'parent') {
-				await goto('/parents_landing_page_id4');
+				window.location.href = '/parents_landing_page_id4';
 			} else {
 				// Falls keine Rolle gefunden wurde
 				throw new Error($_('login.no_valid_role'));
