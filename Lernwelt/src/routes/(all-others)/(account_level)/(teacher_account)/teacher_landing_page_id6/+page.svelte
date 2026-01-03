@@ -140,15 +140,22 @@
                 </form>
             </div>
         </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-			<div class="card">
-				<h3>🚀 Missionen</h3>
-				<p>Erstellen und verwalten Sie Lern-Missionen.</p>
-				<a href="/mission_management"><button class="small-btn">Missionen verwalten</button></a>
-			</div>
-		</div>
-	</div>
+    <!-- ============ MISSIONS ============ -->
+    <div class="general-section">
+        <h2>🚀 Missionen</h2>
+        <div class="general-grid">
+            <div class="card">
+                <h3>Missionen verwalten</h3>
+                <p>Erstellen und verwalten Sie Lern-Missionen.</p>
+                <a href="/mission_management"><button class="small-btn">Missionen verwalten</button></a>
+            </div>
+        </div>
+    </div>
 
 	<section class="class-manager-section">
 		<h2>🏫 {$_('teacher.manage_classes')}</h2>
