@@ -1,17 +1,34 @@
 <!-- Lernwelt/src/routes/(all-others)/(account_level)/(parent_account)/parents_landing_page_id4/+page.svelte-->
 <script>
+    import { onMount } from 'svelte';
     let { data } = $props();
 
     let { supabase, session } = data;
 
     import { _ } from '$lib/i18n/config';
+
+    let role = $state(null);
+    onMount(async () => {
+        try {
+            const { data: userData } = await supabase.auth.getUser();
+            const uid = userData?.user?.id;
+            if (uid) {
+                const { data: prof } = await supabase.from('profiles').select('role').eq('id', uid).single();
+                role = prof?.role || null;
+            }
+        } catch {}
+    });
 </script>
 
 <div id="placeholder" class="main_container">
     <h1>{$_('parent.title')}</h1>
     <div class="subtitle">{$_('parent.welcome')}</div>
     <div class="subtitle">{$_('parent.instruction')}</div>
-
+    {#if role === 'admin'}
+        <p style="text-align:center; margin-top: 0.5rem;">
+            <a href="/admin_landing_page" class="class-link">🛡️ Zum Admin-Dashboard</a>
+        </p>
+    {/if}
     <br>
 
     <!-- Link to the other websites -->
@@ -52,6 +69,8 @@
             </div>
         </li>
     </ul>
+
+
 </div>
 
 <style>

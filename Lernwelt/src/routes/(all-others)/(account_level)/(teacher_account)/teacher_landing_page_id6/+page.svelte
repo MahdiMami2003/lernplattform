@@ -103,6 +103,11 @@
     <p class="untertitel">
         {$_('teacher.subtitle')}
     </p>
+    {#if role === 'admin'}
+        <p style="text-align:center; margin-top: 0.5rem;">
+            <a href="/admin_landing_page" class="class-link">🛡️ Zum Admin-Dashboard</a>
+        </p>
+    {/if}
     <!-- ============ OVERVIEW ============ -->
     <div class="overview">
         <h2>{$_('teacher.pedagogical_tips')}</h2>
@@ -197,6 +202,8 @@
             </div>
         {/if}
     </section>
+
+
 </div>
 
 <style>

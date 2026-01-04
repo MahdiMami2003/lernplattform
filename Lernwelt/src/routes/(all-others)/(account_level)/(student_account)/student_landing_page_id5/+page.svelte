@@ -1,7 +1,6 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/(student_account)/student_landing_page_id5/+page.svelte-->
 <script lang="ts">
-    //import { onMount } from "svelte";
-
+    import { onMount } from "svelte";
     let { data } = $props();
 
     let { supabase, session } = data;
@@ -9,12 +8,31 @@
     import { _ } from '$lib/i18n/config';
 
     let user = session?.user.user_metadata.full_name || $_('student.generic_name');
+
+
+
+    let role = $state(null);
+    onMount(async () => {
+        try {
+            const { data: userData } = await supabase.auth.getUser();
+            const uid = userData?.user?.id;
+            if (uid) {
+                const { data: prof } = await supabase.from('profiles').select('role').eq('id', uid).single();
+                role = prof?.role || null;
+            }
+        } catch {}
+    });
 </script>
 
 <div id="placeholder" class="main_container">
     <h1>{$_('student.title')}{user}</h1>
     <div class="subtitle">{$_('student.welcome')}</div>
     <div class="subtitle">{$_('student.choose_topic')}</div>
+    {#if role === 'admin'}
+        <p style="text-align:center; margin-top: 0.5rem;">
+            <a href="/admin_landing_page" class="class-link">🛡️ Zum Admin-Dashboard</a>
+        </p>
+    {/if}
     <br />
 
     <ul>
@@ -46,6 +64,8 @@
             <div class="link_description">{$_('student.materials_desc')}</div>
         </li>
     </ul>
+
+
 </div>
 
 <style>

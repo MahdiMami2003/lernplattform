@@ -43,11 +43,11 @@
 
     // Sektoren-Status (welche sind aufgeklappt?)
     let isOpen = $state({
-        admins: true,
-        teachers: true,
-        parents: true,
-        classes: true,
-        students: true
+        admins: false,
+        teachers: false,
+        parents: false,
+        classes: false,
+        students: false
     });
 
     // Gruppierungen (Automatisch gefiltert)
@@ -283,7 +283,11 @@
     <header>
         <h1>🛡️ Admin Dashboard</h1>
         <p>Verwalte Nutzer, Rechte und Klassen.</p> <br>
-        <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">Hier geht's zum Lehrpersonen-Dashboard</a>
+        <div style="display:flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">Zum Lehrpersonen-Dashboard</a>
+            <a href="/parents_landing_page_id4" style="color: var(--text-primary)">Zum Eltern-Dashboard</a>
+            <a href="/student_landing_page_id5" style="color: var(--text-primary)">Zum Schüler-Dashboard</a>
+        </div>
     </header>
 
     {#if loading}
@@ -422,7 +426,7 @@
             >
                 <div class="title-group">
                     <span class="icon">👥</span>
-                    <h2>Schüler nach Klassen</h2>
+                    <h2>Schüler:innen nach Klassen</h2>
                 </div>
                 <span class="chevron" class:rotated={isOpen.students}>▼</span>
             </div>
@@ -430,7 +434,7 @@
             {#if isOpen.students}
                 <div class="section-content" transition:slide>
                     {#if Object.keys(studentsByClass).length === 0}
-                        <div class="empty">Keine Schüler gefunden.</div>
+                        <div class="empty">Keine Schüler:in gefunden.</div>
                     {:else}
                         <div class="table-responsive">
                             {#each allClasses as c}
