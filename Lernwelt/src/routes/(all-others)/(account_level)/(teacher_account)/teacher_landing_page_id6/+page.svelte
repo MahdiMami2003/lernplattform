@@ -197,16 +197,6 @@
             </div>
         {/if}
     </section>
-
-    {#if role === 'admin'}
-        <div class="admin-panel" id="adminPanel">
-            <h2>Admin-Verwaltung</h2>
-            <p>Hier können Sie Nutzer, Klassen und Berechtigungen verwalten.</p>
-            <button class="admin-btn">Benutzer verwalten</button>
-            <button class="admin-btn">Klassen verwalten</button>
-            <button class="admin-btn">Berechtigungen bearbeiten</button>
-        </div>
-    {/if}
 </div>
 
 <style>
