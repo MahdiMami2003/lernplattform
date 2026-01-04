@@ -443,13 +443,18 @@
                                     <thead>
                                         <tr>
                                             <th>Name</th>
-                                            <th style="text-align: right;">Aktionen</th>
+                                            <th style="text-align: right;">Details</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {#each (studentsByClass[c.id] || []) as s}
                                             <tr>
-                                                <td>{s.full_name}</td>
+                                                <td>
+                                                    <div>
+                                                        <strong>{s.full_name}</strong>
+                                                        <span class="id-sub">{s.id.slice(0,8)}…</span>
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     <div class="actions">
                                                         <button class="btn-small" onclick={() => openEditStudent(s)}>Bearbeiten</button>
@@ -467,14 +472,18 @@
                                     <thead>
                                         <tr>
                                             <th>Name</th>
-                                            <th>E-Mail</th>
-                                            <th style="text-align: right;">Aktionen</th>
+                                            <th style="text-align: right;">Details</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {#each studentsByClass[-1] as s}
                                             <tr>
-                                                <td>{s.full_name}</td>
+                                                <td>
+                                                    <div>
+                                                        <strong>{s.full_name}</strong>
+                                                        <span class="id-sub">{s.id.slice(0,8)}…</span>
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     <div class="actions">
                                                         <button class="btn-small" onclick={() => openEditStudent(s)}>Bearbeiten</button>
@@ -729,4 +738,7 @@
     .class-link:hover {
         text-decoration: underline;
     }
+
+    .id-muted { color: #94a3b8; font-weight: 500; margin-left: 0.25rem; }
+    .id-sub { display: block; color: #94a3b8; font-weight: 500; font-size: 0.8rem; margin-top: 0.15rem; }
 </style>
