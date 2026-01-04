@@ -1,31 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 
-// Liste der Routen (Pfad-Präfixe), die wirklich geschützt werden sollen
-const protectedPrefixes = [
-    '/progress_page_id11',
-    '/game_page_id12',
-    '/cloze_game',
-    '/mathe_game',
-    '/physik_game',
-    '/deutsch_game',
-    '/englisch_game',
-    '/weekly_test_page_id17',
-    '/weekly_tests_content_page'
-];
-
-function needsAuth(pathname) {
-    return protectedPrefixes.some((p) => pathname.startsWith(p));
-}
-
 export const load = async ({ locals, url }) => {
-    const pathname = url.pathname;
-
-    // Wenn die Route nicht in der geschützten Liste ist -> kein Guard hier
-    if (!needsAuth(pathname)) {
-        return {}; // öffentlich zugänglich
-    }
-
-    // Für geschützte Routen: Session + Rollen prüfen
     const session = await locals.getSession();
 
     if (!session) {

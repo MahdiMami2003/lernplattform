@@ -2,22 +2,16 @@ import type { RequestHandler } from './$types';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
 import { createClient } from '@supabase/supabase-js';
+import { ensureRole } from '$lib/server/roleGuard.js';
 
 // Helper: ensure requester is admin
 async function assertAdmin(event: any) {
-  const session = await event.locals.getSession?.();
-  if (!session?.user?.id) {
-    return { ok: false, status: 401, message: 'Not authenticated' };
+  try {
+    const { session } = await ensureRole({ locals: event.locals, url: new URL('http://localhost'), allowed: ['admin'] });
+    return { ok: true, session };
+  } catch (e) {
+    return { ok: false, status: 303, message: 'Forbidden', redirectTo: '/no_permission_page_id18' };
   }
-  const { data: prof } = await event.locals.supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single();
-  if (prof?.role !== 'admin') {
-    return { ok: false, status: 403, message: 'Forbidden' };
-  }
-  return { ok: true, session };
 }
 
 // GET /api/admin/users/:id -> returns auth email for user id

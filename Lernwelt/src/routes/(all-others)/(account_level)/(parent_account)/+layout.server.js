@@ -1,4 +1,5 @@
 import { redirect } from '@sveltejs/kit';
+import { ensureRole } from '$lib/server/roleGuard.js';
 
 // Nur diese Pfad-Präfixe benötigen wirklich einen Parent-Login
 const protectedPrefixes = [
@@ -33,35 +34,11 @@ export const load = async ({ locals, url }) => {
         return {}; // öffentlich zugänglich
     }
 
-    // Für geschützte Routen: Session + Rollen prüfen
-    const session = await locals.getSession();
-
-    if (!session) {
+    try {
+        const { session, role } = await ensureRole({ locals, url, allowed: ['parent','admin'] });
+        return { session, role };
+    } catch (e) {
         const returnTo = encodeURIComponent(url.pathname + url.search);
         throw redirect(303, `/no_permission_page_id18?redirectTo=${returnTo}`);
-    }
-
-    try {
-        const { data: profile, error } = await locals.supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-
-        if (error) {
-            console.error('Fehler beim Laden des Profils (parent guard):', error);
-            throw redirect(303, '/no_permission_page_id18');
-        }
-
-        const role = profile?.role || session.user?.user_metadata?.role || session.user?.app_metadata?.role;
-
-        if (!['parent', 'admin'].includes(role)) {
-            throw redirect(303, '/no_permission_page_id18');
-        }
-
-        return { session, role };
-    } catch (err) {
-        console.error('Unerwarteter Fehler im parent guard:', err);
-        throw redirect(303, '/no_permission_page_id18');
     }
 };
