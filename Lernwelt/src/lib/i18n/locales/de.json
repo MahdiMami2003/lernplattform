@@ -21,10 +21,15 @@
   "teacher": {
     "title": "Lehrpersonen-Dashboard",
     "subtitle": "Hier sehen Sie Ihre Klassen, Fächer und können Lernmaterialien bearbeiten",
-    "pedagogical_tips": "Pädagogische Tipps",
+    "pedagogical_tips": "Allgemeine Übersicht",
+    "nametag_weekly": "Wochentests",
+    "nametag_materials": "Lernmaterialien",
+    "nametag_tips": "Pädagogische Tipps",
+    "nametag_appointments": "Termine & Aktuelles",
+    "nametag_classes": "Meine Klassen",
     "edit_tips": "Tipps bearbeiten",
-    "general_admin": "Allgemeine Verwaltung",
-    "minigames": "Minispiele",
+    "general_admin": "Verwaltung & Inhalte bearbeiten",
+    "content_creation": "Neue Inhalte erstellen",
     "minigames_desc": "Fragen für die Minispiele erstellen und bearbeiten.",
     "manage_questions": "Fragen verwalten",
     "manage_classes": "Meine Klassen verwalten",
@@ -77,6 +82,10 @@
     "role_teacher": "(Lehrperson)",
     "role_parent": "(Elternteil)",
     "role_admin": "(Admin)",
+    "dashboard_student": "Zum Schüler:in Dashboard",
+    "dashboard_teacher": "Zum Lehrpersonen-Dashboard",
+    "dashboard_parent": "Zum Eltern-Dashboard",
+    "dashboard_admin": "Zum Admin-Dashboard",
     "not_logged_in": "Du bist nicht eingeloggt.",
     "change_language": "Sprache ändern",
     "search_placeholder": "Suchen...",
@@ -403,5 +412,18 @@
     "loading": {
       "classes": "Klassen werden geladen..."
     }
+  },
+  "admin": {
+    "grant_rights": "Rechte geben",
+    "revoke_rights": "Rechte nehmen",
+    "change_role_button": "Rolle ändern",
+    "role_modal_title": "Rolle ändern",
+    "role_modal_label": "Wähle eine Rolle:",
+    "role_option_student": "Schüler/in",
+    "role_option_teacher": "Lehrer/in",
+    "role_option_parent": "Elternteil",
+    "role_option_admin": "Administrator/in",
+    "role_modal_cancel": "Abbrechen",
+    "role_modal_confirm": "Rolle ändern"
   }
 }
