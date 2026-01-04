@@ -1,364 +1,354 @@
 <!-- Lernwelt/src/routes/(all-others)/(account_level)/(no_login_required)/material_page_id14/+page.svelte -->
 <script>
-	import { onMount, tick } from 'svelte';
-	import { page } from '$app/stores';
+    import { onMount } from 'svelte';
 
-	import { locale } from 'svelte-i18n';
-	import { _ } from 'svelte-i18n';
-	let { data } = $props();
+    import {locale} from "svelte-i18n";
+    import { _ } from 'svelte-i18n';
+    let { data } = $props();
 
-	let { supabase, session } = data;
+    let { supabase, session } = data;
 
-	let userRole = $state(null);
-	let editingRight = $state(null);
+    let userRole = $state(null);
+    let editingRight = $state(null);
 
-	// Scroll to hash handling
-	function scrollToHash() {
-		const hash = $page.url.hash;
-		if (hash) {
-			const id = decodeURIComponent(hash.substring(1));
-			const element = document.getElementById(id);
-			if (element) {
-				element.scrollIntoView({ behavior: 'smooth' });
-			}
-		}
-	}
+    onMount(async () => {
+        // Hole den eingeloggten User
+        const { data: userData, error } = await supabase.auth.getUser();
 
-	let materials = $state([]);
-	let loading = $state(true);
-	let errorMsg = $state('');
+        if (error || !userData?.user) {
+            console.error("Fehler beim Holen des Users:", error);
+            return;
+        }
 
-	async function loadMaterials() {
-		loading = true;
-		let query = supabase.from('materials').select('*').order('subject', { ascending: true });
+        // Hole Profil aus DB (mit editing_right)
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role, editing_right')
+            .eq('id', userData.user.id)
+            .single();
 
-		let { data: rows, error } = await query;
+        if (profileError) {
+            console.error("Fehler beim Holen des Profils:", profileError);
+            return;
+        } else {
+            console.log("Gefundenes Profil:", profile);
+            userRole = profile.role;
+            editingRight = profile.editing_right;
+            console.log("User Role:", userRole, "Editing Right:", editingRight);
+        }
+    });
 
-		if (error) {
-			console.error('Fehler:', error);
-			errorMsg = error.message;
-			materials = [];
-		} else {
-			materials = rows || [];
-			// Wait for DOM update then scroll
-			await tick();
-			setTimeout(scrollToHash, 100); // Slight delay to ensure layout
-		}
-		loading = false;
-	}
+    async function getMaterials() {
+        let query = supabase
+            .from('materials')
+            .select('*')
+            .order('subject', { ascending: true });
 
-	onMount(async () => {
-		// Load User
-		const { data: userData, error } = await supabase.auth.getUser();
+        // TODO: Klassenfilter für Studenten implementieren, sobald Klassenstruktur bekannt
+        // Aktuell: Alle Materialien für alle anzeigen
 
-		if (error || !userData?.user) {
-			console.error('Fehler beim Holen des Users:', error);
-		} else {
-			// Load Profile
-			const { data: profile, error: profileError } = await supabase
-				.from('profiles')
-				.select('role, editing_right')
-				.eq('id', userData.user.id)
-				.single();
+        let {data: materials, error} = await query;
 
-			if (profileError) {
-				console.error('Fehler beim Holen des Profils:', profileError);
-			} else {
-				userRole = profile.role;
-				editingRight = profile.editing_right;
-			}
-		}
+        if (error) {
+            console.error('Fehler:', error);
+            return [];
+        }
 
-		// Load Materials
-		await loadMaterials();
-	});
+        return materials || [];
+    }
 
-	/**
-	 * @param {any[]} materials
-	 * @returns {Record<string, any[]>}
-	 */
-	function groupBySubject(materials) {
-		/** @type {Record<string, any[]>} */
-		const grouped = {};
+    /**
+     * @param {any[]} materials
+     * @returns {Record<string, any[]>}
+     */
+    function groupBySubject(materials) {
+        /** @type {Record<string, any[]>} */
+        const grouped = {};
 
-		materials.forEach((material) => {
-			if (!grouped[material.subject]) {
-				grouped[material.subject] = [];
-			}
-			grouped[material.subject].push(material);
-		});
+        materials.forEach(material => {
+            if (!grouped[material.subject]) {
+                grouped[material.subject] = [];
+            }
+            grouped[material.subject].push(material);
+        });
 
-		return grouped;
-	}
+        return grouped;
+    }
 
-	/**
-	 * @param {number} id
-	 */
-	async function deleteMaterial(id) {
-		if (!confirm('Wirklich löschen?')) return;
+    /**
+     * @param {number} id
+     */
+    async function deleteMaterial(id) {
+        if (!confirm('Wirklich löschen?')) return;
 
-		const { error } = await supabase.from('materials').delete().eq('id', id);
+        const { error } = await supabase
+            .from('materials')
+            .delete()
+            .eq('id', id);
 
-		if (error) {
-			alert('Fehler beim Löschen!');
-			console.error(error);
-		} else {
-			window.location.reload();
-		}
-	}
+        if (error) {
+            alert('Fehler beim Löschen!');
+            console.error(error);
+        } else {
+            window.location.reload();
+        }
+    }
 
-	/**
-	 * Prüft ob User Bearbeitungsrechte hat
-	 */
-	function hasEditingRights() {
-		return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
-	}
+    /**
+     * Prüft ob User Bearbeitungsrechte hat
+     */
+    function hasEditingRights() {
+        return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
+    }
 
-	function getTitle(material) {
-		return $locale === 'en' ? material.title_en || material.title : material.title;
-	}
-	function getDescription(material) {
-		return $locale === 'en'
-			? material.description_en || material.description
-			: material.description;
-	}
 
-	function getSubject(material) {
-		return $locale === 'en' ? material.subject_en || material.subject : material.subject;
-	}
+    function getTitle(material) {
+        return $locale === 'en'
+            ? material.title_en || material.title
+            : material.title;
+    }
+    function getDescription(material) {
+        return $locale === 'en'
+            ? material.description_en || material.description
+            : material.description;
+    }
+
+    function getSubject(material) {
+        return $locale === 'en'
+            ? material.subject_en || material.subject
+            : material.subject;
+    }
 </script>
 
 <div id="placeholder" class="main_container">
-	<div class="header">
-		<h1>{$_('materials.title')}</h1>
-		{#if hasEditingRights()}
-			<a href="/form_for_adding_content" class="add-button">➕ {$_('materials.add')}</a>
-		{/if}
-	</div>
+    <div class="header">
+        <h1>{$_('materials.title')}</h1>
+        {#if hasEditingRights()}
+            <a href="/form_for_adding_content" class="add-button">➕ {$_('materials.add')}</a>
+        {/if}
+    </div>
 
-	{#if loading}
-		<p class="loading">{$_('materials.loading')}...</p>
-	{:else if errorMsg}
-		<p class="error">{$_('materials.load_error')} {errorMsg}</p>
-	{:else if materials && materials.length > 0}
-		{@const groupedMaterials = groupBySubject(materials)}
+    {#await getMaterials()}
+        <p class="loading">{$_('materials.loading')}...</p>
+    {:then materials}
+        {#if materials && materials.length > 0}
+            {@const groupedMaterials = groupBySubject(materials)}
 
-		{#each Object.entries(groupedMaterials) as [subject, items]}
-			<section class="subject-section" id={subject}>
-				<h2>{subject}</h2>
-				<ul>
-					{#each items as material}
-						<li class="material-item">
-							<a href="/materials_content_page_16/{material.id}" class="material-link">
-								{getTitle(material)}
-							</a>
+            {#each Object.entries(groupedMaterials) as [subject, items]}
+                <section class="subject-section">
+                    <h2>{subject}</h2>
+                    <ul>
+                        {#each items as material}
+                            <li class="material-item">
+                                <a href="/materials_content_page_16/{material.id}" class="material-link">
+                                    {getTitle(material)}
+                                </a>
 
-							{#if hasEditingRights()}
-								<button class="delete-btn" on:click={() => deleteMaterial(material.id)}>
-									🗑️ {$_('materials.delete')}
-								</button>
-							{/if}
-						</li>
-					{/each}
-				</ul>
-			</section>
-		{/each}
-	{:else}
-		<p class="no-materials">{$_('materials.empty')}</p>
-	{/if}
+                                {#if hasEditingRights()}
+                                    <button class="delete-btn" on:click={() => deleteMaterial(material.id)}>
+                                        🗑️ {$_('materials.delete')}
+                                    </button>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
+                </section>
+            {/each}
+        {:else}
+            <p class="no-materials">{$_('materials.empty')}</p>
+        {/if}
+    {:catch error}
+        <p class="error">{$_('materials.load_error')} {error?.message ?? ''}</p>
+    {/await}
 </div>
 
 <style>
-	/* ============ MAIN CONTAINER ============ */
-	#placeholder {
-		margin: 0;
-		padding: 2rem;
-		min-height: 100vh;
-		font-family: 'Inter', Arial, Helvetica, sans-serif;
-		background-color: var(--bg-main);
-		color: var(--text-primary);
-		transition:
-			background-color 0.3s ease,
-			color 0.3s ease;
-	}
+    /* ============ MAIN CONTAINER ============ */
+    #placeholder {
+        margin: 0;
+        padding: 2rem;
+        min-height: 100vh;
+        font-family: "Inter", Arial, Helvetica, sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-	/* ============ HEADER & TITEL ============ */
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 2.5rem;
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
+    /* ============ HEADER & TITEL ============ */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
 
-	h1 {
-		color: var(--text-primary);
-		margin: 0;
-		font-size: clamp(1.8rem, 4vw, 2.5rem);
-		font-weight: 700;
-		transition: color 0.3s ease;
-	}
+    h1 {
+        color: var(--text-primary);
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 700;
+        transition: color 0.3s ease;
+    }
 
-	.add-button {
-		background-color: var(--button-bg);
-		color: var(--text-primary);
-		padding: 0.65rem 1.3rem;
-		border-radius: 999px;
-		text-decoration: none;
-		font-weight: 600;
-		border: 1px solid var(--button-border);
-		transition: all 0.2s ease;
-		cursor: pointer;
-		white-space: nowrap;
-		min-height: 44px;
-		display: inline-flex;
-		align-items: center;
-	}
+    .add-button {
+        background-color: var(--button-bg);
+        color: var(--text-primary);
+        padding: 0.65rem 1.3rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        border: 1px solid var(--button-border);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        white-space: nowrap;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
 
-	.add-button:hover {
-		background-color: var(--button-hover);
-		transform: translateY(-2px);
-	}
+    .add-button:hover {
+        background-color: var(--button-hover);
+        transform: translateY(-2px);
+    }
 
-	.add-button:focus-visible {
-		outline: 2px solid var(--text-primary);
-		outline-offset: 2px;
-	}
+    .add-button:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
 
-	/* ============ SUBJECT SECTIONS ============ */
-	.subject-section {
-		margin-bottom: 2.5rem;
-	}
+    /* ============ SUBJECT SECTIONS ============ */
+    .subject-section {
+        margin-bottom: 2.5rem;
+    }
 
-	.subject-section h2 {
-		color: var(--text-primary);
-		border-bottom: 3px solid var(--border-accent);
-		padding-bottom: 0.75rem;
-		margin-bottom: 1.2rem;
-		font-size: clamp(1.3rem, 3vw, 1.8rem);
-		font-weight: 600;
-		transition:
-			color 0.3s ease,
-			border-color 0.3s ease;
-	}
+    .subject-section h2 {
+        color: var(--text-primary);
+        border-bottom: 3px solid var(--border-accent);
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.2rem;
+        font-size: clamp(1.3rem, 3vw, 1.8rem);
+        font-weight: 600;
+        transition: color 0.3s ease, border-color 0.3s ease;
+    }
 
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-	/* ============ MATERIAL ITEMS ============ */
-	.material-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 0.8rem;
-		gap: 1rem;
-		flex-wrap: wrap;
-	}
+    /* ============ MATERIAL ITEMS ============ */
+    .material-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 
-	.material-link {
-		flex: 1;
-		min-width: 250px;
-		display: block;
-		padding: 1rem 1.2rem;
-		background-color: var(--bg-card);
-		border-left: 4px solid var(--border-accent);
-		border-radius: 0.8rem;
-		text-decoration: none;
-		color: var(--text-primary);
-		font-weight: 500;
-		transition: all 0.2s ease;
-		border: 1px solid var(--border-color);
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-		min-height: 44px;
-		display: flex;
-		align-items: center;
-	}
+    .material-link {
+        flex: 1;
+        min-width: 250px;
+        display: block;
+        padding: 1rem 1.2rem;
+        background-color: var(--bg-card);
+        border-left: 4px solid var(--border-accent);
+        border-radius: 0.8rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
 
-	.material-link:hover {
-		background-color: var(--bg-hover);
-		border-left-color: var(--border-accent);
-		transform: translateX(4px);
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-	}
+    .material-link:hover {
+        background-color: var(--bg-hover);
+        border-left-color: var(--border-accent);
+        transform: translateX(4px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
 
-	.material-link:focus-visible {
-		outline: 2px solid var(--text-primary);
-		outline-offset: 2px;
-	}
+    .material-link:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
 
-	/* ============ DELETE BUTTON ============ */
-	.delete-btn {
-		padding: 0.5rem 0.9rem;
-		background-color: var(--delete-btn);
-		color: white;
-		border: none;
-		border-radius: 0.6rem;
-		cursor: pointer;
-		font-size: 0.9rem;
-		font-weight: 600;
-		transition: all 0.2s ease;
-		white-space: nowrap;
-		min-height: 44px;
-		min-width: 44px;
-	}
+    /* ============ DELETE BUTTON ============ */
+    .delete-btn {
+        padding: 0.5rem 0.9rem;
+        background-color: var(--delete-btn);
+        color: white;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        min-height: 44px;
+        min-width: 44px;
+    }
 
-	.delete-btn:hover {
-		background-color: var(--delete-hover);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-	}
+    .delete-btn:hover {
+        background-color: var(--delete-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
 
-	.delete-btn:focus-visible {
-		outline: 2px solid white;
-		outline-offset: 2px;
-	}
+    .delete-btn:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 2px;
+    }
 
-	/* ============ MESSAGES ============ */
-	.loading,
-	.no-materials {
-		text-align: center;
-		color: var(--text-muted);
-		font-size: 1.1rem;
-		padding: 2rem;
-		transition: color 0.3s ease;
-	}
+    /* ============ MESSAGES ============ */
+    .loading,
+    .no-materials {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        padding: 2rem;
+        transition: color 0.3s ease;
+    }
 
-	.error {
-		color: var(--error-color);
-		text-align: center;
-		padding: 1.5rem;
-		background-color: var(--bg-card);
-		border-radius: 0.8rem;
-		border-left: 4px solid var(--error-color);
-		transition: all 0.3s ease;
-	}
+    .error {
+        color: var(--error-color);
+        text-align: center;
+        padding: 1.5rem;
+        background-color: var(--bg-card);
+        border-radius: 0.8rem;
+        border-left: 4px solid var(--error-color);
+        transition: all 0.3s ease;
+    }
 
-	/* ============ RESPONSIVE ============ */
-	@media (max-width: 600px) {
-		#placeholder {
-			padding: 1rem;
-		}
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 600px) {
+        #placeholder {
+            padding: 1rem;
+        }
 
-		.material-item {
-			flex-direction: column;
-			align-items: flex-start;
-		}
+        .material-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
 
-		.delete-btn {
-			align-self: flex-end;
-			margin-right: 0;
-		}
+        .delete-btn {
+            align-self: flex-end;
+            margin-right: 0;
+        }
 
-		.material-link {
-			min-width: 100%;
-		}
+        .material-link {
+            min-width: 100%;
+        }
 
-		h1 {
-			font-size: 1.5rem;
-		}
-	}
+        h1 {
+            font-size: 1.5rem;
+        }
+    }
 </style>

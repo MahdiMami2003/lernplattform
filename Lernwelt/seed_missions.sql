@@ -1,7 +1,4 @@
 
--- delete existing missions progress to avoid foreign key violations
-DELETE FROM public.missions_progress;
-
 -- delete existing missions to ensure clean state and avoid redundancy
 DELETE FROM public.missions;
 
@@ -28,13 +25,10 @@ INSERT INTO public.missions (title, description, xp_reward, total) VALUES
 ('Elektro-Ingenieur', 'Beantworte 4 Fragen zu Strom & Spannung', 90, 4),
 ('Astro-Pilot', 'Löse 3 Aufgaben zum Sonnensystem', 75, 3),
 
--- Allgemeine & Streak Missionen
-('Dranbleiber', 'Logge dich 3 Tage in Folge ein', 100, 3),
+-- Allgemeine & Streak Missionen - REMOVED per user request
+-- Only explicit task solving commands kept below
 ('Viel-Lerner', 'Löse insgesamt 20 Aufgaben', 200, 20),
-('Perfektionist', 'Schließe eine Runde ohne Fehler ab', 150, 1),
-('Allrounder', 'Löse Aufgaben in 3 verschiedenen Fächern', 120, 3),
-('Nacht-Eule', 'Löse eine Aufgabe am Abend', 50, 1),
-('Früh-Starter', 'Löse eine Aufgabe am Morgen', 50, 1);
+('Allrounder', 'Löse Aufgaben in 3 verschiedenen Fächern', 120, 3);
 
 -- Note: User progress (missions_progress) might need to be reset or linked.
 -- Trigger logic usually handles new users, but existing users might miss these unless assigned.
