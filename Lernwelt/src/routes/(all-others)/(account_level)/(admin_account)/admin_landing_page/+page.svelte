@@ -31,18 +31,23 @@
         grade_level: number;
     };
 
+    type Student = Profile & { class_id: number | null };
+
     // --- STATE ---
     let users = $state<Profile[]>([]);
     let classes = $state<SchoolClass[]>([]);
     let loading = $state(true);
     let currentUserRole = $state('');
+    let studentsByClass = $state<Record<number, Student[]>>({});
+    let allClasses = $state<SchoolClass[]>([]);
 
     // Sektoren-Status (welche sind aufgeklappt?)
     let isOpen = $state({
         admins: true,
         teachers: true,
         parents: true,
-        classes: true
+        classes: true,
+        students: true
     });
 
     // Gruppierungen (Automatisch gefiltert)
@@ -59,6 +64,13 @@
     let roleModalUser = $state<any | null>(null);
     let roleModalNewRole = $state('student');
 
+    // Modal for editing a student
+    let editStudentModalOpen = $state(false);
+    let editStudentTarget = $state<Student | null>(null);
+    let editForm = $state({ full_name: '', class_id: 0 });
+    // adjust edit form: remove email from mutable fields
+    let editEmailReadonly = $state('');
+
     function openRoleModal(user: any) {
         roleModalUser = user;
         roleModalNewRole = user.role;
@@ -73,6 +85,29 @@
         if (!confirm(`Rolle von "${roleModalUser.full_name || roleModalUser.id}" zu "${roleModalNewRole}" ändern?`)) return;
         await changeRole(roleModalUser, roleModalNewRole);
         closeRoleModal();
+    }
+
+    async function loadAllStudentsGrouped() {
+        const { data: allStudents } = await supabase
+            .from('profiles')
+            .select('id, full_name, role, editing_right, class_id')
+            .eq('role', 'student')
+            .order('full_name', { ascending: true });
+
+        const { data: classesList } = await supabase
+            .from('classes')
+            .select('*')
+            .order('grade_level', { ascending: true })
+            .order('name', { ascending: true });
+
+        allClasses = classesList || [];
+        const grouped: Record<number, Student[]> = {};
+        (allStudents || []).forEach((s: any) => {
+            const key = s.class_id ?? -1;
+            grouped[key] = grouped[key] || [];
+            grouped[key].push(s as Student);
+        });
+        studentsByClass = grouped;
     }
 
     // --- INIT ---
@@ -93,7 +128,7 @@
         }
 
         // 2. Daten laden
-        await Promise.all([loadUsers(), loadClasses()]);
+        await Promise.all([loadUsers(), loadClasses(), loadAllStudentsGrouped()]);
         loading = false;
     }
 
@@ -173,6 +208,57 @@
         else classes = classes.filter(c => c.id !== cls.id);
     }
 
+    async function fetchAuthEmail(userId: string) {
+        try {
+            const res = await fetch(`/api/admin/users/${userId}`);
+            if (!res.ok) return '';
+            const json = await res.json();
+            return json.email || '';
+        } catch { return ''; }
+    }
+
+    async function openEditStudent(s: Student) {
+        editStudentTarget = s;
+        editForm.full_name = s.full_name || '';
+        editForm.class_id = s.class_id ?? 0;
+        editEmailReadonly = await fetchAuthEmail(s.id);
+        editStudentModalOpen = true;
+    }
+    function closeEditStudent() { editStudentModalOpen = false; editStudentTarget = null; }
+
+    async function saveStudentEdits() {
+        if (!editStudentTarget) return;
+        const updates: any = { full_name: editForm.full_name };
+        if (editForm.class_id) updates.class_id = editForm.class_id;
+        const { error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', editStudentTarget.id);
+        if (error) alert('Fehler beim Speichern: ' + error.message);
+        else {
+            // Refresh grouping
+            await loadAllStudentsGrouped();
+            closeEditStudent();
+        }
+    }
+
+    async function deleteStudent() {
+        if (!editStudentTarget) return;
+        if (!confirm(`Schüler "${editStudentTarget.full_name}" wirklich löschen?`)) return;
+        try {
+            const res = await fetch(`/api/admin/users/${editStudentTarget.id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const j = await res.json().catch(() => ({}));
+                alert('Fehler beim Löschen: ' + (j.error || res.statusText));
+                return;
+            }
+            await loadAllStudentsGrouped();
+            closeEditStudent();
+        } catch (e: any) {
+            alert('Fehler beim Löschen: ' + (e?.message || 'Unbekannter Fehler'));
+        }
+    }
+
     // Hilfsfunktion für Accessibility (Tastatur-Support für Divs)
     function handleKeydown(e: KeyboardEvent, key: string) {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -239,7 +325,11 @@
                                 <tbody>
                                 {#each classes as cls (cls.id)}
                                     <tr>
-                                        <td><strong>{cls.name}</strong></td>
+                                        <td>
+                                            <a class="class-link" href={`/class_page_id9/${cls.id}`} aria-label={`Zu Klasse ${cls.name} wechseln`}>
+                                                <strong>{cls.name}</strong>
+                                            </a>
+                                        </td>
                                         <td><span class="badge gray">Klasse {cls.grade_level}</span></td>
                                         <td>
                                             <div class="actions">
@@ -322,6 +412,81 @@
             {/if}
         </div>
 
+        <div class="section-card">
+            <div
+                class="section-header"
+                role="button"
+                tabindex="0"
+                onclick={() => toggleSection('students')}
+                onkeydown={(e) => handleKeydown(e, 'students')}
+            >
+                <div class="title-group">
+                    <span class="icon">👥</span>
+                    <h2>Schüler nach Klassen</h2>
+                </div>
+                <span class="chevron" class:rotated={isOpen.students}>▼</span>
+            </div>
+
+            {#if isOpen.students}
+                <div class="section-content" transition:slide>
+                    {#if Object.keys(studentsByClass).length === 0}
+                        <div class="empty">Keine Schüler gefunden.</div>
+                    {:else}
+                        <div class="table-responsive">
+                            {#each allClasses as c}
+                                <h3 style="margin: 1rem;">{c.name} (Kl. {c.grade_level})</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th style="text-align: right;">Aktionen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {#each (studentsByClass[c.id] || []) as s}
+                                            <tr>
+                                                <td>{s.full_name}</td>
+                                                <td>
+                                                    <div class="actions">
+                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>Bearbeiten</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {/each}
+                                    </tbody>
+                                </table>
+                            {/each}
+
+                            {#if (studentsByClass[-1]?.length)}
+                                <h3 style="margin: 1rem;">Ohne Klasse</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>E-Mail</th>
+                                            <th style="text-align: right;">Aktionen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {#each studentsByClass[-1] as s}
+                                            <tr>
+                                                <td>{s.full_name}</td>
+                                                <td>
+                                                    <div class="actions">
+                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>Bearbeiten</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {/each}
+                                    </tbody>
+                                </table>
+                            {/if}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+
     {/if}
 
     {#if showClassModal}
@@ -378,6 +543,35 @@
                 <div class="modal-actions">
                     <button class="btn-small secondary" onclick={closeRoleModal}>{t('admin.role_modal_cancel')}</button>
                     <button class="btn-small grant" onclick={confirmRoleChange}>{t('admin.role_modal_confirm')}</button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    {#if editStudentModalOpen && editStudentTarget}
+        <div class="modal-backdrop" transition:fade>
+            <div class="modal">
+                <h2>Schüler bearbeiten</h2>
+                <div class="form-group">
+                    <label for="edit-name">Name</label>
+                    <input id="edit-name" type="text" bind:value={editForm.full_name} />
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">E-Mail (nicht bearbeitbar)</label>
+                    <input id="edit-email" type="email" value={editEmailReadonly} disabled />
+                </div>
+                <div class="form-group">
+                    <label for="edit-class">Klasse</label>
+                    <select id="edit-class" bind:value={editForm.class_id}>
+                        {#each allClasses as c}
+                            <option value={c.id}>{c.name} (Kl. {c.grade_level})</option>
+                        {/each}
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-small secondary" onclick={closeEditStudent}>Abbrechen</button>
+                    <button class="btn-small grant" onclick={saveStudentEdits}>Speichern</button>
+                    <button class="btn-small danger" onclick={deleteStudent}>Löschen</button>
                 </div>
             </div>
         </div>
@@ -478,6 +672,7 @@
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; margin-bottom: 0.5rem; color: #475569; font-weight: 500; font-size: 0.9rem; }
     .form-group input { width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
+    .form-group select { width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem; }
 
     /* Role radio visual improvements */
@@ -520,4 +715,14 @@
     }
 
     /* end role styles */
+
+    /* Make class names clickable without visual regressions */
+    .class-link {
+        color: inherit;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .class-link:hover {
+        text-decoration: underline;
+    }
 </style>
