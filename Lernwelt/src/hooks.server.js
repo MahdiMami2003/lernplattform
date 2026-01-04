@@ -10,8 +10,7 @@ export const handle = async ({ event, resolve }) => {
             getAll: () => event.cookies.getAll(),
             setAll: (cookiesToSet) => {
                 cookiesToSet.forEach(({ name, value, options }) => {
-                    const { maxAge, expires, ...sessionOptions } = options;
-                    event.cookies.set(name, value, { ...sessionOptions, path: '/' })
+                    event.cookies.set(name, value, { ...options, path: '/' })
                 })
             },
         },
