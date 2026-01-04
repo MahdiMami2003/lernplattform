@@ -180,7 +180,7 @@
                             ><button class="small-btn">{$_('teacher.view_level')}</button></a
                             >
                             <p>📚 {$_('teacher.edit_materials')}</p>
-                            <a href={'/material_page_id14?classId=' + schoolClass.id}
+                            <a href={'/form_for_adding_content?classId=' + schoolClass.id}
                             ><button class="small-btn">{$_('teacher.manage_materials')}</button></a
                             >
                             <p>📅 {$_('teacher.edit_appointments')}</p>
