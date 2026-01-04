@@ -286,7 +286,7 @@
         <div style="display:flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
             <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">Zum Lehrpersonen-Dashboard</a>
             <a href="/parents_landing_page_id4" style="color: var(--text-primary)">Zum Eltern-Dashboard</a>
-            <a href="/student_landing_page_id5" style="color: var(--text-primary)">Zum Schüler-Dashboard</a>
+            <a href="/student_landing_page_id5" style="color: var(--text-primary)">Zum SuS-Dashboard</a>
         </div>
     </header>
 
