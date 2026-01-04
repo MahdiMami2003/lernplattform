@@ -82,7 +82,7 @@
     }
     async function confirmRoleChange() {
         if (!roleModalUser) return;
-        if (!confirm(`Rolle von "${roleModalUser.full_name || roleModalUser.id}" zu "${roleModalNewRole}" ändern?`)) return;
+        if (!confirm(t('admin_page.confirm_change_role', { name: roleModalUser.full_name || roleModalUser.id, role: roleModalNewRole }))) return;
         await changeRole(roleModalUser, roleModalNewRole);
         closeRoleModal();
     }
@@ -160,7 +160,7 @@
             .update({ editing_right: newStatus })
             .eq('id', user.id);
 
-        if (error) alert("Fehler: " + error.message);
+        if (error) alert(t('admin_page.error_prefix') + error.message);
         else users = users.map(u => u.id === user.id ? { ...u, editing_right: newStatus } : u);
     }
 
@@ -173,7 +173,7 @@
         const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
 
         if (error) {
-            alert("Fehler: " + error.message);
+            alert(t('admin_page.error_prefix') + error.message);
         } else {
             if (newRole === 'student') users = users.filter(u => u.id !== user.id);
             else users = users.map(u => u.id === user.id ? { ...u, role: newRole as any } : u);
@@ -182,7 +182,7 @@
 
     // --- CLASS ACTIONS ---
     async function createClass() {
-        if (!newClass.name || !newClass.grade) return alert("Bitte Name und Stufe angeben.");
+        if (!newClass.name || !newClass.grade) return alert(t('admin_page.errors_create_class_missing'));
 
         const { data: created, error } = await supabase
             .from('classes')
@@ -191,7 +191,7 @@
             .single();
 
         if (error) {
-            alert("Fehler beim Erstellen: " + error.message);
+            alert(t('admin_page.error_create_class') + error.message);
         } else {
             classes = [...classes, created].sort((a, b) => a.grade_level - b.grade_level);
             showClassModal = false;
@@ -200,11 +200,11 @@
     }
 
     async function deleteClass(cls: SchoolClass) {
-        if (!confirm(`Klasse "${cls.name}" wirklich löschen?`)) return;
+        if (!confirm(t('admin_page.confirm_delete_class', { name: cls.name }))) return;
 
         const { error } = await supabase.from('classes').delete().eq('id', cls.id);
 
-        if (error) alert("Fehler: " + error.message);
+        if (error) alert(t('admin_page.error_prefix') + error.message);
         else classes = classes.filter(c => c.id !== cls.id);
     }
 
@@ -234,7 +234,7 @@
             .from('profiles')
             .update(updates)
             .eq('id', editStudentTarget.id);
-        if (error) alert('Fehler beim Speichern: ' + error.message);
+        if (error) alert(t('admin_page.error_save_student') + error.message);
         else {
             // Refresh grouping
             await loadAllStudentsGrouped();
@@ -244,18 +244,18 @@
 
     async function deleteStudent() {
         if (!editStudentTarget) return;
-        if (!confirm(`Schüler "${editStudentTarget.full_name}" wirklich löschen?`)) return;
+        if (!confirm(t('admin_page.confirm_delete_student', { name: editStudentTarget.full_name }))) return;
         try {
             const res = await fetch(`/api/admin/users/${editStudentTarget.id}`, { method: 'DELETE' });
             if (!res.ok) {
                 const j = await res.json().catch(() => ({}));
-                alert('Fehler beim Löschen: ' + (j.error || res.statusText));
+                alert(t('admin_page.error_delete_student') + (j.error || res.statusText));
                 return;
             }
             await loadAllStudentsGrouped();
             closeEditStudent();
         } catch (e: any) {
-            alert('Fehler beim Löschen: ' + (e?.message || 'Unbekannter Fehler'));
+            alert(t('admin_page.error_delete_student') + (e?.message || 'Unbekannter Fehler'));
         }
     }
 
@@ -281,17 +281,17 @@
 
 <div class="admin-layout">
     <header>
-        <h1>🛡️ Admin Dashboard</h1>
-        <p>Verwalte Nutzer, Rechte und Klassen.</p> <br>
+        <h1>{$_('admin_page.title')}</h1>
+        <p>{$_('admin_page.subtitle')}</p> <br>
         <div style="display:flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">Zum Lehrpersonen-Dashboard</a>
-            <a href="/parents_landing_page_id4" style="color: var(--text-primary)">Zum Eltern-Dashboard</a>
-            <a href="/student_landing_page_id5" style="color: var(--text-primary)">Zum SuS-Dashboard</a>
+            <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">{$_('admin_page.link_teacher')}</a>
+            <a href="/parents_landing_page_id4" style="color: var(--text-primary)">{$_('admin_page.link_parent')}</a>
+            <a href="/student_landing_page_id5" style="color: var(--text-primary)">{$_('admin_page.link_student')}</a>
         </div>
     </header>
 
     {#if loading}
-        <div class="loading">Lade Daten...</div>
+        <div class="loading">{$_('admin_page.loading')}</div>
     {:else if currentUserRole === 'admin'}
 
         <div class="section-card">
@@ -304,10 +304,10 @@
             >
                 <div class="title-group">
                     <span class="icon">🏫</span>
-                    <h2>Schulklassen ({classes.length})</h2>
+                    <h2>{$_('admin_page.classes_title')} ({classes.length})</h2>
                 </div>
                 <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button class="btn-add" onclick={(e) => { e.stopPropagation(); showClassModal = true; }}>+ Neu</button>
+                    <button class="btn-add" onclick={(e) => { e.stopPropagation(); showClassModal = true; }}>{$_('admin_page.classes_add')}</button>
                     <span class="chevron" class:rotated={isOpen.classes}>▼</span>
                 </div>
             </div>
@@ -315,29 +315,29 @@
             {#if isOpen.classes}
                 <div class="section-content" transition:slide>
                     {#if classes.length === 0}
-                        <div class="empty">Keine Klassen angelegt.</div>
+                        <div class="empty">{$_('admin_page.classes_empty')}</div>
                     {:else}
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                 <tr>
-                                    <th>Klassenname</th>
-                                    <th>Stufe</th>
-                                    <th style="text-align: right;">Aktionen</th>
+                                    <th>{$_('admin_page.classes_col_name')}</th>
+                                    <th>{$_('admin_page.classes_col_grade')}</th>
+                                    <th style="text-align: right;">{$_('admin_page.classes_col_actions')}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {#each classes as cls (cls.id)}
                                     <tr>
                                         <td>
-                                            <a class="class-link" href={`/class_page_id9/${cls.id}`} aria-label={`Zu Klasse ${cls.name} wechseln`}>
+                                            <a class="class-link" href={`/class_page_id9/${cls.id}`} aria-label={$_('admin_page.classes_link_aria')}>
                                                 <strong>{cls.name}</strong>
                                             </a>
                                         </td>
-                                        <td><span class="badge gray">Klasse {cls.grade_level}</span></td>
+                                        <td><span class="badge gray">{$_('admin_page.classes_grade_badge')}{cls.grade_level}</span></td>
                                         <td>
                                             <div class="actions">
-                                                <button class="btn-small danger" onclick={() => deleteClass(cls)}>Löschen</button>
+                                                <button class="btn-small danger" onclick={() => deleteClass(cls)}>{$_('admin_page.classes_delete')}</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -360,14 +360,14 @@
             >
                 <div class="title-group">
                     <span class="icon">👩‍🏫</span>
-                    <h2>Lehrkräfte ({teachers.length})</h2>
+                    <h2>{$_('admin_page.teachers_title')} ({teachers.length})</h2>
                 </div>
                 <span class="chevron" class:rotated={isOpen.teachers}>▼</span>
             </div>
 
             {#if isOpen.teachers}
                 <div class="section-content" transition:slide>
-                    <UserTable {session} groupUsers={teachers} emptyText={"Keine Lehrkräfte gefunden."} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
+                    <UserTable {session} groupUsers={teachers} emptyText={$_('admin_page.teachers_empty')} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
                 </div>
             {/if}
         </div>
@@ -382,36 +382,36 @@
             >
                 <div class="title-group">
                     <span class="icon">👨‍👩‍👧</span>
-                    <h2>Eltern ({parents.length})</h2>
+                    <h2>{$_('admin_page.parents_title')} ({parents.length})</h2>
                 </div>
                 <span class="chevron" class:rotated={isOpen.parents}>▼</span>
             </div>
 
             {#if isOpen.parents}
                 <div class="section-content" transition:slide>
-                    <UserTable {session} groupUsers={parents} emptyText={"Keine Eltern-Accounts gefunden."} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
+                    <UserTable {session} groupUsers={parents} emptyText={$_('admin_page.parents_empty')} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
                 </div>
             {/if}
         </div>
 
         <div class="section-card">
             <div
-                    class="section-header"
-                    role="button"
-                    tabindex="0"
-                    onclick={() => toggleSection('admins')}
-                    onkeydown={(e) => handleKeydown(e, 'admins')}
+                class="section-header"
+                role="button"
+                tabindex="0"
+                onclick={() => toggleSection('admins')}
+                onkeydown={(e) => handleKeydown(e, 'admins')}
             >
                 <div class="title-group">
                     <span class="icon">🛡️</span>
-                    <h2>Administratoren ({admins.length})</h2>
+                    <h2>{$_('admin_page.admins_title')} ({admins.length})</h2>
                 </div>
                 <span class="chevron" class:rotated={isOpen.admins}>▼</span>
             </div>
 
             {#if isOpen.admins}
                 <div class="section-content" transition:slide>
-                    <UserTable {session} groupUsers={admins} emptyText={"Keine weiteren Admins."} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
+                    <UserTable {session} groupUsers={admins} emptyText={$_('admin_page.admins_empty')} on:onToggleRights={(e) => toggleRights(e.detail)} on:onOpenRoleModal={(e) => openRoleModal(e.detail)} />
                 </div>
             {/if}
         </div>
@@ -426,24 +426,26 @@
             >
                 <div class="title-group">
                     <span class="icon">👥</span>
-                    <h2>Schüler:innen nach Klassen</h2>
+                    <h2>{$_('admin_page.students_by_class_title')}</h2>
                 </div>
                 <span class="chevron" class:rotated={isOpen.students}>▼</span>
             </div>
 
             {#if isOpen.students}
                 <div class="section-content" transition:slide>
+                    <!-- sorting line using the class table header "Klassenname" / "Class name" -->
+                    <div style="padding: 0.75rem 1rem; color: #64748b;">{$_('admin_page.students_sorted_by')}</div>
                     {#if Object.keys(studentsByClass).length === 0}
-                        <div class="empty">Keine Schüler:in gefunden.</div>
+                        <div class="empty">{$_('admin_page.students_empty')}</div>
                     {:else}
                         <div class="table-responsive">
                             {#each allClasses as c}
-                                <h3 style="margin: 1rem;">{c.name} (Kl. {c.grade_level})</h3>
+                                <h3 style="margin: 1rem;">{c.name}</h3>
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th style="text-align: right;">Details</th>
+                                            <th>{$_('admin_page.students_table_name')}</th>
+                                            <th style="text-align: right;">{$_('admin_page.students_table_details')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -457,7 +459,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="actions">
-                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>Bearbeiten</button>
+                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>{$_('admin_page.students_edit')}</button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -467,12 +469,12 @@
                             {/each}
 
                             {#if (studentsByClass[-1]?.length)}
-                                <h3 style="margin: 1rem;">Ohne Klasse</h3>
+                                <h3 style="margin: 1rem;">{$_('admin_page.students_no_class')}</h3>
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th style="text-align: right;">Details</th>
+                                            <th>{$_('admin_page.students_table_name')}</th>
+                                            <th style="text-align: right;">{$_('admin_page.students_table_details')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -486,7 +488,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="actions">
-                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>Bearbeiten</button>
+                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>{$_('admin_page.students_edit')}</button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -505,18 +507,18 @@
     {#if showClassModal}
         <div class="modal-backdrop" transition:fade>
             <div class="modal">
-                <h2>Neue Klasse erstellen</h2>
+                <h2>{$_('admin_page.modal_class_create_title')}</h2>
                 <div class="form-group">
-                    <label for="new-class-name">Name der Klasse (z.B. 10a)</label>
-                    <input id="new-class-name" type="text" bind:value={newClass.name} placeholder="Klassenname..." />
+                    <label for="new-class-name">{$_('admin_page.modal_class_name_label')}</label>
+                    <input id="new-class-name" type="text" bind:value={newClass.name} placeholder={$_('admin_page.modal_class_name_placeholder')} />
                 </div>
                 <div class="form-group">
-                    <label for="new-class-grade">Jahrgangsstufe (z.B. 10)</label>
-                    <input id="new-class-grade" type="number" bind:value={newClass.grade} placeholder="Stufe..." />
+                    <label for="new-class-grade">{$_('admin_page.modal_class_grade_label')}</label>
+                    <input id="new-class-grade" type="number" bind:value={newClass.grade} placeholder={$_('admin_page.modal_class_grade_placeholder')} />
                 </div>
                 <div class="modal-actions">
-                    <button class="btn-small secondary" onclick={() => showClassModal = false}>Abbrechen</button>
-                    <button class="btn-small grant" onclick={createClass}>Erstellen</button>
+                    <button class="btn-small secondary" onclick={() => showClassModal = false}>{$_('admin_page.modal_cancel')}</button>
+                    <button class="btn-small grant" onclick={createClass}>{$_('admin_page.modal_create')}</button>
                 </div>
             </div>
         </div>
@@ -526,36 +528,36 @@
     {#if roleModalVisible && roleModalUser}
         <div class="modal-backdrop" transition:fade>
             <div class="modal">
-                <h2>{t('admin.role_modal_title', { name: roleModalUser.full_name || roleModalUser.id.slice(0,8) })}</h2>
+                <h2>{$_('admin.role_modal_title')}</h2>
                 <div class="form-group">
                     <fieldset class="form-group role-fieldset">
-                        <legend>{t('admin.role_modal_label')}</legend>
+                        <legend>{$_('admin.role_modal_label')}</legend>
                         <div class="role-options">
                             <label class="role-option">
                                 <input type="radio" name="role" value="student" bind:group={roleModalNewRole} class="role-radio" />
-                                <span class="role-box"><span class="role-icon">🎓</span><span class="role-name">{t('admin.role_option_student')}</span></span>
+                                <span class="role-box"><span class="role-icon">🎓</span><span class="role-name">{$_('admin.role_option_student')}</span></span>
                             </label>
 
                             <label class="role-option">
                                 <input type="radio" name="role" value="teacher" bind:group={roleModalNewRole} class="role-radio" />
-                                <span class="role-box"><span class="role-icon">👩‍🏫</span><span class="role-name">{t('admin.role_option_teacher')}</span></span>
+                                <span class="role-box"><span class="role-icon">👩‍🏫</span><span class="role-name">{$_('admin.role_option_teacher')}</span></span>
                             </label>
 
                             <label class="role-option">
                                 <input type="radio" name="role" value="parent" bind:group={roleModalNewRole} class="role-radio" />
-                                <span class="role-box"><span class="role-icon">👪</span><span class="role-name">{t('admin.role_option_parent')}</span></span>
+                                <span class="role-box"><span class="role-icon">👪</span><span class="role-name">{$_('admin.role_option_parent')}</span></span>
                             </label>
 
                             <label class="role-option">
                                 <input type="radio" name="role" value="admin" bind:group={roleModalNewRole} class="role-radio" />
-                                <span class="role-box"><span class="role-icon">🛡️</span><span class="role-name">{t('admin.role_option_admin')}</span></span>
+                                <span class="role-box"><span class="role-icon">🛡️</span><span class="role-name">{$_('admin.role_option_admin')}</span></span>
                             </label>
                         </div>
                     </fieldset>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn-small secondary" onclick={closeRoleModal}>{t('admin.role_modal_cancel')}</button>
-                    <button class="btn-small grant" onclick={confirmRoleChange}>{t('admin.role_modal_confirm')}</button>
+                    <button class="btn-small secondary" onclick={closeRoleModal}>{$_('admin.role_modal_cancel')}</button>
+                    <button class="btn-small grant" onclick={confirmRoleChange}>{$_('admin.role_modal_confirm')}</button>
                 </div>
             </div>
         </div>
@@ -564,27 +566,27 @@
     {#if editStudentModalOpen && editStudentTarget}
         <div class="modal-backdrop" transition:fade>
             <div class="modal">
-                <h2>Schüler bearbeiten</h2>
+                <h2>{$_('admin_page.edit_student_title')}</h2>
                 <div class="form-group">
-                    <label for="edit-name">Name</label>
+                    <label for="edit-name">{$_('admin_page.edit_student_name_label')}</label>
                     <input id="edit-name" type="text" bind:value={editForm.full_name} />
                 </div>
                 <div class="form-group">
-                    <label for="edit-email">E-Mail (nicht bearbeitbar)</label>
+                    <label for="edit-email">{$_('admin_page.edit_student_email_label')}</label>
                     <input id="edit-email" type="email" value={editEmailReadonly} disabled />
                 </div>
                 <div class="form-group">
-                    <label for="edit-class">Klasse</label>
+                    <label for="edit-class">{$_('admin_page.edit_student_class_label')}</label>
                     <select id="edit-class" bind:value={editForm.class_id}>
                         {#each allClasses as c}
-                            <option value={c.id}>{c.name} (Kl. {c.grade_level})</option>
+                            <option value={c.id}>{c.name}</option>
                         {/each}
                     </select>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn-small secondary" onclick={closeEditStudent}>Abbrechen</button>
-                    <button class="btn-small grant" onclick={saveStudentEdits}>Speichern</button>
-                    <button class="btn-small danger" onclick={deleteStudent}>Löschen</button>
+                    <button class="btn-small secondary" onclick={closeEditStudent}>{$_('admin_page.modal_cancel')}</button>
+                    <button class="btn-small grant" onclick={saveStudentEdits}>{$_('admin_page.edit_student_save')}</button>
+                    <button class="btn-small danger" onclick={deleteStudent}>{$_('admin_page.edit_student_delete')}</button>
                 </div>
             </div>
         </div>
@@ -739,6 +741,5 @@
         text-decoration: underline;
     }
 
-    .id-muted { color: #94a3b8; font-weight: 500; margin-left: 0.25rem; }
     .id-sub { display: block; color: #94a3b8; font-weight: 500; font-size: 0.8rem; margin-top: 0.15rem; }
 </style>
