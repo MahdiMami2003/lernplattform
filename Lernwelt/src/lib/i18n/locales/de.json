@@ -410,5 +410,38 @@
     "role_option_admin": "Administrator/in",
     "role_modal_cancel": "Abbrechen",
     "role_modal_confirm": "Rolle ändern"
+  },
+  "create": {
+    "type": {
+      "quiz": "Spielfrage",
+      "material": "Lerninhalt",
+      "weekly_test": "Wochentest",
+      "appointment": "Termin",
+      "ped_tip": "pädagogischen Tipp"
+    },
+    "action": {
+      "create": "erstellen"
+    }
+  },
+  "missions": {
+    "title": "Missionen verwalten",
+    "subtitle": "Erstellen Sie neue Herausforderungen für Ihre Schüler.",
+    "not_found": "Keine Missionen gefunden.",
+    "new": {
+      "title": "Neue Mission erstellen",
+      "name_label": "Titel (z.B. Mathe-Profi)",
+      "name_ph": "Titel eingeben...",
+      "desc_label": "Beschreibung (Was muss getan werden?)",
+      "desc_ph": "z.B. Löse 10 Algebra-Aufgaben...",
+      "xp_label": "XP Belohnung",
+      "goal_label": "Ziel-Anzahl (Total)",
+      "goal_hint": "Wie viele Aufgaben/Aktionen sind nötig?",
+      "save": "Mission speichern"
+    },
+    "existing": {
+      "title": "Vorhandene Missionen",
+      "xp": "+{xp} XP",
+      "goal": "Ziel: {goal}"
+    }
   }
 }

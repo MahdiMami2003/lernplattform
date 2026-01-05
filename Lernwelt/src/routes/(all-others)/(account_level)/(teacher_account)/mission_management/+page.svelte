@@ -98,9 +98,9 @@
 
 <div class="page-container">
 	<header>
-		<button class="back-btn" onclick={() => history.back()}>← Zurück</button>
-		<h1>Missionen verwalten</h1>
-		<p>Erstellen Sie neue Herausforderungen für Ihre Schüler.</p>
+		<button class="back-btn" onclick={() => history.back()}>← {$_('pedagogy.errors.back_link')}</button>
+		<h1>{$_('missions.title')}</h1>
+		<p>{$_('missions.subtitle')}</p>
 	</header>
 
 	{#if errorMsg}
@@ -110,46 +110,46 @@
 	<div class="content-grid">
 		<!-- Add Form -->
 		<section class="card form-section">
-			<h2>➕ Neue Mission erstellen</h2>
+			<h2>➕ {$_('missions.new.title')}</h2>
 			<div class="form-group">
-				<label for="m-title">Titel (z.B. Mathe-Profi)</label>
-				<input id="m-title" type="text" bind:value={title} placeholder="Titel eingeben..." />
+				<label for="m-title">{$_('missions.new.name_label')}</label>
+				<input id="m-title" type="text" bind:value={title} placeholder={$_('missions.new.name_ph')}  />
 			</div>
 
 			<div class="form-group">
-				<label for="m-desc">Beschreibung (Was muss getan werden?)</label>
+				<label for="m-desc">{$_('missions.new.desc_label')}</label>
 				<textarea
 					id="m-desc"
 					bind:value={description}
-					placeholder="z.B. Löse 10 Algebra-Aufgaben..."
+					placeholder={$_('missions.new.desc_ph')}
 				></textarea>
 			</div>
 
 			<div class="row">
 				<div class="form-group half">
-					<label for="m-xp">XP Belohnung</label>
+					<label for="m-xp">{$_('missions.new.xp_label')}</label>
 					<input id="m-xp" type="number" bind:value={xp_reward} min="10" step="10" />
 				</div>
 				<div class="form-group half">
-					<label for="m-total">Ziel-Anzahl (Total)</label>
+					<label for="m-total">{$_('missions.new.goal_label')}</label>
 					<input id="m-total" type="number" bind:value={total} min="1" />
-					<small>Wie viele Aufgaben/Aktionen sind nötig?</small>
+					<small>{$_('missions.new.goal_hint')}</small>
 				</div>
 			</div>
 
 			<button class="primary-btn" onclick={addMission} disabled={loading}>
-				{loading ? '...' : 'Mission speichern'}
+				{loading ? '...' : $_('missions.new.save')}
 			</button>
 		</section>
 
 		<!-- List -->
 		<section class="card list-section">
-			<h2>📋 Vorhandene Missionen</h2>
+			<h2>📋 {$_('missions.existing.title')}</h2>
 
 			{#if loading}
 				<p>Lade...</p>
 			{:else if missions.length === 0}
-				<p>Keine Missionen gefunden.</p>
+				<p>{$_('missions.not_found')}</p>
 			{:else}
 				<div class="mission-list">
 					{#each missions as m (m.id)}
