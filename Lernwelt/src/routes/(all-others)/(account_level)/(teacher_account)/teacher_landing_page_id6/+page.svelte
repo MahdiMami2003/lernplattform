@@ -123,6 +123,9 @@
                 <p>
                     <a href="/appointments_page_id8"><button class="small-btn">📅 {$_('teacher.nametag_appointments')}</button></a>
                 </p>
+				<p>
+					<a href="/mission_management"><button class="small-btn">🎯 {$_('teacher.nametag_missions')}</button></a>
+				</p>
             </div>
         </div>
     </div>

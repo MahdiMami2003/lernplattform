@@ -26,6 +26,7 @@
     "nametag_materials": "Lernmaterialien",
     "nametag_tips": "Pädagogische Tipps",
     "nametag_appointments": "Termine & Aktuelles",
+    "nametag_missions": "Missionen",
     "nametag_classes": "Meine Klassen",
     "edit_tips": "Tipps bearbeiten",
     "general_admin": "Verwaltung & Inhalte bearbeiten",
@@ -492,7 +493,7 @@
     "confirm_change_role": "Rolle von \"{name}\" zu \"{role}\" ändern?",
     "confirm_delete_student": "Schüler \"{name}\" wirklich löschen?",
     "class_heading": "{name} (Kl. {grade})",
-    "students_sorted_by": "Sortiert nach Klassen"
+    "students_sorted_by": "Sortiert nach Klassen",
     "role_modal_confirm": "Rolle ändern"
   },
   "create": {
