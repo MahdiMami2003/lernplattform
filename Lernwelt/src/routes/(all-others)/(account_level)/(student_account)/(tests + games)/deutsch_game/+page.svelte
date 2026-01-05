@@ -60,8 +60,14 @@
 	let confettiPieces = $state<ConfettiPiece[]>([]);
 
 	// Fortschritt & XP als derived
-	const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
-	const xpProgress = $derived((xp / 100) * 100);
+	const progress = $derived.by(() => {
+		if (showSummary) return 100;
+		if (questions.length === 0) return 0;
+		return ((currentIndex + (locked ? 1 : 0)) / questions.length) * 100;
+	});
+	const xpProgress = $derived(Math.min((xp / 100) * 100, 100));
+
+	let category = $state<string | null>(null);
 
 	/* ========= HELPER ========= */
 	function shuffle<T>(array: T[]): T[] {
@@ -80,7 +86,7 @@
 			loadError = null;
 
 			// 0️⃣ Kategorie aus URL lesen
-			const category = $page.url.searchParams.get('category');
+			category = $page.url.searchParams.get('category');
 			console.log('📘 Deutsch Game gestartet. Kategorie:', category || 'Alle');
 
 			/* 1️⃣ USER OPTIONAL LADEN */
@@ -198,7 +204,8 @@
 			if (profile?.id) {
 				const { error } = await supabase.rpc('increment_mission_progress', {
 					p_user_id: profile.id,
-					p_subject_name: 'Deutsch'
+					p_subject_name: 'Deutsch',
+					p_category: category || null
 				});
 				if (error) console.error('Fehler beim Missions-Update:', error);
 			}
@@ -267,12 +274,12 @@
 {:else if loadError}
 	<div class="error">
 		<p>{loadError}</p>
-		<button on:click={loadProfileAndQuestions}>Neu laden</button>
+		<button onclick={loadProfileAndQuestions}>Neu laden</button>
 	</div>
 {:else if questions.length === 0}
 	<div class="error">
 		<p>Für diese Kategorie sind aktuell keine Fragen vorhanden.</p>
-		<button on:click={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
+		<button onclick={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
 			Zurück zum Dashboard
 		</button>
 	</div>
@@ -292,7 +299,7 @@
 		{/each}
 
 		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+			<button class="back-btn" onclick={() => goto('/student_landing_page_id5')}>←</button>
 
 			<div class="hud-center">
 				<div class="progress-top">
@@ -335,7 +342,7 @@
 								selectedIndex !== questions[currentIndex].correctIndex
 									? 'wrong'
 									: ''}"
-								on:click={() => handleAnswerClick(i)}
+								onclick={() => handleAnswerClick(i)}
 								disabled={locked}
 							>
 								{ans}
@@ -385,8 +392,8 @@
 				</div>
 
 				<div class="summary-actions">
-					<button on:click={restartLesson}>Nochmal spielen</button>
-					<button on:click={() => goto('/student_landing_page_id5')}> Dashboard </button>
+					<button onclick={restartLesson}>Nochmal spielen</button>
+					<button onclick={() => goto('/student_landing_page_id5')}> Dashboard </button>
 				</div>
 			</section>
 		{/if}

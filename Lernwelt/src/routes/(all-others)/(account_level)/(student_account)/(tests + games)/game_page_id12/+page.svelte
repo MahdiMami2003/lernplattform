@@ -136,6 +136,13 @@
 			return;
 		}
 
+		// Check if user is a student - only students can access games
+		if (data.role !== 'student') {
+			console.warn('⚠ Nur Schüler dürfen auf die Spiele zugreifen');
+			goto('/');
+			return;
+		}
+
 		profile = data as UserProfile;
 		userName = profile.full_name || 'Schüler';
 		xp = profile.xp;
@@ -171,8 +178,19 @@
 </script>
 
 <section class="hero">
+	<div class="back-btn-wrapper">
+		<button
+			class="back-home-btn"
+			onclick={() => goto('/student_landing_page_id5')}
+			aria-label="Zurück"
+		>
+			<span class="back-icon">←</span>
+			<span>Zurück</span>
+		</button>
+	</div>
+
 	<div class="avatar-wrapper">
-		<button class="avatar-btn" on:click={() => (avatarModal = true)}>
+		<button class="avatar-btn" onclick={() => (avatarModal = true)}>
 			<img class="avatar-img" src={avatar} alt="avatar" />
 		</button>
 	</div>
@@ -180,16 +198,16 @@
 	{#if avatarModal}
 		<div
 			class="modal-bg"
-			on:click={() => (avatarModal = false)}
+			onclick={() => (avatarModal = false)}
 			role="button"
 			tabindex="0"
-			on:keydown={() => {}}
+			onkeydown={() => {}}
 		></div>
 		<div class="modal">
 			<h2>{$_('student.avatar_choose')}</h2>
 			<div class="avatar-list">
 				{#each avatars as a}
-					<button class="img-btn" on:click={() => selectAvatar(a)}>
+					<button class="img-btn" onclick={() => selectAvatar(a)}>
 						<img src={a} alt="avatar" />
 					</button>
 				{/each}
@@ -200,10 +218,10 @@
 	{#if categoryModal}
 		<div
 			class="modal-bg"
-			on:click={() => (categoryModal = false)}
+			onclick={() => (categoryModal = false)}
 			role="button"
 			tabindex="0"
-			on:keydown={() => {}}
+			onkeydown={() => {}}
 		></div>
 		<div class="modal category-modal">
 			<h2>{$_('student.choose_topic_for', { values: { subject: selectedSubjectName } })}</h2>
@@ -212,19 +230,19 @@
 				<p>{$_('student.loading_topics')}</p>
 			{:else}
 				<div class="category-grid">
-					<button class="cat-btn all" on:click={() => startGameWithCategory(null)}>
+					<button class="cat-btn all" onclick={() => startGameWithCategory(null)}>
 						{$_('student.shuffle_all')}
 					</button>
 
 					{#each availableCategories as cat}
-						<button class="cat-btn" on:click={() => startGameWithCategory(cat)}>
+						<button class="cat-btn" onclick={() => startGameWithCategory(cat)}>
 							{cat}
 						</button>
 					{/each}
 				</div>
 			{/if}
 
-			<button class="close-btn" on:click={() => (categoryModal = false)}
+			<button class="close-btn" onclick={() => (categoryModal = false)}
 				>{$_('student.cancel')}</button
 			>
 		</div>
@@ -258,14 +276,14 @@
 	</div>
 
 	<div class="subject-grid">
-		<button on:click={() => openSubject('Mathe', '/mathe_game')}>➕ {$_('subjects.math')}</button>
-		<button on:click={() => openSubject('Physik', '/physik_game')}
+		<button onclick={() => openSubject('Mathe', '/mathe_game')}>➕ {$_('subjects.math')}</button>
+		<button onclick={() => openSubject('Physik', '/physik_game')}
 			>⚛ {$_('subjects.physics')}</button
 		>
-		<button on:click={() => openSubject('Deutsch', '/deutsch_game')}
+		<button onclick={() => openSubject('Deutsch', '/deutsch_game')}
 			>📘 {$_('subjects.german')}</button
 		>
-		<button on:click={() => openSubject('English', '/englisch_game')}
+		<button onclick={() => openSubject('English', '/englisch_game')}
 			>🌎 {$_('subjects.english')}</button
 		>
 	</div>
@@ -279,11 +297,20 @@
 	}
 
 	.hero {
+		position: relative;
 		text-align: center;
 		margin-bottom: 2rem;
 		padding-top: 1rem;
+		padding-left: 1.5rem;
+		padding-right: 1.5rem;
 	}
 
+	.back-btn-wrapper {
+		display: flex;
+		justify-content: flex-start;
+		width: 100%;
+		margin-bottom: 1rem;
+	}
 	.avatar-wrapper {
 		width: 150px;
 		height: 150px;
@@ -555,5 +582,42 @@
 		font-size: 1.4rem;
 		font-weight: bold;
 		z-index: 999;
+	}
+
+	.back-home-btn {
+		display: inline-flex;
+		align-items: center;
+		align-self: flex-start;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+		padding: 0.7rem 1.4rem;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		border: none;
+		border-radius: 50px;
+		box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: white;
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+	.back-home-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+		background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+	}
+
+	.back-home-btn:active {
+		transform: translateY(0);
+	}
+
+	.back-home-btn .back-icon {
+		font-size: 1.1rem;
+		transition: transform 0.2s ease;
+	}
+
+	.back-home-btn:hover .back-icon {
+		transform: translateX(-3px);
 	}
 </style>
