@@ -1,11 +1,14 @@
 <!--Lernwelt/src/lib/templates/Footer.svelte-->
+<script>
+    import { locale, _ } from '$lib/i18n/config';
+</script>
 <footer>
     <div class="footer-content">
-        <span class="copyright">© 2025 HSG-Lernwelt</span>
+        <span class="copyright">© 2025 {$_('login.title')}</span>
         <nav class="footer-nav">
-            <a href="/impressum">Impressum</a>
-            <a href="/datenschutz">Datenschutz</a>
-            <a href="/barrierefreiheit">Barrierefreiheit</a>
+            <a href="/impressum">{$_('imprint.title')}</a>
+            <a href="/datenschutz">{$_('privacy.title')}</a>
+            <a href="/barrierefreiheit">{$_('access.title')}</a>
         </nav>
     </div>
 </footer>

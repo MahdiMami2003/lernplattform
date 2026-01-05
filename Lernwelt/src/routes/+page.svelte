@@ -2,7 +2,9 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { browser } from '$app/environment';
-    import { locale, _ } from '$lib/i18n/config';
+    import { onMount } from 'svelte';
+    import { locale, _, isLoading } from '$lib/i18n/config';
+
     function setLang(l: 'de' | 'en') {
         locale.set(l);
         if (browser) localStorage.setItem('lang', l);
@@ -20,8 +22,14 @@
     function goReg() {
         goto('/register_page_id3');
     }
-    function goGuest() {
-        goto('/no_login_page_id7');
+    async function goGuest() {
+        try {
+            await supabase.auth.signOut();
+        } catch (e) {
+            console.log('No active session to sign out');
+        }
+        // Use full page navigation to avoid auth state race conditions
+        window.location.href = '/no_login_page_id7';
     }
 
     // ✅ HINZUFÜGEN (Svelte 5):
@@ -29,6 +37,15 @@
 
     // Optional: Damit du nicht immer 'data.supabase' schreiben musst:
     let { supabase, session } = data;
+
+    // Sign out any active session when landing on login page
+    onMount(async () => {
+        try {
+            await supabase.auth.signOut();
+        } catch (e) {
+            console.log('No active session to sign out');
+        }
+    });
 
     let email = $state('');
     let password = $state('');
@@ -82,78 +99,75 @@
     }
 </script>
 
-<div class="landing_grid">
-    <main class="main_container">
-        <div class="lang-switch">
-            <button type="button" class:selected={$locale === 'de'} onclick={() => setLang('de')}>DE</button>
-            <button type="button" class:selected={$locale === 'en'} onclick={() => setLang('en')}>EN</button>
-        </div>
-        <header>
-            <h1 class="start-title">{$_('login.title')}</h1>
-            <p class="start-subtitle">{$_('login.subtitle')}</p>
-        </header>
-
-        <div class="center-content-wrapper">
-            <h2>{$_('login.cta')}</h2>
-            <div class="auth-section">
-                <form onsubmit={handleLogin} class="login-form">
-                    <div class="input-row">
-                        <input
-                                type="email"
-                                class="login-input"
-                                placeholder={$_('login.email_placeholder')}
-                                bind:value={email}
-                                required
-                        />
-                        <input
-                                type="password"
-                                class="login-input"
-                                name="password"
-                                placeholder={$_('login.password_placeholder')}
-                                bind:value={password}
-                                required
-                        />
-                    </div>
-                    <button type="submit" class="full-width-btn primary-btn">{$_('login.login_button')}</button>
-                    {#if message}
-                        <p style="color: red; margin-top: 0.5rem; font-size: 0.9rem;">{message}</p>
-                    {/if}
-                </form>
-
-                <button class="full-width-btn secondary-btn" type="button" onclick={goReg}>
-                    {$_('login.register_button')}
-                </button>
+{#if $isLoading}
+    <div
+            style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg-main, #fdfaf2);"
+    >
+        <p style="color: var(--text-primary, #000);">Laden...</p>
+    </div>
+{:else}
+    <div class="landing_grid">
+        <main class="main_container">
+            <div class="lang-switch">
+                <button type="button" class:selected={$locale === 'de'} onclick={() => setLang('de')}
+                >DE</button
+                >
+                <button type="button" class:selected={$locale === 'en'} onclick={() => setLang('en')}
+                >EN</button
+                >
             </div>
+            <header>
+                <h1 class="start-title">{$_('login.title')}</h1>
+                <p class="start-subtitle">{$_('login.subtitle')}</p>
+            </header>
 
-            <div class="guest-section">
-                <div class="divider"><span>{$_('login.or')}</span></div>
-                <button class="guest-btn" type="button" onclick={goGuest}>
-                    {$_('login.guest_button')}
-                </button>
+            <div class="center-content-wrapper">
+                <h2>{$_('login.cta')}</h2>
+                <div class="auth-section">
+                    <form onsubmit={handleLogin} class="login-form">
+                        <div class="input-row">
+                            <input
+                                    type="email"
+                                    class="login-input"
+                                    placeholder={$_('login.email_placeholder')}
+                                    bind:value={email}
+                                    required
+                            />
+                            <input
+                                    type="password"
+                                    class="login-input"
+                                    name="password"
+                                    placeholder={$_('login.password_placeholder')}
+                                    bind:value={password}
+                                    required
+                            />
+                        </div>
+                        <button type="submit" class="full-width-btn primary-btn"
+                        >{$_('login.login_button')}</button
+                        >
+                        {#if message}
+                            <p class="message-text">{message}</p>
+                        {/if}
+                    </form>
+
+                    <button class="full-width-btn secondary-btn" type="button" onclick={goReg}>
+                        {$_('login.register_button')}
+                    </button>
+                </div>
+
+                <div class="guest-section">
+                    <div class="divider"><span>{$_('login.or')}</span></div>
+                    <button class="guest-btn" type="button" onclick={goGuest}>
+                        {$_('login.guest_button')}
+                    </button>
+                </div>
             </div>
-        </div>
-        <section class="start-roles">
-            <h2 class="start-roles-title">{$_('login.quick_links')}</h2>
-            <div class="start-roles-grid">
-                <button class="role-card" type="button" onclick={goStudent}>
-                    <span class="role-icon">🧒</span>
-                    <span class="role-title">{$_('login.role_student')}</span>
-                </button>
-                <button class="role-card" type="button" onclick={goTeacher}>
-                    <span class="role-icon">👩‍🏫</span>
-                    <span class="role-title">{$_('login.role_teacher')}</span>
-                </button>
-                <button class="role-card" type="button" onclick={goParent}>
-                    <span class="role-icon">👨‍👩‍👧</span>
-                    <span class="role-title">{$_('login.role_parent')}</span>
-                </button>
-            </div>
-        </section>
-    </main>
-</div>
+        </main>
+    </div>
+{/if}
 
 <style>
-    /* --- Main Container Layout --- */
+    /* ============ DARK MODE OVERLAY FÜR BACKGROUND ============ */
     .landing_grid {
         display: grid;
         grid-template-rows: auto 1fr auto;
@@ -161,14 +175,30 @@
         background-image: url('../lib/assets/images/bg_f.jpeg');
         background-size: cover;
         background-repeat: no-repeat;
+        position: relative;
     }
 
+    /* Dark Mode Overlay */
+    :root.darkmode .landing_grid::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ============ MAIN CONTAINER ============ */
     .main_container {
         position: relative;
+        z-index: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: rgba(255, 255, 255);
+        background-color: var(--bg-card, rgba(255, 255, 255));
         padding: clamp(1.5rem, 4vw, 3rem);
         margin: 1.5rem auto;
         width: min(95%, 600px);
@@ -178,7 +208,10 @@
         font-family: Arial, Helvetica, sans-serif;
         text-align: center;
         box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease;
     }
+
+    /* ============ LANGUAGE SWITCH ============ */
     .lang-switch {
         position: absolute;
         top: 0.8rem;
@@ -186,32 +219,47 @@
         display: flex;
         gap: 0.4rem;
     }
+
     .lang-switch button {
-        border: 1px solid #ccc;
-        background: white;
+        border: 1px solid var(--border-color, #ccc);
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
         padding: 0.25rem 0.5rem;
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.85rem;
+        transition: all 0.2s ease;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .lang-switch button:hover {
+        background: var(--bg-hover, #f5f5f5);
     }
 
     .lang-switch button.selected {
         font-weight: 700;
         text-decoration: underline;
+        background: var(--button-bg, #f0be71);
     }
 
-    /* --- NEU: Wrapper für die Zentrierung --- */
+    /* ============ CENTER CONTENT WRAPPER ============ */
     .center-content-wrapper {
         display: flex;
         flex-direction: column;
-        align-items: center; /* Horizontal zentrieren */
-        justify-content: center; /* Vertikal zentrieren */
-        flex-grow: 1; /* Nimmt allen freien Platz zwischen Header und Footer */
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
         width: 100%;
-        margin: 1rem 0; /* Etwas Abstand, damit es nicht klebt */
+        margin: 1rem 0;
     }
 
-    /* --- Auth & Guest Styles --- */
+    .center-content-wrapper h2 {
+        color: var(--text-primary, #000);
+        transition: color 0.3s ease;
+    }
+
+    /* ============ AUTH SECTION ============ */
     .auth-section {
         display: flex;
         flex-direction: column;
@@ -236,20 +284,24 @@
 
     .login-input {
         padding: 0.75rem 1.2rem;
-        border: 1px solid #ccc;
+        border: 1px solid var(--border-color, #ccc);
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
         border-radius: 999px;
         font-size: 0.95rem;
         outline: none;
         flex: 1;
         text-align: center;
-        transition:
-                border-color 0.2s,
-                box-shadow 0.2s;
+        transition: all 0.2s ease;
+    }
+
+    .login-input::placeholder {
+        color: var(--text-muted, #888);
     }
 
     .login-input:focus {
-        border-color: #f4d584;
-        box-shadow: 0 0 0 3px rgb(240, 190, 113);
+        border-color: var(--button-bg, #f4d584);
+        box-shadow: 0 0 0 3px rgba(240, 190, 113, 0.3);
     }
 
     .full-width-btn {
@@ -260,10 +312,9 @@
         cursor: pointer;
         font-size: 0.95rem;
         text-align: center;
-        transition:
-                transform 0.1s,
-                opacity 0.2s;
-        border: 1px solid #f0be71;
+        transition: all 0.2s ease;
+        border: 1px solid var(--button-border, #f0be71);
+        min-height: 44px;
     }
 
     .full-width-btn:hover {
@@ -271,16 +322,29 @@
         transform: translateY(-1px);
     }
 
+    .full-width-btn:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
+
     .primary-btn {
-        background-color: #f0be71;
-        color: #000000;
+        background-color: var(--button-bg, #f0be71);
+        color: var(--text-primary, #000);
     }
 
     .secondary-btn {
-        background-color: #f0be71;
-        color: #000000;
+        background-color: var(--button-bg, #f0be71);
+        color: var(--text-primary, #000);
     }
 
+    .message-text {
+        color: var(--error-color, red);
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    /* ============ GUEST SECTION ============ */
     .guest-section {
         width: 100%;
         max-width: 500px;
@@ -296,16 +360,17 @@
         align-items: center;
         text-align: center;
         width: 100%;
-        color: #888;
+        color: var(--text-muted, #888);
         font-size: 0.85rem;
         margin: 0.5rem 0;
+        transition: color 0.3s ease;
     }
 
     .divider::before,
     .divider::after {
         content: '';
         flex: 1;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid var(--border-color, #ddd);
     }
 
     .divider span {
@@ -314,99 +379,58 @@
 
     .guest-btn {
         background: transparent;
-        border: 2px solid #ccc;
-        color: #666;
+        border: 2px solid var(--border-color, #ccc);
+        color: var(--text-secondary, #666);
         padding: 0.6rem 1.5rem;
         border-radius: 999px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         font-size: 0.9rem;
+        min-height: 44px;
     }
 
     .guest-btn:hover {
-        border-color: #888;
-        color: #333;
-        background-color: rgba(0, 0, 0, 0.02);
+        border-color: var(--text-secondary, #888);
+        color: var(--text-primary, #333);
+        background-color: var(--bg-hover, rgba(0, 0, 0, 0.02));
     }
 
-    @media (max-width: 500px) {
-        .input-row {
-            flex-direction: column;
-        }
+    .guest-btn:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
     }
 
-    /* --- Typography & Footer --- */
+    /* ============ TYPOGRAPHY ============ */
     .start-title {
         font-size: clamp(2.2rem, 4vw, 3rem);
         margin-top: -1rem;
         margin-bottom: 0.8rem;
         font-weight: 700;
+        color: var(--text-primary, #000);
+        transition: color 0.3s ease;
     }
 
     .start-subtitle {
         font-size: clamp(1.1rem, 2vw, 1.4rem);
-        color: #444;
-        margin-bottom: 0; /* Weniger Margin, da der Flex-Grow Wrapper übernimmt */
+        color: var(--text-secondary, #444);
+        margin-bottom: 0;
+        transition: color 0.3s ease;
     }
 
-    .start-roles {
-        width: 100%;
-        /* margin-top: auto ist hier nicht mehr zwingend nötig, schadet aber auch nicht.
-            Der .center-content-wrapper drückt das hier sowieso nach unten. */
-        padding-top: 1rem;
-    }
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 500px) {
+        .input-row {
+            flex-direction: column;
+        }
 
-    .start-roles-title {
-        font-size: clamp(1rem, 2.5vw, 1.2rem);
-        margin-bottom: 1rem;
-        font-weight: 600;
-        color: #555;
-    }
-
-    .start-roles-grid {
-        display: grid;
-        gap: 1rem;
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (max-width: 800px) {
-        .start-roles-grid {
-            grid-template-columns: 1fr;
+        .main_container {
+            margin: 0.5rem auto;
+            width: 98%;
         }
     }
 
-    .role-card {
-        border: none;
-        border-radius: 0.9rem;
-        background: #f3be6a;
-        padding: 0.8rem;
-        text-align: center;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.35rem;
-        transition:
-                transform 0.15s ease,
-                box-shadow 0.15s ease;
-        box-shadow: 0 4px 10px rgba(15, 41, 64, 0.12);
-    }
-
-    .role-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(15, 41, 64, 0.18);
-    }
-
-    .role-icon {
-        font-size: clamp(1.4rem, 3vw, 1.8rem);
-    }
-
-    .role-title {
-        font-weight: 700;
-        font-size: clamp(0.8rem, 2vw, 1rem);
-    }
-
+    /* ============ GLOBAL RESET ============ */
     html,
     body {
         margin: 0;

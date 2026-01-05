@@ -313,7 +313,6 @@
     "s1_intro_a": "Via the menu",
     "s1_intro_b": "\"Accessible\"",
     "s1_intro_c": "in the left sidebar you can enable the following options:",
-
     "s1_li1_bold": "Dark mode",
     "s1_li1_text": "– reduces brightness for more comfortable viewing.",
     "s1_li2_bold": "High contrast mode",
@@ -482,6 +481,40 @@
     "confirm_change_role": "Change role of \"{name}\" to \"{role}\"?",
     "confirm_delete_student": "Really delete student \"{name}\"?",
     "class_heading": "{name} (Gr. {grade})",
-    "students_sorted_by": "Sorted by classes"
+    "students_sorted_by": "Sorted by classes",
+    "role_modal_confirm": "Change role"
+  },
+  "create": {
+    "type": {
+      "quiz": "Quiz question",
+      "material": "Learning content",
+      "weekly_test": "Weekly test",
+      "appointment": "Appointment",
+      "ped_tip": "Pedagogical tip"
+    },
+    "action": {
+      "create": "Create"
+    }
+  },
+  "missions": {
+    "title": "Manage missions",
+    "subtitle": "Create new challenges for your students.",
+    "not_found": "No missions found.",
+    "new": {
+      "title": "Create new mission",
+      "name_label": "Title (e.g., Math Pro)",
+      "name_ph": "Enter title...",
+      "desc_label": "Description (What needs to be done?)",
+      "desc_ph": "e.g., Solve 10 algebra tasks...",
+      "xp_label": "XP reward",
+      "goal_label": "Goal count (total)",
+      "goal_hint": "How many tasks/actions are required?",
+      "save": "Save mission"
+    },
+    "existing": {
+      "title": "Existing missions",
+      "xp": "+{xp} XP",
+      "goal": "Goal: {goal}"
+    }
   }
 }

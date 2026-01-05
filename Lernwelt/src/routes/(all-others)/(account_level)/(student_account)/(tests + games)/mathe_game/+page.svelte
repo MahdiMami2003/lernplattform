@@ -1,841 +1,887 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/(student_account)/(tests + games)/mathe_game/+page.svelte-->
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { locale } from 'svelte-i18n';
-	import { _ } from '$lib/i18n/config';
+    import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
+    import { locale } from 'svelte-i18n';
+    import { _ } from '$lib/i18n/config';
 
-	let { data } = $props();
-	let { supabase, session } = data;
+    let { data } = $props();
+    let { supabase, session } = data;
 
-	/* ========== TYPES ========== */
-	type Question = {
-		id?: number;
-		question: string;
-		answers: (string | null)[];
-		correctIndex: number;
-		xpReward: number;
-	};
+    /* ========== TYPES ========== */
+    type Question = {
+        id?: number;
+        question: string;
+        answers: (string | null)[];
+        correctIndex: number;
+        xpReward: number;
+    };
 
-	type Profile = {
-		id: string;
-		xp: number;
-		level: number;
-		streak: number;
-		hearts: number;
-		last_boss?: string;
-		last_grade?: number;
-	};
+    type Profile = {
+        id: string;
+        xp: number;
+        level: number;
+        streak: number;
+        hearts: number;
+        last_boss?: string;
+        last_grade?: number;
+    };
 
-	type ConfettiPiece = {
-		id: number;
-		left: number;
-		duration: number;
-		delay: number;
-		color: string;
-	};
+    type ConfettiPiece = {
+        id: number;
+        left: number;
+        duration: number;
+        delay: number;
+        color: string;
+    };
 
-	/* ========== STATE ========== */
-	let loading = $state(true);
-	let loadError = $state<string | null>(null);
-	let profile = $state<Profile | null>(null);
+    /* ========== STATE ========== */
+    let loading = $state(true);
+    let loadError = $state<string | null>(null);
+    let profile = $state<Profile | null>(null);
 
-	let xp = $state(0);
-	let level = $state(1);
-	let streak = $state(0);
-	const MAX_HEARTS = 3;
-	let hearts = $state(MAX_HEARTS);
+    let xp = $state(0);
+    let level = $state(1);
+    let streak = $state(0);
+    const MAX_HEARTS = 3;
+    let hearts = $state(MAX_HEARTS);
 
-	let questions = $state<Question[]>([]);
-	let currentIndex = $state(0);
-	let selectedIndex = $state<number | null>(null);
-	let locked = $state(false);
-	let correctCount = $state(0);
+    let questions = $state<Question[]>([]);
+    let currentIndex = $state(0);
+    let selectedIndex = $state<number | null>(null);
+    let locked = $state(false);
+    let correctCount = $state(0);
 
-	let showSummary = $state(false);
-	let outOfHearts = $state(false);
-	let levelUpVisible = $state(false);
+    let showSummary = $state(false);
+    let outOfHearts = $state(false);
+    let levelUpVisible = $state(false);
 
-	let sessionXp = $state(0);
-	let confettiPieces = $state<ConfettiPiece[]>([]);
+    let sessionXp = $state(0);
+    let confettiPieces = $state<ConfettiPiece[]>([]);
 
-	// Fortschritt & XP als derived
-    const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
-	const xpProgress = $derived((xp / 100) * 100);
+    // Fortschritt & XP als derived
+    const progress = $derived.by(() => {
+        if (showSummary) return 100;
+        if (questions.length === 0) return 0;
+        return ((currentIndex + (locked ? 1 : 0)) / questions.length) * 100;
+    });
+    const xpProgress = $derived((xp / 100) * 100);
 
-	/* ========= HELPER ========= */
-	function shuffle<T>(array: T[]): T[] {
-		return [...array].sort(() => Math.random() - 0.5);
-	}
+    let category = $state<string | null>(null);
 
-	async function updateProfile(update: Partial<Profile>) {
-		if (!profile) return;
-		await supabase.from('profiles').update(update).eq('id', profile.id);
-	}
+    /* ========= HELPER ========= */
+    function shuffle<T>(array: T[]): T[] {
+        return [...array].sort(() => Math.random() - 0.5);
+    }
 
-	/* ========= LOAD DATA ========= */
-	async function loadProfileAndQuestions() {
-		try {
-			loading = true;
-			loadError = null;
+    async function updateProfile(update: Partial<Profile>) {
+        if (!profile) return;
+        await supabase.from('profiles').update(update).eq('id', profile.id);
+    }
 
-			// 0️⃣ Kategorie aus URL lesen
-			const category = $page.url.searchParams.get('category');
-			console.log('🔹 Mathe Game gestartet. Kategorie:', category || 'Alle');
+    /* ========= LOAD DATA ========= */
+    async function loadProfileAndQuestions() {
+        try {
+            loading = true;
+            loadError = null;
 
-			/* 1️⃣ USER OPTIONAL LADEN */
-			const { data: authData } = await supabase.auth.getUser();
-			const user = authData?.user ?? null;
+            // 0️⃣ Kategorie aus URL lesen
+            category = $page.url.searchParams.get('category');
+            console.log('🔹 Mathe Game gestartet. Kategorie:', category || 'Alle');
 
-			if (user) {
-				const { data: profileData } = await supabase
-					.from('profiles')
-					.select('*')
-					.eq('id', user.id)
-					.single();
+            /* 1️⃣ USER OPTIONAL LADEN */
+            const { data: authData } = await supabase.auth.getUser();
+            const user = authData?.user ?? null;
 
-				if (profileData) {
-					profile = profileData;
-					xp = profileData.xp ?? 0;
-					level = profileData.level ?? 1;
-					streak = profileData.streak ?? 0;
-					// Herzen zurücksetzen bei neuem Spiel
-					if (profileData.hearts !== null && profileData.hearts < MAX_HEARTS) {
-						hearts = MAX_HEARTS;
-						await updateProfile({ hearts: MAX_HEARTS });
-						console.log('❤️ Herzen automatisch zurückgesetzt.');
-					} else {
-						hearts = profileData.hearts ?? MAX_HEARTS;
-					}
-				}
-			} else {
-				console.warn('⚠ Kein Login – Zugriff verweigert');
-				goto('/');
-				return;
-			}
+            if (user) {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
 
-			/* 2️⃣ FRAGEN LADEN (MIT KATEGORIE FILTER) */
-			let query = supabase.from('questions').select('*').ilike('subject', 'Mathe%'); // Nur Mathe Fragen
+                if (profileData) {
+                    profile = profileData;
+                    xp = profileData.xp ?? 0;
+                    level = profileData.level ?? 1;
+                    streak = profileData.streak ?? 0;
+                    // Herzen zurücksetzen bei neuem Spiel
+                    if (profileData.hearts !== null && profileData.hearts < MAX_HEARTS) {
+                        hearts = MAX_HEARTS;
+                        await updateProfile({ hearts: MAX_HEARTS });
+                        console.log('❤️ Herzen automatisch zurückgesetzt.');
+                    } else {
+                        hearts = profileData.hearts ?? MAX_HEARTS;
+                    }
+                }
+            } else {
+                console.warn('⚠ Kein Login – Zugriff verweigert');
+                goto('/');
+                return;
+            }
 
-			// Falls eine Kategorie gewählt wurde, filtern wir danach
-			if (category) {
-				query = query.eq('category', category);
-			}
+            /* 2️⃣ FRAGEN LADEN (MIT KATEGORIE FILTER) */
+            let query = supabase.from('questions').select('*').ilike('subject', 'Mathe%'); // Nur Mathe Fragen
 
-			// Wir laden bis zu 20 Fragen
-			const { data, error } = await query.limit(20);
+            // Falls eine Kategorie gewählt wurde, filtern wir danach
+            if (category) {
+                query = query.eq('category', category);
+            }
 
-			if (error) {
-				console.error('❌ Fehler beim Laden:', error);
-				loadError = 'Fragen konnten nicht geladen werden.';
-			} else if (!data || data.length === 0) {
-				console.warn('⚠ Keine Mathe-Fragen gefunden.');
-				// Fallback Dummy Frage
-				questions = [
-					{
-						question: 'Was ist 5 + 7?',
-						answers: ['10', '11', '12', '13'],
-						correctIndex: 2,
-						xpReward: 10
-					}
-				];
-			} else {
-				// Daten mischen und die ersten 5 nehmen
-				const mixedData = shuffle(data).slice(0, 5);
+            // Wir laden bis zu 20 Fragen
+            const { data, error } = await query.limit(20);
 
-				questions = mixedData.map((q) => ({
-					id: q.id,
-					question: q.question,
-					answers: [q.a1, q.a2, q.a3, q.a4],
-					correctIndex: q.correct_index,
-					xpReward: q.xp_reward ?? 10
-				}));
-			}
-		} catch (err) {
-			console.error(err);
-			loadError = 'Unerwarteter Fehler beim Laden.';
-		} finally {
-			loading = false;
-			currentIndex = 0;
-			selectedIndex = null;
-			locked = false;
-			correctCount = 0;
-			showSummary = false;
-			outOfHearts = false;
-		}
-	}
+            if (error) {
+                console.error('❌ Fehler beim Laden:', error);
+                loadError = 'Fragen konnten nicht geladen werden.';
+            } else if (!data || data.length === 0) {
+                console.warn('⚠ Keine Mathe-Fragen gefunden.');
+                // Fallback Dummy Frage
+                questions = [
+                    {
+                        question: 'Was ist 5 + 7?',
+                        answers: ['10', '11', '12', '13'],
+                        correctIndex: 2,
+                        xpReward: 10
+                    }
+                ];
+            } else {
+                // Daten mischen und die ersten 5 nehmen
+                const mixedData = shuffle(data).slice(0, 5);
 
-	function goNextOrFinish() {
-		if (currentIndex < questions.length - 1) {
-			currentIndex++;
-			selectedIndex = null;
-			locked = false;
-		} else {
-			showSummary = true;
-			saveBossResult();
-		}
-	}
+                questions = mixedData.map((q) => ({
+                    id: q.id,
+                    question: q.question,
+                    answers: [q.a1, q.a2, q.a3, q.a4],
+                    correctIndex: q.correct_index,
+                    xpReward: q.xp_reward ?? 10
+                }));
+            }
+        } catch (err) {
+            console.error(err);
+            loadError = 'Unerwarteter Fehler beim Laden.';
+        } finally {
+            loading = false;
+            currentIndex = 0;
+            selectedIndex = null;
+            locked = false;
+            correctCount = 0;
+            showSummary = false;
+            outOfHearts = false;
+        }
+    }
 
-	/* ========= ANSWER CLICK (MIT MISSION UPDATE) ========== */
-	// 🔥 WICHTIG: Async für DB-Aufruf
-	async function handleAnswerClick(index: number) {
-		if (locked || showSummary || outOfHearts) return;
+    function goNextOrFinish() {
+        if (currentIndex < questions.length - 1) {
+            currentIndex++;
+            selectedIndex = null;
+            locked = false;
+        } else {
+            showSummary = true;
+            saveBossResult();
+        }
+    }
 
-		console.log('Antwort gewählt:', index);
-		selectedIndex = index;
-		locked = true;
+    /* ========= ANSWER CLICK (MIT MISSION UPDATE) ========== */
+    // 🔥 WICHTIG: Async für DB-Aufruf
+    async function handleAnswerClick(index: number) {
+        if (locked || showSummary || outOfHearts) return;
 
-		const current = questions[currentIndex];
-		const isCorrect = index === current.correctIndex;
+        console.log('Antwort gewählt:', index);
+        selectedIndex = index;
+        locked = true;
 
-		if (isCorrect) {
-			correctCount++;
-			rewardXP(current.xpReward);
+        const current = questions[currentIndex];
+        const isCorrect = index === current.correctIndex;
 
-			// -----------------------------------------------------------
-			// 🚀 NEU: Mission Progress Update für 'Mathe'
-			// -----------------------------------------------------------
-			if (profile?.id) {
-				const { error } = await supabase.rpc('increment_mission_progress', {
-					p_user_id: profile.id,
-					p_subject_name: 'Mathe' // Zählt Mathe-Missionen hoch
-				});
+        if (isCorrect) {
+            correctCount++;
+            rewardXP(current.xpReward);
 
-				if (error) {
-					console.error('Fehler beim Missions-Update:', error);
-				} else {
-					console.log('Mission Progress erfolgreich erhöht!');
-				}
-			}
-			// -----------------------------------------------------------
-		} else {
-			loseHeart();
-		}
+            // -----------------------------------------------------------
+            // 🚀 NEU: Mission Progress Update für 'Mathe'
+            // -----------------------------------------------------------
+            if (profile?.id) {
+                const { error } = await supabase.rpc('increment_mission_progress', {
+                    p_user_id: profile.id,
+                    p_subject_name: 'Mathe', // Zählt Mathe-Missionen hoch
+                    p_category: category || null
+                });
 
-		setTimeout(() => {
-			if (!outOfHearts) {
-				goNextOrFinish();
-			}
-		}, 1000); // Etwas Zeit lassen um Farbe zu sehen
-	}
+                if (error) {
+                    console.error('Fehler beim Missions-Update:', error);
+                } else {
+                    console.log('Mission Progress erfolgreich erhöht!');
+                }
+            }
+            // -----------------------------------------------------------
+        } else {
+            loseHeart();
+        }
 
-	async function rewardXP(amount: number) {
-		xp += amount;
-		sessionXp += amount;
+        setTimeout(() => {
+            if (!outOfHearts) {
+                goNextOrFinish();
+            }
+        }, 1000); // Etwas Zeit lassen um Farbe zu sehen
+    }
 
-		if (xp >= 100) {
-			xp -= 100;
-			level++;
-			levelUpVisible = true;
-			setTimeout(() => (levelUpVisible = false), 2000);
-		}
+    async function rewardXP(amount: number) {
+        xp += amount;
+        sessionXp += amount;
 
-		if (profile) {
-			await updateProfile({ xp, level });
-		}
-	}
+        if (xp >= 100) {
+            xp -= 100;
+            level++;
+            levelUpVisible = true;
+            setTimeout(() => (levelUpVisible = false), 2000);
+        }
 
-	async function loseHeart() {
-		hearts = Math.max(0, hearts - 1);
-		if (hearts === 0) outOfHearts = true;
-		await updateProfile({ hearts });
-	}
+        if (profile) {
+            await updateProfile({ xp, level });
+        }
+    }
 
-	async function saveBossResult() {
-		const grade = Math.ceil(6 - (correctCount / questions.length) * 5);
-		await updateProfile({ last_boss: 'Classe10Math', last_grade: grade });
+    async function loseHeart() {
+        hearts = Math.max(0, hearts - 1);
+        if (hearts === 0) outOfHearts = true;
+        await updateProfile({ hearts });
+    }
 
-		if (correctCount > 0) {
-			streak++;
-			await updateProfile({ streak });
-		}
-	}
+    async function saveBossResult() {
+        const grade = Math.ceil(6 - (correctCount / questions.length) * 5);
+        await updateProfile({ last_boss: 'Classe10Math', last_grade: grade });
 
-	async function restartLesson() {
-		currentIndex = 0;
-		selectedIndex = null;
-		outOfHearts = false;
-		showSummary = false;
-		hearts = MAX_HEARTS;
-		correctCount = 0;
+        if (correctCount > 0) {
+            streak++;
+            await updateProfile({ streak });
+        }
+    }
 
-		if (profile) {
-			await updateProfile({ hearts: MAX_HEARTS });
-		}
+    async function restartLesson() {
+        currentIndex = 0;
+        selectedIndex = null;
+        outOfHearts = false;
+        showSummary = false;
+        hearts = MAX_HEARTS;
+        correctCount = 0;
 
-		await loadProfileAndQuestions();
-	}
+        if (profile) {
+            await updateProfile({ hearts: MAX_HEARTS });
+        }
 
-	onMount(loadProfileAndQuestions);
+        await loadProfileAndQuestions();
+    }
 
-	// I18n Helper
-	function getSubject(q: any) {
-		return $locale === 'en' ? q.subject_en || q.subject : q.subject;
-	}
-	function getQuestion(q: any) {
-		return $locale === 'en' ? q.question_en || q.question : q.question;
-	}
-	function getCategory(q: any) {
-		return $locale === 'en' ? q.category_en || q.category : q.category;
-	}
+    onMount(loadProfileAndQuestions);
+
+    // I18n Helper
+    function getSubject(q: any) {
+        return $locale === 'en' ? q.subject_en || q.subject : q.subject;
+    }
+    function getQuestion(q: any) {
+        return $locale === 'en' ? q.question_en || q.question : q.question;
+    }
+    function getCategory(q: any) {
+        return $locale === 'en' ? q.category_en || q.category : q.category;
+    }
 </script>
 
 {#if loading}
-	<div class="loading"><p>{$_('game.loading')}</p></div>
+    <div class="loading"><p>{$_('game.loading')}</p></div>
 {:else if loadError}
-	<div class="error">
-		<p>{loadError}</p>
-		<button on:click={loadProfileAndQuestions}>{$_('game.reload')}</button>
-	</div>
+    <div class="error">
+        <p>{loadError}</p>
+        <button onclick={loadProfileAndQuestions}>{$_('game.reload')}</button>
+    </div>
 {:else if questions.length === 0}
-	<div class="error">
-		<p>{$_('game.no_questions')}</p>
-		<button on:click={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
-			Dashboard
-		</button>
-	</div>
+    <div class="error">
+        <p>{$_('game.no_questions')}</p>
+        <button onclick={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
+            Dashboard
+        </button>
+    </div>
 {:else}
-	<div class="game-root">
-		{#if levelUpVisible}
-			<div class="levelup-popup">
-				{$_('game.level_reached')}
-				{level}
-			</div>
-		{/if}
+    <div class="game-root">
+        {#if levelUpVisible}
+            <div class="levelup-popup">
+                {$_('game.level_reached')}
+                {level}
+            </div>
+        {/if}
 
-		{#each confettiPieces as piece (piece.id)}
-			<div
-				class="confetti"
-				style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
-			></div>
-		{/each}
+        {#each confettiPieces as piece (piece.id)}
+            <div
+                    class="confetti"
+                    style={`left:${piece.left}%;animation-duration:${piece.duration}ms;animation-delay:${piece.delay}ms;background:${piece.color};`}
+            ></div>
+        {/each}
 
-		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+        <header class="hud">
+            <button class="back-btn" onclick={() => goto('/student_landing_page_id5')}>←</button>
 
-			<div class="hud-center">
-				<div class="progress-top">
-					<div class="progress-inner" style={`width: ${progress}%`}></div>
-				</div>
-				<p class="question-count">
-					{$_('game.question_count')}
-					{currentIndex + 1} / {questions.length}
-				</p>
-			</div>
+            <div class="hud-center">
+                <div class="progress-top">
+                    <div class="progress-inner" style={`width: ${progress}%`}></div>
+                </div>
+                <p class="question-count">
+                    {$_('game.question_count')}
+                    {currentIndex + 1} / {questions.length}
+                </p>
+            </div>
 
-			<div class="hud-right">
-				<div class="hearts">
-					{#each Array(MAX_HEARTS) as _, i}
-						<span class:lost={i >= hearts}>❤️</span>
-					{/each}
-				</div>
+            <div class="hud-right">
+                <div class="hearts">
+                    {#each Array(MAX_HEARTS) as _, i}
+                        <span class:lost={i >= hearts}>❤️</span>
+                    {/each}
+                </div>
 
-				<div class="xp-display">
-					<span>Lvl {level}</span>
-					<div class="xp-bar">
-						<div class="xp-inner" style={`width: ${xpProgress}%`}></div>
-					</div>
-				</div>
+                <div class="xp-display">
+                    <span>Lvl {level}</span>
+                    <div class="xp-bar">
+                        <div class="xp-inner" style={`width: ${Math.min(Math.max(xpProgress, 0), 100)}%`}></div>
+                    </div>
+                </div>
 
-				<div class="streak">
-					<span>🔥</span>{streak}
-				</div>
-			</div>
-		</header>
+                <div class="streak">
+                    <span>🔥</span>{streak}
+                </div>
+            </div>
+        </header>
 
-		{#if !showSummary && !outOfHearts}
-			<main class="card">
-				<h2 class="question">{questions[currentIndex].question}</h2>
-				<div class="answers">
-					{#each questions[currentIndex].answers as ans, i}
-						{#if ans}
-							<button
-								class="answer-btn {locked && i === questions[currentIndex].correctIndex
+        {#if !showSummary && !outOfHearts}
+            <main class="card">
+                <h2 class="question">{questions[currentIndex].question}</h2>
+                <div class="answers">
+                    {#each questions[currentIndex].answers as ans, i}
+                        {#if ans}
+                            <button
+                                    class="answer-btn {locked && i === questions[currentIndex].correctIndex
 									? 'correct'
 									: ''} {locked &&
 								selectedIndex === i &&
 								selectedIndex !== questions[currentIndex].correctIndex
 									? 'wrong'
 									: ''}"
-								on:click={() => handleAnswerClick(i)}
-								disabled={locked}
-							>
-								{ans}
-							</button>
-						{/if}
-					{/each}
-				</div>
-			</main>
-		{:else}
-			<section class="summary">
-				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
+                                    onclick={() => handleAnswerClick(i)}
+                                    disabled={locked}
+                            >
+                                {ans}
+                            </button>
+                        {/if}
+                    {/each}
+                </div>
+            </main>
+        {:else}
+            <section class="summary">
+                <h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
 
-				<div class="xp-chest">
-					<div class="chest-glow"></div>
-					<div class="chest-lid"></div>
-					<div class="chest-box"></div>
-				</div>
+                <div class="xp-chest">
+                    <div class="chest-glow"></div>
+                    <div class="chest-lid"></div>
+                    <div class="chest-box"></div>
+                </div>
 
-				<div class="summary-stats">
-					<div>
-						<span>{$_('game.correct_answers')}</span>
-						<strong>{correctCount} / {questions.length}</strong>
-					</div>
-					<div>
-						<span>Level</span>
-						<strong>{level}</strong>
-					</div>
-				</div>
+                <div class="summary-stats">
+                    <div>
+                        <span>{$_('game.correct_answers')}</span>
+                        <strong>{correctCount} / {questions.length}</strong>
+                    </div>
+                    <div>
+                        <span>Level</span>
+                        <strong>{level}</strong>
+                    </div>
+                </div>
 
-				{#if sessionXp > 0}
-					<p class="xp-earned">+{sessionXp} XP</p>
-				{/if}
+                {#if sessionXp > 0}
+                    <p class="xp-earned">+{sessionXp} XP</p>
+                {/if}
 
-				<div class="achievements">
-					<p>{$_('game.badges_title')}</p>
-					<div class="badge-row">
-						{#if correctCount === questions.length}
-							<span class="badge">{$_('game.badge_perfect')}</span>
-						{/if}
-						{#if streak >= 3}
-							<span class="badge">{$_('game.badge_streak')}</span>
-						{/if}
-						{#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
-							<span class="badge">{$_('game.badge_math_hero')}</span>
-						{/if}
-					</div>
-				</div>
+                <div class="achievements">
+                    <p>{$_('game.badges_title')}</p>
+                    <div class="badge-row">
+                        {#if correctCount === questions.length}
+                            <span class="badge">{$_('game.badge_perfect')}</span>
+                        {/if}
+                        {#if streak >= 3}
+                            <span class="badge">{$_('game.badge_streak')}</span>
+                        {/if}
+                        {#if !outOfHearts && correctCount >= Math.ceil(questions.length / 2)}
+                            <span class="badge">{$_('game.badge_math_hero')}</span>
+                        {/if}
+                    </div>
+                </div>
 
-				<div class="summary-actions">
-					<button on:click={restartLesson}>{$_('game.play_again')}</button>
-					<button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
-				</div>
-			</section>
-		{/if}
-	</div>
+                <div class="summary-actions">
+                    <button onclick={restartLesson}>{$_('game.play_again')}</button>
+                    <button onclick={() => goto('/student_landing_page_id5')}>Dashboard</button>
+                </div>
+            </section>
+        {/if}
+    </div>
 {/if}
 
 <style>
-	:global(body) {
-		margin: 0;
-		font-family:
-			system-ui,
-			-apple-system,
-			BlinkMacSystemFont,
-			'Segoe UI',
-			sans-serif;
-		background: #e7f4fa;
-	}
+    /* ============ DARK MODE SUPPORT ============ */
+    :global(body) {
+        margin: 0;
+        font-family:
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                'Segoe UI',
+                sans-serif;
+        background: var(--bg-main, #e7f4fa);
+        transition: background-color 0.3s ease;
+    }
 
-	.game-root {
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 1.5rem 1rem 3rem;
-		position: relative;
-	}
+    .game-root {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 3rem;
+        position: relative;
+    }
 
-	.loading,
-	.error {
-		text-align: center;
-		padding: 4rem 1rem;
-	}
+    .loading,
+    .error {
+        text-align: center;
+        padding: 4rem 1rem;
+        color: var(--text-primary, #000);
+    }
 
-	.error button {
-		margin-top: 1rem;
-		padding: 0.6rem 1.4rem;
-		border-radius: 12px;
-		border: none;
-		background: #236c93;
-		color: white;
-		cursor: pointer;
-	}
+    .error button {
+        margin-top: 1rem;
+        padding: 0.6rem 1.4rem;
+        border-radius: 12px;
+        border: none;
+        background: #236c93;
+        color: white;
+        cursor: pointer;
+        min-height: 44px;
+    }
 
-	/* HUD */
-	.hud {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 1.2rem;
-		gap: 0.6rem;
-	}
+    .error button:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
 
-	.back-btn {
-		border: none;
-		background: white;
-		border-radius: 999px;
-		width: 40px;
-		height: 40px;
-		font-size: 1.4rem;
-		cursor: pointer;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-		color: #236c93;
-	}
+    /* ============ HUD ============ */
+    .hud {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.2rem;
+        gap: 0.6rem;
+    }
 
-	.hud-center {
-		flex: 1;
-		text-align: center;
-	}
+    .back-btn {
+        border: none;
+        background: var(--bg-card, white);
+        border-radius: 999px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.4rem;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        color: #236c93;
+        transition: all 0.2s ease;
+        min-height: 44px;
+        min-width: 44px;
+    }
 
-	.progress-top {
-		height: 10px;
-		background: #d9e5f0;
-		border-radius: 999px;
-		overflow: hidden;
-		margin-bottom: 0.2rem;
-	}
+    .back-btn:hover {
+        transform: scale(1.05);
+    }
 
-	.progress-inner {
-		height: 100%;
-		background: linear-gradient(90deg, #3ba776, #65d492);
-		transition: width 0.2s;
-	}
+    .back-btn:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
 
-	.question-count {
-		font-size: 0.85rem;
-		color: #4a6175;
-		margin: 0;
-	}
+    .hud-center {
+        flex: 1;
+        text-align: center;
+    }
 
-	.hud-right {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 0.3rem;
-		font-size: 0.9rem;
-	}
+    .progress-top {
+        height: 10px;
+        background: var(--bg-hover, #d9e5f0);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 0.2rem;
+        transition: background-color 0.3s ease;
+    }
 
-	.hearts span {
-		font-size: 1.2rem;
-		margin-left: 0.1rem;
-	}
+    .progress-inner {
+        height: 100%;
+        background: linear-gradient(90deg, #3ba776, #65d492);
+        transition: width 0.2s;
+    }
 
-	.hearts span.lost {
-		opacity: 0.25;
-	}
+    .question-count {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #4a6175);
+        margin: 0;
+        transition: color 0.3s ease;
+    }
 
-	.xp-display {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 0.15rem;
-	}
+    .hud-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+    }
 
-	.xp-display span {
-		font-size: 0.8rem;
-		color: #1d5e84;
-		font-weight: 600;
-	}
+    .hearts span {
+        font-size: 1.2rem;
+        margin-left: 0.1rem;
+    }
 
-	.xp-bar {
-		width: 110px;
-		height: 6px;
-		border-radius: 999px;
-		background: #d9e5f0;
-		overflow: hidden;
-	}
+    .hearts span.lost {
+        opacity: 0.25;
+    }
 
-	.xp-inner {
-		height: 100%;
-		background: linear-gradient(90deg, #f6ad55, #f56565);
-		transition: width 0.2s;
-	}
+    .xp-display {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.15rem;
+    }
 
-	.streak {
-		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-		background: white;
-		padding: 0.1rem 0.5rem;
-		border-radius: 999px;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-	}
+    .xp-display span {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #1d5e84);
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
 
-	.streak span:first-child {
-		font-size: 1.1rem;
-	}
+    .xp-bar {
+        width: 110px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--bg-hover, #d9e5f0);
+        overflow: hidden;
+        transition: background-color 0.3s ease;
+    }
 
-	/* LEVEL UP POPUP */
-	.levelup-popup {
-		position: fixed;
-		top: 15%;
-		left: 50%;
-		transform: translateX(-50%);
-		background: #3ba776;
-		color: white;
-		padding: 0.8rem 1.6rem;
-		border-radius: 14px;
-		font-weight: bold;
-		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-		animation:
-			popup 0.6s ease-out forwards,
-			fadeOut 2s ease forwards;
-		z-index: 50;
-	}
+    .xp-inner {
+        height: 100%;
+        background: linear-gradient(90deg, #f6ad55, #f56565);
+        transition: width 0.2s;
+    }
 
-	@keyframes popup {
-		0% {
-			transform: translate(-50%, -50%) scale(0.8);
-			opacity: 0;
-		}
-		50% {
-			transform: translate(-50%, -50%) scale(1.08);
-			opacity: 1;
-		}
-		100% {
-			transform: translate(-50%, -50%) scale(1);
-			opacity: 1;
-		}
-	}
+    .streak {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
+        padding: 0.1rem 0.5rem;
+        border-radius: 999px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
 
-	@keyframes fadeOut {
-		0%,
-		60% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
-		}
-	}
+    .streak span:first-child {
+        font-size: 1.1rem;
+    }
 
-	/* CARD */
-	.card {
-		background: white;
-		padding: 2rem 1.5rem;
-		border-radius: 18px;
-		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-		animation: slideUp 0.25s ease-out;
-	}
+    /* ============ LEVEL UP POPUP ============ */
+    .levelup-popup {
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #3ba776;
+        color: white;
+        padding: 0.8rem 1.6rem;
+        border-radius: 14px;
+        font-weight: bold;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        animation:
+                popup 0.6s ease-out forwards,
+                fadeOut 2s ease forwards;
+        z-index: 50;
+    }
 
-	.question {
-		font-size: 1.5rem;
-		color: #1d5e84;
-		margin-bottom: 1.5rem;
-		text-align: center;
-	}
+    @keyframes popup {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.08);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+    }
 
-	.answers {
-		display: grid;
-		gap: 0.9rem;
-	}
+    @keyframes fadeOut {
+        0%,
+        60% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
 
-	.answer-btn {
-		width: 100%;
-		text-align: left;
-		padding: 0.9rem 1rem;
-		border-radius: 14px;
-		border: 2px solid #d7e4ef;
-		background: #f8fbff;
-		font-size: 1rem;
-		cursor: pointer;
-		transition:
-			transform 0.12s,
-			box-shadow 0.12s,
-			border-color 0.12s,
-			background 0.12s;
-	}
+    /* ============ CARD ============ */
+    .card {
+        background: var(--bg-card, white);
+        padding: 2rem 1.5rem;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        animation: slideUp 0.25s ease-out;
+        transition: background-color 0.3s ease;
+    }
 
-	.answer-btn:hover:not(:disabled) {
-		transform: translateY(-1px);
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-	}
+    .question {
+        font-size: 1.5rem;
+        color: var(--text-primary, #1d5e84);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        transition: color 0.3s ease;
+    }
 
-	.answer-btn.correct {
-		background: #c6f6d5;
-		border-color: #3ba776;
-	}
+    .answers {
+        display: grid;
+        gap: 0.9rem;
+    }
 
-	.answer-btn.wrong {
-		background: #ffd1d1;
-		border-color: #ff6b6b;
-	}
+    .answer-btn {
+        width: 100%;
+        text-align: left;
+        padding: 0.9rem 1rem;
+        border-radius: 14px;
+        border: 2px solid var(--border-color, #d7e4ef);
+        background: var(--bg-hover, #f8fbff);
+        color: var(--text-primary, #000);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 44px;
+    }
 
-	/* SUMMARY */
-	.summary {
-		background: white;
-		padding: 2rem 1.5rem;
-		border-radius: 18px;
-		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-		text-align: center;
-		animation: slideUp 0.25s ease-out;
-	}
+    .answer-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-	.summary h1 {
-		margin-bottom: 0.5rem;
-		color: #1d5e84;
-	}
+    .answer-btn:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
 
-	.summary p {
-		margin: 0.2rem 0;
-		color: #4a6175;
-	}
+    .answer-btn.correct {
+        background: #c6f6d5;
+        border-color: #3ba776;
+    }
 
-	.xp-earned {
-		font-size: 1.3rem;
-		font-weight: bold;
-		color: #3ba776;
-		margin-top: 0.6rem;
-	}
+    .answer-btn.wrong {
+        background: #ffd1d1;
+        border-color: #ff6b6b;
+    }
 
-	/* XP Chest */
-	.xp-chest {
-		position: relative;
-		width: 130px;
-		height: 100px;
-		margin: 1.3rem auto 1rem;
-	}
+    /* ============ SUMMARY ============ */
+    .summary {
+        background: var(--bg-card, white);
+        padding: 2rem 1.5rem;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        text-align: center;
+        animation: slideUp 0.25s ease-out;
+        transition: background-color 0.3s ease;
+    }
 
-	.chest-box {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		margin: auto;
-		width: 130px;
-		height: 70px;
-		background: linear-gradient(180deg, #d69e2e, #b7791f);
-		border-radius: 10px;
-		box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-	}
+    .summary h1 {
+        margin-bottom: 0.5rem;
+        color: var(--text-primary, #1d5e84);
+        transition: color 0.3s ease;
+    }
 
-	.chest-lid {
-		position: absolute;
-		bottom: 55px;
-		left: 10px;
-		right: 10px;
-		height: 30px;
-		background: linear-gradient(180deg, #faf089, #ecc94b);
-		border-radius: 10px;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-	}
+    .summary p {
+        margin: 0.2rem 0;
+        color: var(--text-secondary, #4a6175);
+        transition: color 0.3s ease;
+    }
 
-	.chest-glow {
-		position: absolute;
-		bottom: 60px;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 90px;
-		height: 40px;
-		background: radial-gradient(circle, rgba(250, 240, 137, 0.9), transparent);
-		opacity: 0.8;
-		animation: glow 1.4s ease-in-out infinite;
-	}
+    .xp-earned {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #3ba776;
+        margin-top: 0.6rem;
+    }
 
-	@keyframes glow {
-		0% {
-			transform: translateX(-50%) scale(0.9);
-			opacity: 0.7;
-		}
-		50% {
-			transform: translateX(-50%) scale(1.05);
-			opacity: 1;
-		}
-		100% {
-			transform: translateX(-50%) scale(0.9);
-			opacity: 0.7;
-		}
-	}
+    /* XP Chest - bleibt golden! */
+    .xp-chest {
+        position: relative;
+        width: 130px;
+        height: 100px;
+        margin: 1.3rem auto 1rem;
+    }
 
-	.summary-stats {
-		display: flex;
-		justify-content: center;
-		gap: 1.5rem;
-		margin: 1rem 0;
-	}
+    .chest-box {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 130px;
+        height: 70px;
+        background: linear-gradient(180deg, #d69e2e, #b7791f);
+        border-radius: 10px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+    }
 
-	.summary-stats span {
-		display: block;
-		font-size: 0.85rem;
-		color: #6e8191;
-	}
+    .chest-lid {
+        position: absolute;
+        bottom: 55px;
+        left: 10px;
+        right: 10px;
+        height: 30px;
+        background: linear-gradient(180deg, #faf089, #ecc94b);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-	.summary-stats strong {
-		font-size: 1.2rem;
-		color: #1d5e84;
-	}
+    .chest-glow {
+        position: absolute;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90px;
+        height: 40px;
+        background: radial-gradient(circle, rgba(250, 240, 137, 0.9), transparent);
+        opacity: 0.8;
+        animation: glow 1.4s ease-in-out infinite;
+    }
 
-	.achievements {
-		margin: 0.8rem 0;
-	}
+    @keyframes glow {
+        0% {
+            transform: translateX(-50%) scale(0.9);
+            opacity: 0.7;
+        }
+        50% {
+            transform: translateX(-50%) scale(1.05);
+            opacity: 1;
+        }
+        100% {
+            transform: translateX(-50%) scale(0.9);
+            opacity: 0.7;
+        }
+    }
 
-	.badge-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-		justify-content: center;
-		margin-top: 0.3rem;
-	}
+    .summary-stats {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin: 1rem 0;
+    }
 
-	.badge {
-		background: #e7f4fa;
-		border-radius: 999px;
-		padding: 0.3rem 0.8rem;
-		border: 1px solid #236c93;
-		font-size: 0.85rem;
-		color: #236c93;
-	}
+    .summary-stats span {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-secondary, #6e8191);
+        transition: color 0.3s ease;
+    }
 
-	.summary-actions {
-		margin-top: 1.2rem;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.6rem;
-		justify-content: center;
-	}
+    .summary-stats strong {
+        font-size: 1.2rem;
+        color: var(--text-primary, #1d5e84);
+        transition: color 0.3s ease;
+    }
 
-	.summary-actions button {
-		padding: 0.7rem 1.5rem;
-		border-radius: 14px;
-		border: none;
-		background: linear-gradient(90deg, #236c93, #3ba776);
-		color: white;
-		font-weight: 600;
-		cursor: pointer;
-	}
+    .achievements {
+        margin: 0.8rem 0;
+    }
 
-	.summary-actions button:nth-child(2) {
-		background: #e2e8f0;
-		color: #1d5e84;
-	}
+    .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: center;
+        margin-top: 0.3rem;
+    }
 
-	/* CONFETTI */
-	.confetti {
-		position: fixed;
-		top: -20px;
-		width: 10px;
-		height: 16px;
-		border-radius: 2px;
-		animation-name: confetti-fall;
-		animation-timing-function: linear;
-		animation-iteration-count: 1;
-		z-index: 100;
-	}
+    .badge {
+        background: var(--bg-hover, #e7f4fa);
+        border-radius: 999px;
+        padding: 0.3rem 0.8rem;
+        border: 1px solid #236c93;
+        font-size: 0.85rem;
+        color: #236c93;
+        transition: background-color 0.3s ease;
+    }
 
-	@keyframes confetti-fall {
-		from {
-			transform: translateY(-20px) rotate(0deg);
-			opacity: 1;
-		}
-		to {
-			transform: translateY(110vh) rotate(360deg);
-			opacity: 0;
-		}
-	}
+    .summary-actions {
+        margin-top: 1.2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        justify-content: center;
+    }
 
-	@keyframes slideUp {
-		from {
-			opacity: 0;
-			transform: translateY(16px);
-		}
-	}
+    .summary-actions button {
+        padding: 0.7rem 1.5rem;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(90deg, #236c93, #3ba776);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        min-height: 44px;
+        transition: transform 0.2s;
+    }
 
-	.answer-btn.correct {
-		background: #c6f6d5;
-		border-color: #3ba776;
-	}
+    .summary-actions button:hover {
+        transform: translateY(-2px);
+    }
 
-	.answer-btn.wrong {
-		background: #ffd1d1;
-		border-color: #ff6b6b;
-	}
+    .summary-actions button:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 2px;
+    }
+
+    .summary-actions button:nth-child(2) {
+        background: var(--bg-hover, #e2e8f0);
+        color: var(--text-primary, #1d5e84);
+    }
+
+    /* ============ CONFETTI ============ */
+    .confetti {
+        position: fixed;
+        top: -20px;
+        width: 10px;
+        height: 16px;
+        border-radius: 2px;
+        animation-name: confetti-fall;
+        animation-timing-function: linear;
+        animation-iteration-count: 1;
+        z-index: 100;
+    }
+
+    @keyframes confetti-fall {
+        from {
+            transform: translateY(-20px) rotate(0deg);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(110vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+    }
 </style>
