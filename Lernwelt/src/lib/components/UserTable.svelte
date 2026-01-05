@@ -36,9 +36,9 @@
     <table>
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Rechte</th>
-          <th style="text-align: right;">Aktionen</th>
+          <th>{$_('admin.user_table.headers.name')}</th>
+          <th>{$_('admin.user_table.headers.rights')}</th>
+          <th style="text-align: right;">{$_('admin.user_table.headers.actions')}</th>
         </tr>
       </thead>
       <tbody>
@@ -47,29 +47,29 @@
           <tr class:pending={user.role !== 'admin' && !user.editing_right}>
             <td>
               <div class="user-info">
-                <strong>{user.full_name || 'Unbekannt'}</strong>
+                <strong>{user.full_name || $_('admin.user_table.unknown')}</strong>
                 <small class="uuid">{user.id.slice(0,8)}...</small>
               </div>
             </td>
             <td>
               {#if user.editing_right}
-                <span class="status-ok">✅ Editierrechte</span>
+                <span class="status-ok">✅ {$_('admin.user_table.status.edit_rights')}</span>
               {:else}
-                <span class="status-no">⛔ Nur Lesen</span>
+                <span class="status-no">⛔ {$_('admin.user_table.status.read_only')}</span>
               {/if}
             </td>
             <td style="overflow: visible;">
               <div class="actions">
                 {#if !isMe}
                   <button class="btn-small" class:revoke={user.editing_right} class:grant={!user.editing_right} onclick={() => handleToggle(user)}>
-                    {user.editing_right ? t('admin.revoke_rights') : t('admin.grant_rights')}
+                    {user.editing_right ? $_('admin.revoke_rights') : $_('admin.grant_rights')}
                   </button>
 
                   <button class="btn-small secondary" onclick={() => handleOpenRole(user)}>
-                    {t('admin.change_role_button')}
+                    {$_('admin.change_role_button')}
                   </button>
                 {:else}
-                  <span class="me-badge">(Du)</span>
+                  <span class="me-badge">{$_('admin.user_table.me')}</span>
                 {/if}
               </div>
             </td>

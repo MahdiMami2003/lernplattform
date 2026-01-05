@@ -28,6 +28,7 @@
     "general_admin": "Administration & Content Management",
     "nametag_tips": "Pedagogical tips",
     "nametag_appointments": "Appointments & news",
+    "nametag_missions": "Missions",
     "nametag_classes": "My classes",
     "content_creation": "Create new content",
     "minigames_desc": "Create and manage questions for the mini games.",
@@ -143,7 +144,8 @@
     "weekly_test_generic": "Weekly Test",
     "classroom_generic": "Classroom",
     "page_generic": "Page",
-    "detail_prefix": "Detail"
+    "detail_prefix": "Detail",
+    "access_denied": "Access denied"
   },
   "progress": {
     "loading": "Loading data...",
@@ -325,12 +327,20 @@
 
     "s3_title": "Known limitations",
     "s3_p1": "Since this is a school learning project, accessibility is not fully implemented yet. Some areas can still be improved, for example:",
-    "s3_li1": "Consistent contrast across all subpages",
+    "s3_li1": "Consistent contrasts across all subpages",
     "s3_li2": "Alt texts for all images and icons",
     "s3_li3": "Keyboard navigation and screen reader support",
 
     "s4_title": "Feedback",
-    "s4_p1": "If you notice barriers or have ideas for improvement, please contact the address listed in the imprint."
+    "s4_p1": "If you notice barriers or have ideas for improvement, please contact the address listed in the imprint.",
+
+    "no_permission_title": "Access denied",
+    "no_permission_text": "Oh no — you don't have access to this page. Please sign in with the appropriate account (e.g. as student or parent). If you don't have an account yet, you can register.",
+    "link_to_login": "Go to Login",
+    "link_to_register": "Register",
+    "back_to_home": "Back to Home",
+    "go_to_appointments": "View appointments",
+    "go_to_materials": "View materials"
   },
   "register": {
     "page_title": "Welcome to HSG-Lernwelt",
@@ -403,6 +413,76 @@
     "role_option_parent": "Parent",
     "role_option_admin": "Administrator",
     "role_modal_cancel": "Cancel",
+    "role_modal_confirm": "Change role",
+    "user_table": {
+      "headers": {
+        "name": "Name",
+        "rights": "Rights",
+        "actions": "Actions"
+      },
+      "status": {
+        "edit_rights": "Edit rights",
+        "read_only": "Read only"
+      },
+      "me": "(You)",
+      "unknown": "Unknown"
+    }
+  },
+  "admin_page": {
+    "title": "🛡️ Admin Dashboard",
+    "subtitle": "Manage users, permissions and classes.",
+    "link_teacher": "Go to Teacher Dashboard",
+    "link_parent": "Go to Parents Dashboard",
+    "link_student": "Go to Student Dashboard",
+    "loading": "Loading data...",
+    "classes_title": "School classes",
+    "classes_count": "School classes ({count})",
+    "classes_add": "+ New",
+    "classes_empty": "No classes created.",
+    "classes_col_name": "Class name",
+    "classes_col_grade": "Grade",
+    "classes_col_actions": "Actions",
+    "classes_grade_badge": "Class ",
+    "classes_delete": "Delete",
+    "classes_link_aria": "Switch to class {name}",
+    "teachers_title": "Teachers",
+    "teachers_count": "Teachers ({count})",
+    "teachers_empty": "No teachers found.",
+    "parents_title": "Parents",
+    "parents_count": "Parents ({count})",
+    "parents_empty": "No parent accounts found.",
+    "admins_title": "Administrators",
+    "admins_count": "Administrators ({count})",
+    "admins_empty": "No other admins.",
+    "students_by_class_title": "Students by class",
+    "students_empty": "No students found.",
+    "students_table_name": "Name",
+    "students_table_details": "Details",
+    "students_edit": "Edit",
+    "students_no_class": "Without class",
+    "modal_class_create_title": "Create new class",
+    "modal_class_name_label": "Class name (e.g. 10a)",
+    "modal_class_name_placeholder": "Class name...",
+    "modal_class_grade_label": "Grade level (e.g. 10)",
+    "modal_class_grade_placeholder": "Grade...",
+    "modal_cancel": "Cancel",
+    "modal_create": "Create",
+    "edit_student_title": "Edit student",
+    "edit_student_name_label": "Name",
+    "edit_student_email_label": "Email (not editable)",
+    "edit_student_class_label": "Class",
+    "edit_student_save": "Save",
+    "edit_student_delete": "Delete",
+    "errors_create_class_missing": "Please provide name and grade.",
+    "confirm_delete_class": "Really delete class \"{name}\"?",
+    "error_prefix": "Error: ",
+    "error_create_class": "Error while creating: ",
+    "error_save_student": "Error while saving: ",
+    "error_delete_student": "Error while deleting: ",
+    "confirm_change_role": "Change role of \"{name}\" to \"{role}\"?",
+    "confirm_delete_student": "Really delete student \"{name}\"?",
+    "class_heading": "{name} (Gr. {grade})",
+    "students_sorted_by": "Sorted by classes",
     "role_modal_confirm": "Change role"
   },
   "create": {

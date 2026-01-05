@@ -22,21 +22,9 @@
 			data: { user }
 		} = await supabase.auth.getUser();
 		if (!user) {
-			goto('/');
+			goto('/no_permission_page_id18');
 			return;
 		}
-
-		const { data: profile } = await supabase
-			.from('profiles')
-			.select('role')
-			.eq('id', user.id)
-			.single();
-
-		if (profile?.role !== 'teacher' && profile?.role !== 'admin') {
-			goto('/'); // Not authorized
-			return;
-		}
-
 		await loadMissions();
 	});
 
