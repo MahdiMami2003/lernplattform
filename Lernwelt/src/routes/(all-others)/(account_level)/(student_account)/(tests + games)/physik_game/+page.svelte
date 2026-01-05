@@ -61,8 +61,10 @@
 	let confettiPieces = $state<ConfettiPiece[]>([]);
 
 	// Fortschritt & XP als derived
-    const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
+	const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
 	const xpProgress = $derived((xp / 100) * 100);
+
+	let category = $state<string | null>(null);
 
 	/* ========= HELPER ========= */
 	function shuffle<T>(array: T[]): T[] {
@@ -81,7 +83,7 @@
 			loadError = null;
 
 			// 0️⃣ Kategorie aus URL lesen
-			const category = $page.url.searchParams.get('category');
+			category = $page.url.searchParams.get('category');
 			console.log('⚛ Physik Game gestartet. Kategorie:', category || 'Alle');
 
 			/* 1️⃣ USER OPTIONAL LADEN */
@@ -199,7 +201,8 @@
 			if (profile?.id) {
 				const { error } = await supabase.rpc('increment_mission_progress', {
 					p_user_id: profile.id,
-					p_subject_name: 'Physik' // Zählt Physik-Missionen hoch
+					p_subject_name: 'Physik', // Zählt Physik-Missionen hoch
+					p_category: category || null
 				});
 
 				if (error) {
