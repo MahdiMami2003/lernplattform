@@ -184,6 +184,26 @@
 	function goToLogin() {
 		goto(`/`);
 	}
+    function getLandingUrl() {
+        // nicht eingeloggt -> Login/Main
+        if (!data.session?.user) return '/';
+
+        const role = data.session.user.user_metadata?.role;
+
+        // admin sauber über role behandeln (nicht über full_name)
+        if (role === 'admin') return '/admin_landing_page';
+        if (role === 'student') return '/student_landing_page_id5';
+        if (role === 'teacher') return '/teacher_landing_page_id6';
+        if (role === 'parent') return '/parents_landing_page_id4';
+
+        // Fallback
+        return '/';
+    }
+
+    function goFromLogo(e: MouseEvent) {
+        e.preventDefault();
+        goto(getLandingUrl());
+    }
 
 	function goToMaterial(item: { id?: number; url?: string }) {
 		searchOpen = false;
@@ -252,12 +272,12 @@
 </script>
 
 <nav class="header-root">
-	<a style="text-decoration: none" href="/">
-		<div class="signature">
-			<img class="logo" src={logo} alt="Logo" />
-			<p>HSGG-Lernwelt</p>
-		</div>
-	</a>
+    <a style="text-decoration: none" href={getLandingUrl()} onclick={goFromLogo}>
+        <div class="signature">
+            <img class="logo" src={logo} alt="Logo" />
+            <p>HSGG-Lernwelt</p>
+        </div>
+    </a>
 
 	<!-- Only show user info if search is closed on small screens, or always on large -->
 	{#if !searchOpen || innerW > 600}
