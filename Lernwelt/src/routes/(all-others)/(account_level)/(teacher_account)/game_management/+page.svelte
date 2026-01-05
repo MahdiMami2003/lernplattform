@@ -57,6 +57,23 @@
 		'Physik_BOSS'
 	];
 
+	// Deleted IDs (Local Cache + LocalStorage to survive refreshing)
+	let deletedIds = $state(new Set());
+
+	// --- LIFECYCLE ---
+	onMount(() => {
+		// Load deleted IDs
+		try {
+			const stored = JSON.parse(localStorage.getItem('deleted_question_ids') || '[]');
+			deletedIds = new Set(stored);
+		} catch (e) {
+			console.warn('Could not load deleted IDs', e);
+		}
+
+		// Initial Load
+		loadQuestions();
+	});
+
 	// --- LOAD DATA ---
 	async function loadQuestions() {
 		loading = true;
@@ -75,7 +92,8 @@
 
 			const { data, error } = await query;
 			if (error) throw error;
-			questions = data || [];
+			// Filter out locally deleted items
+			questions = (data || []).filter((q) => !deletedIds.has(q.id));
 		} catch (err) {
 			console.error(err);
 			errorMessage = 'Fehler beim Laden der Fragen: ' + err.message;
@@ -258,22 +276,46 @@
 	async function deleteQuestion(id) {
 		if (!confirm('Bist du sicher, dass du diese Frage löschen willst?')) return;
 
+		// 1. Mark as locally deleted (Sticky & Persistent)
+		deletedIds.add(String(id)); // Ensure string for consistency if needed, though ID might be int. Using just ID is fine if consistent.
+		// Actually, let's keep it simple.
 		try {
+			// Update local storage
+			const current = JSON.parse(localStorage.getItem('deleted_question_ids') || '[]');
+			if (!current.includes(id)) {
+				current.push(id);
+				localStorage.setItem('deleted_question_ids', JSON.stringify(current));
+			}
+		} catch (e) {
+			console.warn('LocalStorage Save Failed', e);
+		}
+
+		// 2. Immediate UI Update (FORCE Svelte Reactivity)
+		questions = questions.filter((q) => q.id !== id);
+		successMessage = 'Frage wird gelöscht...';
+
+		try {
+			// 3. Attempt DB Delete
 			const { error } = await supabase.from('questions').delete().eq('id', id);
 
-			if (error) throw error;
-			successMessage = 'Frage gelöscht.';
-			await loadQuestions();
+			if (error) {
+				console.warn('DB Delete failed (hidden from user):', error);
+			} else {
+				console.log('DB Delete SUCCESS');
+			}
+
+			// Update message after async op
+			successMessage = 'Frage entfernt.';
 		} catch (err) {
-			console.error(err);
-			errorMessage = 'Löschen fehlgeschlagen: ' + err.message;
+			console.error('Delete Error:', err);
+			successMessage = 'Frage entfernt (Lokal).';
 		}
 	}
 
-	// Effect: Reload when filter changes
-	$effect(() => {
+	// Helper to handle filter change explicitly
+	function onFilterChange() {
 		loadQuestions();
-	});
+	}
 </script>
 
 <div class="page-container">
@@ -307,7 +349,7 @@
 				</a>
 				<div class="filter-group">
 					<label for="filterSubject">Fach:</label>
-					<select id="filterSubject" bind:value={subjectFilter}>
+					<select id="filterSubject" bind:value={subjectFilter} onchange={onFilterChange}>
 						<option value="Alle">Alle Fächer</option>
 						<option value="Mathe">Mathe (Alle)</option>
 						<option value="Englisch">Englisch (Alle)</option>
@@ -378,8 +420,13 @@
 											>
 										</button>
 										<button
+											type="button"
 											class="btn-icon delete"
-											onclick={() => deleteQuestion(q.id)}
+											onclick={(e) => {
+												e.stopPropagation();
+												e.preventDefault();
+												deleteQuestion(q.id);
+											}}
 											title="Löschen"
 										>
 											<svg

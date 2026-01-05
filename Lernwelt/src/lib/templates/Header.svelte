@@ -185,9 +185,17 @@
 		goto(`/`);
 	}
 
-	function goToMaterial(id: number) {
+	function goToMaterial(item: { id?: number; url?: string }) {
 		searchOpen = false;
-		goto(`/materials_content_page_16/${id}`);
+		searchQuery = '';
+		searchResults = [];
+		// If item has url (static pages, subject links), use that
+		if (item.url) {
+			goto(item.url);
+		} else if (item.id) {
+			// Otherwise navigate to material detail page
+			goto(`/materials_content_page_16/${item.id}`);
+		}
 	}
 
 	async function handleLogout() {
@@ -318,13 +326,13 @@
 
 			{#if searchOpen && searchResults.length > 0}
 				<div class="search-dropdown" role="listbox">
-					{#each searchResults as item (item.id)}
+					{#each searchResults as item (item.id || item.title)}
 						<div
 							class="search-item"
-							onclick={() => goToMaterial(item.id)}
+							onclick={() => goToMaterial(item)}
 							role="option"
 							tabindex="0"
-							onkeydown={(e) => e.key === 'Enter' && goToMaterial(item.id)}
+							onkeydown={(e) => e.key === 'Enter' && goToMaterial(item)}
 						>
 							<strong>{item.title}</strong>
 							<span class="search-meta">{item.subject}</span>

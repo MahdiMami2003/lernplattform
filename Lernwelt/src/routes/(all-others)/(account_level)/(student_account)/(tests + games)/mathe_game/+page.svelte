@@ -61,8 +61,14 @@
 	let confettiPieces = $state<ConfettiPiece[]>([]);
 
 	// Fortschritt & XP als derived
-    const progress = $derived(questions.length > 0 ? (currentIndex / questions.length) * 100 : 0);
+	const progress = $derived.by(() => {
+		if (showSummary) return 100;
+		if (questions.length === 0) return 0;
+		return ((currentIndex + (locked ? 1 : 0)) / questions.length) * 100;
+	});
 	const xpProgress = $derived((xp / 100) * 100);
+
+	let category = $state<string | null>(null);
 
 	/* ========= HELPER ========= */
 	function shuffle<T>(array: T[]): T[] {
@@ -81,7 +87,7 @@
 			loadError = null;
 
 			// 0️⃣ Kategorie aus URL lesen
-			const category = $page.url.searchParams.get('category');
+			category = $page.url.searchParams.get('category');
 			console.log('🔹 Mathe Game gestartet. Kategorie:', category || 'Alle');
 
 			/* 1️⃣ USER OPTIONAL LADEN */
@@ -199,7 +205,8 @@
 			if (profile?.id) {
 				const { error } = await supabase.rpc('increment_mission_progress', {
 					p_user_id: profile.id,
-					p_subject_name: 'Mathe' // Zählt Mathe-Missionen hoch
+					p_subject_name: 'Mathe', // Zählt Mathe-Missionen hoch
+					p_category: category || null
 				});
 
 				if (error) {
@@ -286,12 +293,12 @@
 {:else if loadError}
 	<div class="error">
 		<p>{loadError}</p>
-		<button on:click={loadProfileAndQuestions}>{$_('game.reload')}</button>
+		<button onclick={loadProfileAndQuestions}>{$_('game.reload')}</button>
 	</div>
 {:else if questions.length === 0}
 	<div class="error">
 		<p>{$_('game.no_questions')}</p>
-		<button on:click={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
+		<button onclick={() => goto('/student_landing_page_id5', { invalidateAll: true })}>
 			Dashboard
 		</button>
 	</div>
@@ -312,7 +319,7 @@
 		{/each}
 
 		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+			<button class="back-btn" onclick={() => goto('/student_landing_page_id5')}>←</button>
 
 			<div class="hud-center">
 				<div class="progress-top">
@@ -334,7 +341,7 @@
 				<div class="xp-display">
 					<span>Lvl {level}</span>
 					<div class="xp-bar">
-						<div class="xp-inner" style={`width: ${xpProgress}%`}></div>
+						<div class="xp-inner" style={`width: ${Math.min(Math.max(xpProgress, 0), 100)}%`}></div>
 					</div>
 				</div>
 
@@ -358,7 +365,7 @@
 								selectedIndex !== questions[currentIndex].correctIndex
 									? 'wrong'
 									: ''}"
-								on:click={() => handleAnswerClick(i)}
+								onclick={() => handleAnswerClick(i)}
 								disabled={locked}
 							>
 								{ans}
@@ -408,8 +415,8 @@
 				</div>
 
 				<div class="summary-actions">
-					<button on:click={restartLesson}>{$_('game.play_again')}</button>
-					<button on:click={() => goto('/student_landing_page_id5')}>Dashboard</button>
+					<button onclick={restartLesson}>{$_('game.play_again')}</button>
+					<button onclick={() => goto('/student_landing_page_id5')}>Dashboard</button>
 				</div>
 			</section>
 		{/if}

@@ -74,7 +74,7 @@
 		// Fill bar as user finishes current question
 		return ((currentIndex + (locked ? 1 : 0)) / questions.length) * 100;
 	});
-	const xpProgress = $derived(() => (xp / 100) * 100);
+	const xpProgress = $derived(Math.min((xp / 100) * 100, 100));
 
 	/* ========= HELPER ========= */
 	async function fetchQuestionsFromDB() {
@@ -266,7 +266,7 @@
 		}
 	}
 
-	function checkAnswer() {
+	async function checkAnswer() {
 		if (locked) return;
 
 		const currentQ = questions[currentIndex];
@@ -281,6 +281,15 @@
 			checkResult = 'correct';
 			correctCount++;
 			rewardXP(currentQ.xpReward);
+			// 🚀 NEU: Mission Progress Update
+			if (profiles?.id) {
+				const { error } = await supabase.rpc('increment_mission_progress', {
+					p_user_id: profiles.id,
+					p_subject_name: subject,
+					p_category: topic || null
+				});
+				if (error) console.error('Missions-Update Fehler:', error);
+			}
 			triggerConfetti();
 		} else {
 			checkResult = 'wrong';
@@ -419,7 +428,7 @@
 				<div class="xp-display">
 					<span>Lvl {level}</span>
 					<div class="xp-bar">
-						<div class="xp-inner" style={`width: ${xpProgress()}%`}></div>
+						<div class="xp-inner" style={`width: ${xpProgress}%`}></div>
 					</div>
 				</div>
 			</div>
