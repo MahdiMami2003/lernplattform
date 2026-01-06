@@ -521,11 +521,11 @@
 							</span>
 						</a>
 					</li>
-					<li class="nav__items" id="sub">
+					<!--<li class="nav__items" id="sub">
 						<a href="#">
 							<span class="nav-text">{$_('header.nav_contrast')}</span>
 						</a>
-					</li>
+					</li>-->
 					<li class="nav__items" id="task">
 						<a href="#" onclick={toggleLangMenu}>
 							<span class="nav-text">{$_('header.change_language')}</span>
