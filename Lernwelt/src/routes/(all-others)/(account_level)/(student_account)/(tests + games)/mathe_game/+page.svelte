@@ -186,7 +186,14 @@
 			}
 
 			/* 2️⃣ FRAGEN LADEN (MIT KATEGORIE FILTER) */
-			let query = supabase.from('questions').select('*').ilike('subject', 'Mathe%'); // Nur Mathe Fragen
+			let query = supabase.from('questions').select('*').ilike('subject', 'Mathe%');
+
+			// Check for question type filter (from URL)
+			const typeFilter = $page.url.searchParams.get('type');
+			if (typeFilter === 'mc') {
+				// Exclude questions that look like Cloze (contain brackets)
+				query = query.not('question', 'ilike', '%[%]%');
+			}
 
 			// Falls eine Kategorie gewählt wurde, filtern wir danach
 			if (category) {
@@ -286,14 +293,30 @@
 
 	async function updateMissionProgress() {
 		if (profile?.id) {
-			const { error } = await supabase.rpc('increment_mission_progress', {
+			console.log('🚀 Calling increment_mission_progress with:', {
 				p_user_id: profile.id,
 				p_subject_name: 'Mathe',
 				p_category: category || null
 			});
-			if (error) console.error('Fehler beim Missions-Update:', error);
+			const { data, error } = await supabase.rpc('increment_mission_progress', {
+				p_user_id: profile.id,
+				p_subject_name: 'Mathe',
+				p_category: category || null
+			});
+			if (error) {
+				console.error('❌ Fehler beim Missions-Update:', error);
+			} else {
+				console.log('✅ Mission update successful (RPC returned void)');
+			}
+		} else {
+			console.warn('⚠️ No profile ID, cannot update mission.');
 		}
 	}
+
+	// DEBUG: Expose supabase for console testing
+	$effect(() => {
+		if (typeof window !== 'undefined') (window as any).supabase = supabase;
+	});
 
 	/* ========= ANSWER CLICK (MIT MISSION UPDATE) ========== */
 	// 🔥 WICHTIG: Async für DB-Aufruf
@@ -423,7 +446,7 @@
 		{/each}
 
 		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+			<button class="back-btn" on:click={() => goto('/game_page_id12')}>←</button>
 
 			<div class="hud-center">
 				<div class="progress-top">
@@ -528,7 +551,13 @@
 			</main>
 		{:else}
 			<section class="summary">
-				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
+				<h1>
+					{outOfHearts
+						? '😥 Keine Herzen mehr'
+						: correctCount === 0
+							? 'Viel Glück beim nächsten Mal'
+							: '🎉 Super gemacht!'}
+				</h1>
 
 				<div class="xp-chest">
 					<div class="chest-glow"></div>
@@ -576,7 +605,6 @@
 {/if}
 
 <style>
-	/* ============ DARK MODE SUPPORT ============ */
 	:global(body) {
 		margin: 0;
 		font-family:
@@ -585,8 +613,7 @@
 			BlinkMacSystemFont,
 			'Segoe UI',
 			sans-serif;
-		background: var(--bg-main, #e7f4fa);
-		transition: background-color 0.3s ease;
+		background: #e7f4fa;
 	}
 
 	.game-root {
@@ -600,7 +627,7 @@
 	.error {
 		text-align: center;
 		padding: 4rem 1rem;
-		color: var(--text-primary, #000);
+		color: #1d5e84;
 	}
 
 	.error button {
@@ -614,11 +641,6 @@
 		min-height: 44px;
 	}
 
-	.error button:focus-visible {
-		outline: 2px solid var(--text-primary, #000);
-		outline-offset: 2px;
-	}
-
 	/* ============ HUD ============ */
 	.hud {
 		display: flex;
@@ -630,7 +652,7 @@
 
 	.back-btn {
 		border: none;
-		background: var(--bg-card, white);
+		background: white;
 		border-radius: 999px;
 		width: 40px;
 		height: 40px;
@@ -638,18 +660,13 @@
 		cursor: pointer;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 		color: #236c93;
-		transition: all 0.2s ease;
+		transition: transform 0.2s ease;
 		min-height: 44px;
 		min-width: 44px;
 	}
 
 	.back-btn:hover {
 		transform: scale(1.05);
-	}
-
-	.back-btn:focus-visible {
-		outline: 2px solid var(--text-primary, #000);
-		outline-offset: 2px;
 	}
 
 	.hud-center {
@@ -659,11 +676,10 @@
 
 	.progress-top {
 		height: 10px;
-		background: var(--bg-hover, #d9e5f0);
+		background: #d9e5f0;
 		border-radius: 999px;
 		overflow: hidden;
 		margin-bottom: 0.2rem;
-		transition: background-color 0.3s ease;
 	}
 
 	.progress-inner {
@@ -674,9 +690,8 @@
 
 	.question-count {
 		font-size: 0.85rem;
-		color: var(--text-secondary, #4a6175);
+		color: #4a6175;
 		margin: 0;
-		transition: color 0.3s ease;
 	}
 
 	.hud-right {
@@ -705,18 +720,16 @@
 
 	.xp-display span {
 		font-size: 0.8rem;
-		color: var(--text-secondary, #1d5e84);
+		color: #1d5e84;
 		font-weight: 600;
-		transition: color 0.3s ease;
 	}
 
 	.xp-bar {
 		width: 110px;
 		height: 6px;
 		border-radius: 999px;
-		background: var(--bg-hover, #d9e5f0);
+		background: #d9e5f0;
 		overflow: hidden;
-		transition: background-color 0.3s ease;
 	}
 
 	.xp-inner {
@@ -729,12 +742,11 @@
 		display: flex;
 		align-items: center;
 		gap: 0.2rem;
-		background: var(--bg-card, white);
-		color: var(--text-primary, #000);
+		background: white;
+		color: #000;
 		padding: 0.1rem 0.5rem;
 		border-radius: 999px;
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-		transition: all 0.3s ease;
 	}
 
 	.streak span:first-child {
@@ -786,20 +798,18 @@
 
 	/* ============ CARD ============ */
 	.card {
-		background: var(--bg-card, white);
+		background: white;
 		padding: 2rem 1.5rem;
 		border-radius: 18px;
 		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 		animation: slideUp 0.25s ease-out;
-		transition: background-color 0.3s ease;
 	}
 
 	.question {
 		font-size: 1.5rem;
-		color: var(--text-primary, #1d5e84);
+		color: #1d5e84; /* Restored Blue */
 		margin-bottom: 1.5rem;
 		text-align: center;
-		transition: color 0.3s ease;
 	}
 
 	.answers {
@@ -812,9 +822,9 @@
 		text-align: left;
 		padding: 0.9rem 1rem;
 		border-radius: 14px;
-		border: 2px solid var(--border-color, #d7e4ef);
-		background: var(--bg-hover, #f8fbff);
-		color: var(--text-primary, #000);
+		border: 2px solid #d7e4ef;
+		background: #f8fbff;
+		color: #1d5e84; /* Restored Blue */
 		font-size: 1rem;
 		cursor: pointer;
 		transition: all 0.2s ease;
@@ -827,41 +837,40 @@
 	}
 
 	.answer-btn:focus-visible {
-		outline: 2px solid var(--text-primary, #000);
+		outline: 2px solid #1d5e84;
 		outline-offset: 2px;
 	}
 
 	.answer-btn.correct {
 		background: #c6f6d5;
 		border-color: #3ba776;
+		color: #065f46;
 	}
 
 	.answer-btn.wrong {
 		background: #ffd1d1;
 		border-color: #ff6b6b;
+		color: #991b1b;
 	}
 
 	/* ============ SUMMARY ============ */
 	.summary {
-		background: var(--bg-card, white);
+		background: white;
 		padding: 2rem 1.5rem;
 		border-radius: 18px;
 		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 		text-align: center;
 		animation: slideUp 0.25s ease-out;
-		transition: background-color 0.3s ease;
 	}
 
 	.summary h1 {
 		margin-bottom: 0.5rem;
-		color: var(--text-primary, #1d5e84);
-		transition: color 0.3s ease;
+		color: #1d5e84;
 	}
 
 	.summary p {
 		margin: 0.2rem 0;
-		color: var(--text-secondary, #4a6175);
-		transition: color 0.3s ease;
+		color: #4a6175;
 	}
 
 	.xp-earned {
@@ -940,14 +949,12 @@
 	.summary-stats span {
 		display: block;
 		font-size: 0.85rem;
-		color: var(--text-secondary, #6e8191);
-		transition: color 0.3s ease;
+		color: #6e8191;
 	}
 
 	.summary-stats strong {
 		font-size: 1.2rem;
-		color: var(--text-primary, #1d5e84);
-		transition: color 0.3s ease;
+		color: #1d5e84;
 	}
 
 	.achievements {
@@ -963,13 +970,44 @@
 	}
 
 	.badge {
-		background: var(--bg-hover, #e7f4fa);
+		background: #e7f4fa;
 		border-radius: 999px;
 		padding: 0.3rem 0.8rem;
-		border: 1px solid #236c93;
 		font-size: 0.85rem;
 		color: #236c93;
-		transition: background-color 0.3s ease;
+		font-weight: 600;
+	}
+
+	.summary-actions {
+		display: flex;
+		justify-content: center;
+		gap: 0.8rem;
+		margin-top: 1.5rem;
+	}
+
+	.summary-actions button {
+		background: #236c93;
+		color: white;
+		border: none;
+		padding: 0.8rem 1.6rem;
+		border-radius: 14px;
+		font-weight: bold;
+		cursor: pointer;
+		transition: transform 0.1s;
+	}
+
+	.summary-actions button:hover {
+		transform: scale(1.03);
+	}
+
+	.summary-actions button:focus-visible {
+		outline: 2px solid #236c93;
+		outline-offset: 2px;
+	}
+
+	.summary-actions button:nth-child(2) {
+		background: #e2e8f0;
+		color: #1d5e84;
 	}
 
 	/* ============ CLOZE STYLES ============ */
@@ -980,28 +1018,28 @@
 	.cloze-text {
 		font-size: 1.3rem;
 		line-height: 2.2;
-		color: var(--text-primary, #333);
+		color: #333;
 		margin-bottom: 2rem;
 	}
 
 	.cloze-text input {
 		border: none;
 		border-bottom: 2px solid #ccc;
-		background: var(--bg-hover, #f9f9f9);
+		background: #f9f9f9;
 		font-size: 1.2rem;
 		width: 140px;
 		text-align: center;
 		margin: 0 6px;
 		padding: 4px 8px;
 		border-radius: 6px;
-		color: var(--text-primary, #333);
+		color: #333;
 		transition: all 0.2s;
 	}
 
 	.cloze-text input:focus {
 		outline: none;
 		border-bottom-color: #3ba776;
-		background: var(--bg-card, white);
+		background: #fff;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 	}
 
@@ -1021,33 +1059,6 @@
 		color: #3ba776;
 		font-weight: bold;
 		margin-left: 5px;
-	}
-
-	.actions {
-		margin-top: 1.5rem;
-	}
-
-	.check-btn {
-		background: #3ba776;
-		color: white;
-		border: none;
-		padding: 0.8rem 2.5rem;
-		border-radius: 999px;
-		font-size: 1.1rem;
-		font-weight: bold;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: 0 4px 10px rgba(59, 167, 118, 0.3);
-	}
-
-	.check-btn:disabled {
-		background: #cbd5e0;
-		cursor: not-allowed;
-		box-shadow: none;
-	}
-
-	.check-btn:active:not(:disabled) {
-		transform: scale(0.96);
 	}
 
 	.feedback {
@@ -1075,38 +1086,31 @@
 		}
 	}
 
-	.summary-actions {
-		margin-top: 1.2rem;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.6rem;
-		justify-content: center;
+	.actions {
+		margin-top: 1.5rem;
 	}
 
-	.summary-actions button {
-		padding: 0.7rem 1.5rem;
-		border-radius: 14px;
-		border: none;
-		background: linear-gradient(90deg, #236c93, #3ba776);
+	.check-btn {
+		background: #3ba776;
 		color: white;
-		font-weight: 600;
+		border: none;
+		padding: 0.8rem 2.5rem;
+		border-radius: 999px;
+		font-size: 1.1rem;
+		font-weight: bold;
 		cursor: pointer;
-		min-height: 44px;
-		transition: transform 0.2s;
+		transition: all 0.2s ease;
+		box-shadow: 0 4px 10px rgba(59, 167, 118, 0.3);
 	}
 
-	.summary-actions button:hover {
-		transform: translateY(-2px);
+	.check-btn:disabled {
+		background: #cbd5e0;
+		cursor: not-allowed;
+		box-shadow: none;
 	}
 
-	.summary-actions button:focus-visible {
-		outline: 2px solid white;
-		outline-offset: 2px;
-	}
-
-	.summary-actions button:nth-child(2) {
-		background: var(--bg-hover, #e2e8f0);
-		color: var(--text-primary, #1d5e84);
+	.check-btn:active:not(:disabled) {
+		transform: scale(0.96);
 	}
 
 	/* ============ CONFETTI ============ */
@@ -1137,6 +1141,19 @@
 		from {
 			opacity: 0;
 			transform: translateY(16px);
+		}
+	}
+
+	@media (max-width: 600px) {
+		.hud {
+			flex-direction: column;
+			gap: 1rem;
+		}
+		.card {
+			padding: 1.5rem;
+		}
+		.question {
+			font-size: 1.3rem;
 		}
 	}
 </style>
