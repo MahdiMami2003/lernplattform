@@ -1,6 +1,5 @@
 <!--Lernwelt/src/lib/Breadcrumbs.svelte-->
 <script lang="ts">
-    import { page } from '$app/stores';
     import { breadService } from '$lib/breadService.svelte';
     import { afterNavigate } from '$app/navigation'; // Wichtig: Wir holen afterNavigate zurück
     import { _ } from '$lib/i18n/config';
@@ -88,6 +87,7 @@
             '/form_for_adding_weekly_test': $t('breadcrumbs.create_weekly_test'),
             '/game_management': $t('breadcrumbs.manage_games'),
             '/teacher_landing_page_id6': $t('breadcrumbs.dashboard_teacher'),
+            '/no_permission_page_id18': $t('breadcrumbs.access_denied'),
         };
 
         if (routeMap[cleanPath]) return routeMap[cleanPath];
