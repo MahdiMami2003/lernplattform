@@ -1,6 +1,5 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/form_for_adding_weekly_test/+page.svelte-->
 <script>
-
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
 
@@ -9,18 +8,22 @@
     let { supabase, session } = data;
 
 
-    let title = '';
-    let selectedClassId = null;
+    let title = $state('');
+    /** @type {string} */
+    let selectedClassId = $state('');
     /** @type {File | null} */
-    let questionPdf = null;
+    let questionPdf = $state(null);
     /** @type {File | null} */
-    let answerPdf = null;
-    let classes = [];
-    let uploading = false;
-    let message = '';
+    let answerPdf = $state(null);
+    /** @type {{ id: number; name: string }[]} */
+    let classes = $state([]);
+    let classesLoading = $state(true);
+    let classesError = $state('');
+    let uploading = $state(false);
+    let message = $state('');
 
     onMount(async () => {
-        // Lade alle Klassen für Dropdown
+        // Lade alle Klassen für Dropdown (Lehrkräfte dürfen alle sehen)
         const { data, error } = await supabase
             .from('classes')
             .select('id, name')
@@ -28,9 +31,11 @@
 
         if (error) {
             console.error('Fehler beim Laden der Klassen:', error);
+            classesError = 'Fehler beim Laden der Klassen';
         } else {
             classes = data || [];
         }
+        classesLoading = false;
     });
 
     /**
@@ -51,6 +56,12 @@
         if (target.files && target.files[0]) {
             answerPdf = target.files[0];
         }
+    }
+
+    /** @param {Event} event */
+    function handleClassChange(event) {
+        const target = /** @type {HTMLSelectElement} */ (event.target);
+        selectedClassId = target.value ?? '';
     }
 
     async function handleSubmit() {
@@ -109,6 +120,8 @@
                 .getPublicUrl(answerFileName);
 
             // 5. Füge Eintrag in Datenbank ein
+            // class_id zuverlässig als Zahl oder NULL setzen
+            const parsedClassId = selectedClassId === '' ? null : Number(selectedClassId);
             const { error: insertError } = await supabase
                 .from('weekly_tests')
                 .insert({
@@ -116,7 +129,7 @@
                     title: title,
                     link_question: questionUrlData.publicUrl,
                     link_answere: answerUrlData.publicUrl,
-                    class_id: selectedClassId || null,
+                    class_id: Number.isNaN(parsedClassId) ? null : parsedClassId,
                     created_at: new Date().toISOString()
                 });
 
@@ -130,7 +143,8 @@
 
         } catch (error) {
             console.error('Fehler:', error);
-            message = `❌ Fehler: ${error.message}`;
+            const e = /** @type {any} */(error);
+            message = `❌ Fehler: ${e?.message ?? 'Unbekannter Fehler'}`;
         } finally {
             uploading = false;
         }
@@ -140,7 +154,7 @@
 <div class="container">
     <h1>📝 Neuen Test hinzufügen</h1>
 
-    <form on:submit|preventDefault={handleSubmit}>
+    <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div class="form-group">
             <label for="title">Titel *</label>
             <input
@@ -154,22 +168,30 @@
 
         <div class="form-group">
             <label for="classId">Klasse (optional)</label>
-            <select id="classId" bind:value={selectedClassId}>
-                <option value={null}>-- Für alle --</option>
-                {#each classes as cls}
-                    <option value={cls.id}>{cls.name}</option>
-                {/each}
+            <select id="classId" onchange={handleClassChange}>
+                <option value="">-- Für alle --</option>
+                {#if classesLoading}
+                    <option disabled>Lade Klassen...</option>
+                {:else if classesError}
+                    <option disabled>{classesError}</option>
+                {:else if classes.length === 0}
+                    <option disabled>Keine Klassen gefunden</option>
+                {:else}
+                    {#each classes as cls}
+                        <option value={String(cls.id)}>{cls.name}</option>
+                    {/each}
+                {/if}
             </select>
         </div>
 
         <div class="form-group">
             <label for="questionPdf">Aufgaben-PDF hochladen *</label>
             <input
-                    type="file"
-                    id="questionPdf"
-                    accept=".pdf"
-                    on:change={handleQuestionFileChange}
-                    required
+                type="file"
+                id="questionPdf"
+                accept=".pdf"
+                onchange={handleQuestionFileChange}
+                required
             >
             {#if questionPdf}
                 <p class="file-info">📄 Ausgewählt: {questionPdf.name}</p>
@@ -179,11 +201,11 @@
         <div class="form-group">
             <label for="answerPdf">Lösungs-PDF hochladen *</label>
             <input
-                    type="file"
-                    id="answerPdf"
-                    accept=".pdf"
-                    on:change={handleAnswerFileChange}
-                    required
+                type="file"
+                id="answerPdf"
+                accept=".pdf"
+                onchange={handleAnswerFileChange}
+                required
             >
             {#if answerPdf}
                 <p class="file-info">📄 Ausgewählt: {answerPdf.name}</p>
