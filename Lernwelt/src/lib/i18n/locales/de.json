@@ -38,13 +38,13 @@
     "class_overview": "Ihre Klassen Übersicht",
     "no_classes_selected": "Sie haben noch keine Klassen ausgewählt. Bitte klicken Sie oben auf Ihre Klassen.",
     "view_progress": "Lernfortschritt der Klasse einsehen",
-    "view_level": "Lernstand ansehen",
-    "edit_materials": "Unterrichtsmaterial bearbeiten",
+    "view_level": "Klassenzimmer",
+    "edit_materials": "Unterrichtsmaterial einsehen",
     "manage_materials": "Materialien verwalten",
-    "edit_appointments": "Termine und Aktuelles bearbeiten",
-    "manage_appointments": "Termine bearbeiten",
-    "edit_tests": "Wochentests und spielerische Fragen bearbeiten",
-    "manage_tests": "Wochentests bearbeiten"
+    "edit_appointments": "Termine und Aktuelles einsehen",
+    "manage_appointments": "Termine und Aktuelles",
+    "edit_tests": "Wochentests und spielerische Fragen einsehen",
+    "manage_tests": "Wochentests"
   },
   "student": {
     "title": "Hallo liebe:r ",
@@ -528,6 +528,22 @@
       "title": "Vorhandene Missionen",
       "xp": "+{xp} XP",
       "goal": "Ziel: {goal}"
+    }
+  },
+  "gm": {
+    "subject": {
+      "Mathe": "Mathe",
+      "Englisch_EASY": "Englisch · Leicht",
+      "Englisch_MEDIUM": "Englisch · Mittel",
+      "Englisch_HARD": "Englisch · Schwer",
+      "Deutsch_EASY": "Deutsch · Leicht",
+      "Deutsch_MEDIUM": "Deutsch · Mittel",
+      "Deutsch_HARD": "Deutsch · Schwer",
+      "Deutsch_BOSS": "Deutsch · Experte",
+      "Physik_EASY": "Physik · Leicht",
+      "Physik_MEDIUM": "Physik · Mittel",
+      "Physik_HARD": "Physik · Schwer",
+      "Physik_BOSS": "Physik · Experte"
     }
   }
 }

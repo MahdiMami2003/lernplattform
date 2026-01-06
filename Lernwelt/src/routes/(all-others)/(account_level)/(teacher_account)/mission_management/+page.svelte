@@ -7,7 +7,8 @@
 	let { supabase, session } = data;
 
 	let loading = $state(true);
-	let missions = $state([]);
+	type Mission = { id: number; title: string; description: string; xp_reward: number; total: number };
+	let missions = $state([] as Mission[]);
 	let errorMsg = $state('');
 
 	// Form State
@@ -38,7 +39,7 @@
 		if (error) {
 			errorMsg = error.message;
 		} else {
-			missions = data || [];
+			missions = (data as Mission[]) || [];
 		}
 		loading = false;
 	}
@@ -68,7 +69,7 @@
 		}
 	}
 
-	async function deleteMission(id) {
+	async function deleteMission(id: number) {
 		if (
 			!confirm('Sind Sie sicher? Dies löscht auch den Fortschritt der Schüler für diese Mission.')
 		)
@@ -448,5 +449,20 @@
         .row {
             flex-direction: column;
         }
+    }
+
+    .back-bar {
+        padding: 0.5rem 0;
+    }
+
+    .back-link {
+        color: var(--button-bg);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .back-link:hover {
+        color: var(--button-hover);
+        text-decoration: underline;
     }
 </style>

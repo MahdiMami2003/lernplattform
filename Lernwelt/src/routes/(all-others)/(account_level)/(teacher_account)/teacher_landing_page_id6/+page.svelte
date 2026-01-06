@@ -149,7 +149,8 @@
 			{#each classes as schoolClass}
 				{@const isActive = myClassIds.includes(schoolClass.id)}
 				<button
-					class="class-select-btn {isActive ? 'active' : ''}"
+					class="class-select-btn"
+					data-active={isActive}
 					onclick={() => toggleClass(schoolClass.id)}
 				>
 					{schoolClass.name}
@@ -172,21 +173,21 @@
 					<article class="class-card">
 						<h3>{schoolClass.name}</h3>
 						<div class="class-actions">
-							<p>📌 {$_('teacher.view_progress')}</p>
+							<p></p>
 							<a href={'/class_page_id9/' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.view_level')}</button></a
+								><button title="{$_('teacher.view_progress')}" class="small-btn">📌 {$_('teacher.view_level')}</button></a
 							>
-							<p>📚 {$_('teacher.edit_materials')}</p>
+							<p></p>
 							<a href={'/material_page_id14?classId=' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.manage_materials')}</button></a
+								><button title="{$_('teacher.edit_materials')}" class="small-btn">📚 {$_('teacher.manage_materials')}</button></a
 							>
-							<p>📅 {$_('teacher.edit_appointments')}</p>
-							<a href={'/create_appointments_page?classId=' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.manage_appointments')}</button></a
+							<p></p>
+							<a href={'/appointments_page_id8?classId=' + schoolClass.id}
+								><button title="{$_('teacher.edit_appointments')}" class="small-btn">📅 {$_('teacher.manage_appointments')}</button></a
 							>
-							<p>📝 {$_('teacher.edit_tests')}</p>
-							<a href={'/form_for_adding_weekly_test?classId=' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.manage_tests')}</button></a
+							<p></p>
+							<a href={'/weekly_test_page_id17?classId=' + schoolClass.id}
+								><button title="{$_('teacher.edit_tests')}" class="small-btn">📝 {$_('teacher.manage_tests')}</button></a
 							>
 						</div>
 					</article>
@@ -249,17 +250,7 @@
     }
 
     /* ============ TIPPS SECTION ============ */
-    .overview-grid {
-        background-color: var(--bg-card);
-        border-radius: 1.2rem;
-        border: 1px solid var(--border-color);
-        padding: 1rem 1.2rem;
-        display: inline-flex;
-        gap: 1rem;
-        font-size: clamp(0.9rem, 1.8vw, 1rem);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-        transition: all 0.3s ease;
-    }
+    /* .overview-grid { ... }  → entfernt */
 
     /* ============ GENERAL SECTION ============ */
     .general-section {
@@ -341,14 +332,13 @@
         outline-offset: 2px;
     }
 
-    /* Wenn ausgewählt (Aktiv) */
-    .class-select-btn.active {
+    .class-select-btn[data-active="true"] {
         background-color: var(--button-bg);
         color: var(--text-primary);
         border-color: var(--button-bg);
     }
 
-    .class-select-btn.active:hover {
+    .class-select-btn[data-active="true"]:hover {
         background-color: var(--button-hover);
     }
 
@@ -426,41 +416,6 @@
         outline-offset: 2px;
     }
 
-    /* ============ ADMIN PANEL ============ */
-    .admin-panel {
-        margin-top: 3rem;
-        padding: 1.8rem;
-        background-color: var(--bg-card);
-        border: 2px solid var(--border-accent);
-        border-radius: 1.2rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-        max-width: 700px;
-        transition: all 0.3s ease;
-    }
-
-    .admin-btn {
-        margin: 0.5rem 0.5rem 0 0;
-        padding: 0.65rem 1.3rem;
-        background-color: var(--button-bg);
-        border: 1px solid var(--button-border);
-        color: var(--text-primary);
-        font-weight: 600;
-        border-radius: 999px;
-        cursor: pointer;
-        transition: all 0.2s;
-        min-height: 44px;
-    }
-
-    .admin-btn:hover {
-        background-color: var(--button-hover);
-        transform: translateY(-2px);
-    }
-
-    .admin-btn:focus-visible {
-        outline: 2px solid var(--text-primary);
-        outline-offset: 2px;
-    }
-
     /* ============ LINKS ============ */
     .class-link {
         text-decoration: none;
@@ -502,3 +457,4 @@
         }
     }
 </style>
+

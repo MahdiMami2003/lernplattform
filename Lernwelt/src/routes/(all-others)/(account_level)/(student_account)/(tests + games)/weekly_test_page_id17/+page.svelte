@@ -98,6 +98,10 @@
 </script>
 
 <div id="placeholder">
+    <div class="back-bar">
+        <button class="back-btn" onclick={() => history.back()} aria-label="Zurück">← Zurück</button>
+    </div>
+
     <div class="header">
         <h1>Wöchentliche Tests</h1>
     </div>
@@ -143,6 +147,24 @@
         margin: 0;
         padding: 20px;
         min-height: 100vh;
+    }
+
+    .back-bar {
+        padding: 0.5rem 0;
+    }
+
+    .back-btn {
+        background: none;
+        border: 1px solid var(--button-border);
+        color: var(--text-secondary);
+        padding: 0.35rem 0.6rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--button-hover);
     }
 
     .header {
