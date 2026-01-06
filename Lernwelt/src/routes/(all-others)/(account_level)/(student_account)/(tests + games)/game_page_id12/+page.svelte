@@ -121,7 +121,7 @@
 
         if (!auth?.user) {
             console.warn('⚠ Kein Login – Zugriff verweigert');
-            goto('/');
+            goto('/no_permission_page_id18');
             return;
         }
 
@@ -136,10 +136,10 @@
             return;
         }
 
-        // Check if user is a student - only students can access games
-        if (data.role !== 'student') {
-            console.warn('⚠ Nur Schüler dürfen auf die Spiele zugreifen');
-            goto('/');
+        // Lockere Rollenprüfung: Erlaube student ODER admin
+        if (data.role !== 'student' && data.role !== 'admin') {
+            console.warn('⚠ Zugriff auf Spiele ist nur für Schüler/Admin erlaubt');
+            goto('/no_permission_page_id18');
             return;
         }
 
