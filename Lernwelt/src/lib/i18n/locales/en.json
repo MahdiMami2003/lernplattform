@@ -518,5 +518,21 @@
       "xp": "+{xp} XP",
       "goal": "Goal: {goal}"
     }
+  },
+  "gm": {
+    "subject": {
+      "Mathe": "Math",
+      "Englisch_EASY": "English · Easy",
+      "Englisch_MEDIUM": "English · Medium",
+      "Englisch_HARD": "English · Hard",
+      "Deutsch_EASY": "German · Easy",
+      "Deutsch_MEDIUM": "German · Medium",
+      "Deutsch_HARD": "German · Hard",
+      "Deutsch_BOSS": "German · Expert",
+      "Physik_EASY": "Physics · Easy",
+      "Physik_MEDIUM": "Physics · Medium",
+      "Physik_HARD": "Physics · Hard",
+      "Physik_BOSS": "Physics · Expert"
+    }
   }
 }

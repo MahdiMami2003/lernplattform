@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { fade, scale } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
+    import { _ } from '$lib/i18n/config';
 
     // Props from layout
     let { data } = $props();
@@ -42,18 +43,18 @@
 
     // Valid Subjects
     const SUBJECTS = [
-        'Mathe',
-        'Englisch_EASY',
-        'Englisch_MEDIUM',
-        'Englisch_HARD',
-        'Deutsch_EASY',
-        'Deutsch_MEDIUM',
-        'Deutsch_HARD',
-        'Deutsch_BOSS',
-        'Physik_EASY',
-        'Physik_MEDIUM',
-        'Physik_HARD',
-        'Physik_BOSS'
+        $_('gm.subject.Mathe'),
+        $_('gm.subject.Englisch_EASY'),
+        $_('gm.subject.Englisch_MEDIUM'),
+        $_('gm.subject.Englisch_HARD'),
+        $_('gm.subject.Deutsch_EASY'),
+        $_('gm.subject.Deutsch_MEDIUM'),
+        $_('gm.subject.Deutsch_HARD'),
+        $_('gm.subject.Deutsch_BOSS'),
+        $_('gm.subject.Physik_EASY'),
+        $_('gm.subject.Physik_MEDIUM'),
+        $_('gm.subject.Physik_HARD'),
+        $_('gm.subject.Physik_BOSS')
     ];
 
     // --- LIFECYCLE ---
@@ -376,7 +377,7 @@
                 <div class="form-body">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Fach / Subject</label>
+                            <label>Fach</label>
                             <select bind:value={draft.subject} onchange={handleSubjectChange}>
                                 {#each SUBJECTS as sub}
                                     <option value={sub}>{sub}</option>
