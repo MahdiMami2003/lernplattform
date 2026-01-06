@@ -174,19 +174,19 @@
 						<div class="class-actions">
 							<p></p>
 							<a href={'/class_page_id9/' + schoolClass.id}
-								><button class="small-btn">📌 {$_('teacher.view_level')}</button></a
+								><button title="{$_('teacher.view_progress')}" class="small-btn">📌 {$_('teacher.view_level')}</button></a
 							>
 							<p></p>
 							<a href={'/material_page_id14?classId=' + schoolClass.id}
-								><button class="small-btn">📚 {$_('teacher.manage_materials')}</button></a
+								><button title="{$_('teacher.edit_materials')}" class="small-btn">📚 {$_('teacher.manage_materials')}</button></a
 							>
 							<p></p>
 							<a href={'/appointments_page_id8?classId=' + schoolClass.id}
-								><button class="small-btn">📅 {$_('teacher.manage_appointments')}</button></a
+								><button title="{$_('teacher.edit_appointments')}" class="small-btn">📅 {$_('teacher.manage_appointments')}</button></a
 							>
 							<p></p>
 							<a href={'/weekly_test_page_id17?classId=' + schoolClass.id}
-								><button class="small-btn">📝 {$_('teacher.manage_tests')}</button></a
+								><button title="{$_('teacher.edit_tests')}" class="small-btn">📝 {$_('teacher.manage_tests')}</button></a
 							>
 						</div>
 					</article>
