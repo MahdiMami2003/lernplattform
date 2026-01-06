@@ -502,7 +502,8 @@
       "material": "Lerninhalt",
       "weekly_test": "Wochentest",
       "appointment": "Termin",
-      "ped_tip": "pädagogischen Tipp"
+      "ped_tip": "Pädagogischen Tipp",
+      "mission_management": "Mission"
     },
     "action": {
       "create": "erstellen"

@@ -1,18 +1,15 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/(teacher_account)/teacher_landing_page_id6/+page.svelte-->
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { _ } from '$lib/i18n/config';
 	let { data } = $props();
 	let { supabase, session } = data;
 
-	let role = $state(null);
-	let userId = $state(null);
-
-	// "classes" enthält ALLE Klassen der Schule (für die Auswahl oben)
-	let classes = $state([]);
-
-	// "myClassIds" speichert nur die IDs der Klassen, die ich ausgewählt habe
-	let myClassIds = $state([]);
+	// Typisierte States
+	let classes: any[] = $state([]);
+	let myClassIds: number[] = $state([]);
+	let userId: string | null = $state(null);
+	let role: string | null = $state(null);
 
 	onMount(async () => {
 		const { data: userData, error } = await supabase.auth.getUser();
@@ -33,7 +30,7 @@
 		if (profileError) {
 			console.error('Fehler beim Holen des Profils:', profileError);
 		} else {
-			role = profile.role;
+			role = profile.role as string;
 		}
 
 		// 2. ALLE Klassen laden (für die Auswahl-Liste)
@@ -49,25 +46,21 @@
 		}
 
 		// 3. MEINE Klassen laden (aus teacher_role Tabelle)
-		// Wir wollen wissen: Welche Klassen hat dieser Lehrer schon ausgewählt?
 		const { data: myRoles, error: rolesError } = await supabase
 			.from('teacher_role')
 			.select('class_id')
 			.eq('teacher_id', userId);
 
 		if (!rolesError && myRoles) {
-			// Wir wandeln das Ergebnis in eine simple Liste von IDs um: [1, 5, 8]
-			myClassIds = myRoles.map((r) => r.class_id);
+			myClassIds = myRoles.map((r: any) => r.class_id as number);
 		}
 	});
 
 	// Funktion: Klasse hinzufügen oder entfernen
-	async function toggleClass(classId) {
-		// Prüfen: Bin ich schon drin?
+	async function toggleClass(classId: number) {
 		const isJoined = myClassIds.includes(classId);
 
 		if (isJoined) {
-			// AUSTRETEN (Löschen aus teacher_role)
 			const { error } = await supabase
 				.from('teacher_role')
 				.delete()
@@ -75,18 +68,15 @@
 				.eq('class_id', classId);
 
 			if (!error) {
-				// UI sofort aktualisieren (ID entfernen)
 				myClassIds = myClassIds.filter((id) => id !== classId);
 			}
 		} else {
-			// BEITRETEN (Einfügen in teacher_role)
 			const { error } = await supabase.from('teacher_role').insert({
 				teacher_id: userId,
 				class_id: classId
 			});
 
 			if (!error) {
-				// UI sofort aktualisieren (ID hinzufügen)
 				myClassIds = [...myClassIds, classId];
 			} else {
 				console.error('Fehler beim Speichern:', error);
@@ -143,6 +133,7 @@
 						<option value="/form_for_adding_weekly_test"> {$_('create.type.weekly_test')} </option>
 						<option value="/create_appointments_page"> {$_('create.type.appointment')} </option>
 						<option value="/pedagogic_form"> {$_('create.type.ped_tip')} </option>
+						<option value="/mission_management"> {$_('create.type.mission_management')} </option>
 					</select>
 					<button class="small-btn" type="submit">{$_('create.action.create')}</button>
 				</form>
@@ -212,10 +203,9 @@
     #placeholder {
         min-height: 100vh;
         font-family: 'Inter', Arial, Helvetica, sans-serif;
-        padding-bottom: 2rem;
         max-width: 1200px;
         margin: 0 auto;
-        padding: 1rem;
+        padding: 1rem 1rem 2rem;
         background-color: var(--bg-main);
         color: var(--text-primary);
         transition: background-color 0.3s ease, color 0.3s ease;
