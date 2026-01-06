@@ -162,6 +162,10 @@
 </script>
 
 <div id="placeholder" class="main_container">
+    <div class="back-bar">
+        <button class="back-btn" onclick={() => history.back()} aria-label="Zurück">← Zurück</button>
+    </div>
+
     <div class="header">
         <h1>{$_('appointment.title')}</h1>
         {#if hasEditingRights()}
@@ -228,6 +232,25 @@
         background-color: var(--bg-main);
         color: var(--text-primary);
         transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ============ BACK BAR ============ */
+    .back-bar {
+        padding: 0.5rem 0;
+    }
+
+    .back-btn {
+        background: none;
+        border: 1px solid var(--button-border);
+        color: var(--text-secondary);
+        padding: 0.35rem 0.6rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--button-hover);
     }
 
     /* ============ HEADER ============ */

@@ -1,12 +1,11 @@
-<script>
-    import { onMount } from 'svelte';
-    import { fade, scale } from 'svelte/transition';
-    import { quintOut } from 'svelte/easing';
-    import { _ } from '$lib/i18n/config';
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { fade, scale } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
+	import { _ } from '$lib/i18n/config';
 
-    // Props from layout
-    let { data } = $props();
-    let { supabase } = data;
+	let { data } = $props();
+	let { supabase } = data;
 
     // --- STATE ---
     // Filters & Data
