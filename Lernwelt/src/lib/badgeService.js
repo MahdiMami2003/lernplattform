@@ -1,4 +1,3 @@
-
 /**
  * Badge Service
  * Handles checking and awarding badges based on game performance.
@@ -76,6 +75,12 @@ export async function checkAndAwardBadges(supabase, userId, stats) {
             if (!insertError) {
                 newBadges.push(badgeId);
             } else {
+                // Bei Duplicate-Fehler (Unique-Constraint) nicht abbrechen
+                const msg = String(insertError?.message || '').toLowerCase();
+                if (msg.includes('duplicate key') || msg.includes('unique')) {
+                    // Badge existiert bereits – stillschweigend ignorieren
+                    continue;
+                }
                 console.error(`Fehler beim Speichern von Badge ${badgeId}:`, insertError);
             }
         }
