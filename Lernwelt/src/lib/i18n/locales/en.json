@@ -491,7 +491,8 @@
       "material": "Learning content",
       "weekly_test": "Weekly test",
       "appointment": "Appointment",
-      "ped_tip": "Pedagogical tip"
+      "ped_tip": "Pedagogical tip",
+      "mission_management": "Mission"
     },
     "action": {
       "create": "Create"

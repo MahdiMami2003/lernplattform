@@ -154,6 +154,11 @@
             ? item.content_en || item.content
             : item.content;
     }
+
+    /** @param {{ classid?: number|null }} item */
+    function getClassLabel(item) {
+        return item.classid ? `Klasse ${item.classid}` : 'Allgemein';
+    }
 </script>
 
 <div id="placeholder" class="main_container">
@@ -173,6 +178,11 @@
                 <option value={String(c.id)}>{c.name}{c.grade_level ? ` (Klasse ${c.grade_level})` : ''}</option>
             {/each}
         </select>
+        {#if selectedClassStr !== 'all'}
+            <span class="current-filter">Angezeigt: Klasse {selectedClassStr} + Allgemein</span>
+        {:else}
+            <span class="current-filter">Angezeigt: Alle Klassen</span>
+        {/if}
     </div>
 
     {#await appointmentsPromise}
@@ -195,6 +205,7 @@
                         </div>
                         <div class="card-body">
                             <p>{getContent(appointment) || '-'}</p>
+                            <span class="class-badge" title="Zugeordnete Klasse">{getClassLabel(appointment)}</span>
                         </div>
                     </div>
                 {/each}
@@ -280,6 +291,12 @@
         color: var(--text-primary);
     }
 
+    .current-filter {
+        color: var(--text-secondary, var(--text-primary));
+        font-size: 0.95rem;
+        margin-left: 0.5rem;
+    }
+
     /* ============ APPOINTMENTS LIST ============ */
     .appointments-list {
         display: flex;
@@ -336,6 +353,18 @@
         font-weight: 500;
         white-space: nowrap;
         backdrop-filter: blur(10px);
+    }
+
+    .class-badge {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        font-size: 0.85rem;
+        white-space: nowrap;
     }
 
     /* ============ DELETE BUTTON ============ */
