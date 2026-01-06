@@ -6,31 +6,25 @@
 	let { data } = $props();
 	let { supabase } = data;
 
-	// State
+	// State (vereinfacht typisiert, um Build-Fehler zu vermeiden)
 	let loading = $state(true);
 	let errorMessage = $state('');
-	let profile = $state(null);
+	let profile = $state<any>(null);
 	let missionsData = $state<any[]>([]);
-
-	// Rollen & Logik
-	let viewerRole = $state(''); // 'teacher', 'parent', 'student'
+	let viewerRole = $state('');
 	let isOwner = $state(false);
-
-	// Für Eltern: Liste der Kinder
-	let myChildren = $state([]);
+	let myChildren = $state<any[]>([]);
 	let showChildSelection = $state(false);
 
 	onMount(async () => {
-		// 1. Session holen
-		const {
-			data: { session }
-		} = await supabase.auth.getSession();
-		if (!session) {
+		// 1. Authentifizierten Benutzer sicher holen (statt getSession())
+		const { data: { user } } = await supabase.auth.getUser();
+		if (!user) {
 			goto('/login_page_id2');
 			return;
 		}
 
-		const myUserId = session.user.id;
+		const myUserId = user.id;
 
 		// 2. Meine Rolle holen
 		const { data: myProfile } = await supabase
@@ -55,19 +49,18 @@
 
 			if (links && links.length > 0) {
 				const childIds = links.map((l) => l.child_id);
-				// Profile der Kinder laden für die Auswahl-Anzeige
 				const { data: kids } = await supabase
 					.from('profiles')
 					.select('id, full_name, avatar_url')
 					.in('id', childIds);
-				myChildren = kids || [];
+				myChildren = kids ?? [];
 			}
 
 			// Wenn keine ID in der URL ist -> Auswahl anzeigen
 			if (!targetUserId) {
 				if (myChildren.length === 1) {
-					// Bei nur einem Kind direkt laden
-					targetUserId = myChildren[0].id;
+					const onlyChild: any = myChildren[0];
+					targetUserId = onlyChild?.id;
 				} else if (myChildren.length > 1) {
 					showChildSelection = true;
 					loading = false;
@@ -79,7 +72,7 @@
 				}
 			} else {
 				// Sicherheitscheck: Ist das wirklich mein Kind?
-				const isMyChild = myChildren.some((c) => c.id === targetUserId);
+				const isMyChild = myChildren.some((c: any) => c?.id === targetUserId);
 				if (!isMyChild && myChildren.length > 0) {
 					errorMessage = 'Du hast keinen Zugriff auf dieses Profil.';
 					loading = false;
@@ -111,7 +104,7 @@
 		await loadData(idToLoad);
 	});
 
-	async function loadData(targetId) {
+	async function loadData(targetId: string) {
 		try {
 			loading = true;
 			showChildSelection = false;
@@ -186,13 +179,15 @@
 	}
 
 	// Für Eltern: Klick auf ein Kind in der Auswahl
-	function selectChild(childId) {
+	function selectChild(childId: string) {
 		window.location.href = `?userId=${childId}`;
 	}
 
-	function getBarColor(p, c) {
+	function getBarColor(p: number, c: boolean) {
 		return c ? '#4caf50' : p > 0 ? '#f3be6a' : '#ddd';
 	}
+
+	function childrenList(): any[] { return Array.isArray(myChildren) ? myChildren : []; }
 </script>
 
 <div class="page-container main_container">
@@ -210,16 +205,13 @@
 			<p>{$_('progress.select_subtitle')}</p>
 
 			<div class="child-grid">
-				{#each myChildren as child}
-					<button class="child-card" onclick={() => selectChild(child.id)}>
+				{#each childrenList() as child}
+					<button class="child-card" onclick={() => selectChild(child?.id)}>
 						<img
-							src={child.avatar_url}
-							alt={child.full_name}
-							onerror={(e) =>
-								((e.target as HTMLImageElement).src =
-									`https://ui-avatars.com/api/?name=${child.full_name}&background=random`)}
+							src={child?.avatar_url}
+							alt={child?.full_name}
 						/>
-						<span>{child.full_name}</span>
+						<span>{child?.full_name}</span>
 					</button>
 				{/each}
 			</div>
@@ -233,7 +225,7 @@
 		{#if viewerRole === 'parent'}
 			<div class="info-banner parent">
 				<div class="banner-text">
-					<span>{$_('progress.parent_viewing')} <strong>{profile.full_name}</strong></span>
+					<span>{$_('progress.parent_viewing')} <strong>{profile?.full_name}</strong></span>
 				</div>
 				<div class="banner-actions">
 					{#if myChildren.length > 1}
@@ -248,30 +240,25 @@
 
 		{#if viewerRole === 'teacher'}
 			<div class="info-banner teacher">
-				<span>👨‍🏫 {$_('progress.teacher_view')} <strong>{profile.full_name}</strong></span>
-				<button class="back-btn" onclick={() => history.back()}
-					>{$_('progress.back_to_list')}</button
-				>
+				<span>👨‍🏫 {$_('progress.teacher_view')} <strong>{profile?.full_name}</strong></span>
+				<button class="back-btn" onclick={() => history.back()}>{$_('progress.back_to_list')}</button>
 			</div>
 		{/if}
 
 		<header class="profile-header">
 			<img
-				src={profile.avatar_url}
+				src={profile?.avatar_url}
 				alt={$_('progress.avatar_alt')}
 				class="avatar"
-				onerror={(e) =>
-					((e.target as HTMLImageElement).src =
-						`https://ui-avatars.com/api/?name=${profile.full_name}&background=f3be6a&color=fff`)}
 			/>
 			<div class="info">
-				<h1>{profile.full_name}</h1>
+				<h1>{profile?.full_name}</h1>
 				<div class="stats">
 					<div class="stat">
-						<span>{$_('progress.level')}</span> <strong>{profile.level || 1}</strong>
+						<span>{$_('progress.level')}</span> <strong>{profile?.level || 1}</strong>
 					</div>
 					<div class="stat">
-						<span>{$_('progress.xp')}</span> <strong>{profile.xp || 0}</strong>
+						<span>{$_('progress.xp')}</span> <strong>{profile?.xp || 0}</strong>
 					</div>
 				</div>
 			</div>
@@ -299,7 +286,7 @@
 											item.progress,
 											item.completed
 										)}"
-									/>
+									></div>
 								</div>
 								<small>{item.completed ? $_('progress.done') : `${item.progress}%`}</small>
 							</div>

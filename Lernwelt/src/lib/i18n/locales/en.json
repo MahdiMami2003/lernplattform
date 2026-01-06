@@ -37,14 +37,14 @@
     "manage_classes_hint": "Click the classes you teach to show them below.",
     "class_overview": "Your class overview",
     "no_classes_selected": "You have not selected any classes yet. Please click on your classes above.",
-    "view_progress": "View class learning progress",
-    "view_level": "View learning level",
-    "edit_materials": "Edit teaching materials",
-    "manage_materials": "Manage materials",
-    "edit_appointments": "Edit appointments and updates",
-    "manage_appointments": "Manage appointments",
-    "edit_tests": "Edit weekly tests and interactive questions",
-    "manage_tests": "Manage weekly tests"
+    "view_progress": "View class progress",
+    "view_level": "Classroom",
+    "edit_materials": "View teaching materials",
+    "manage_materials": "Materials",
+    "edit_appointments": "View appointments and updates",
+    "manage_appointments": "Appointments and Updates",
+    "edit_tests": "View weekly tests and interactive questions",
+    "manage_tests": "Weekly tests"
   },
   "student": {
     "title": "Hello dear ",
@@ -95,6 +95,7 @@
     "menu_logout": "Logout",
     "menu_login": "Login",
     "menu_register": "Registration",
+    "menu_appointments": "Appointments & News",
     "nav_learning_content": "Materials",
     "nav_tasks": "Tasks",
     "nav_progress": "Progress",
@@ -491,7 +492,8 @@
       "material": "Learning content",
       "weekly_test": "Weekly test",
       "appointment": "Appointment",
-      "ped_tip": "Pedagogical tip"
+      "ped_tip": "Pedagogical tip",
+      "mission_management": "Mission"
     },
     "action": {
       "create": "Create"
@@ -516,6 +518,22 @@
       "title": "Existing missions",
       "xp": "+{xp} XP",
       "goal": "Goal: {goal}"
+    }
+  },
+  "gm": {
+    "subject": {
+      "Mathe": "Math",
+      "Englisch_EASY": "English · Easy",
+      "Englisch_MEDIUM": "English · Medium",
+      "Englisch_HARD": "English · Hard",
+      "Deutsch_EASY": "German · Easy",
+      "Deutsch_MEDIUM": "German · Medium",
+      "Deutsch_HARD": "German · Hard",
+      "Deutsch_BOSS": "German · Expert",
+      "Physik_EASY": "Physics · Easy",
+      "Physik_MEDIUM": "Physics · Medium",
+      "Physik_HARD": "Physics · Hard",
+      "Physik_BOSS": "Physics · Expert"
     }
   }
 }

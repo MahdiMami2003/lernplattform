@@ -154,9 +154,18 @@
             ? item.content_en || item.content
             : item.content;
     }
+
+    /** @param {{ classid?: number|null }} item */
+    function getClassLabel(item) {
+        return item.classid ? `Klasse ${item.classid}` : 'Allgemein';
+    }
 </script>
 
 <div id="placeholder" class="main_container">
+    <div class="back-bar">
+        <button class="back-btn" onclick={() => history.back()} aria-label="Zurück">← Zurück</button>
+    </div>
+
     <div class="header">
         <h1>{$_('appointment.title')}</h1>
         {#if hasEditingRights()}
@@ -173,6 +182,11 @@
                 <option value={String(c.id)}>{c.name}{c.grade_level ? ` (Klasse ${c.grade_level})` : ''}</option>
             {/each}
         </select>
+        {#if selectedClassStr !== 'all'}
+            <span class="current-filter">Angezeigt: Klasse {selectedClassStr} + Allgemein</span>
+        {:else}
+            <span class="current-filter">Angezeigt: Alle Klassen</span>
+        {/if}
     </div>
 
     {#await appointmentsPromise}
@@ -195,6 +209,7 @@
                         </div>
                         <div class="card-body">
                             <p>{getContent(appointment) || '-'}</p>
+                            <span class="class-badge" title="Zugeordnete Klasse">{getClassLabel(appointment)}</span>
                         </div>
                     </div>
                 {/each}
@@ -217,6 +232,25 @@
         background-color: var(--bg-main);
         color: var(--text-primary);
         transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ============ BACK BAR ============ */
+    .back-bar {
+        padding: 0.5rem 0;
+    }
+
+    .back-btn {
+        background: none;
+        border: 1px solid var(--button-border);
+        color: var(--text-secondary);
+        padding: 0.35rem 0.6rem;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--button-hover);
     }
 
     /* ============ HEADER ============ */
@@ -280,6 +314,12 @@
         color: var(--text-primary);
     }
 
+    .current-filter {
+        color: var(--text-secondary, var(--text-primary));
+        font-size: 0.95rem;
+        margin-left: 0.5rem;
+    }
+
     /* ============ APPOINTMENTS LIST ============ */
     .appointments-list {
         display: flex;
@@ -336,6 +376,18 @@
         font-weight: 500;
         white-space: nowrap;
         backdrop-filter: blur(10px);
+    }
+
+    .class-badge {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        font-size: 0.85rem;
+        white-space: nowrap;
     }
 
     /* ============ DELETE BUTTON ============ */
