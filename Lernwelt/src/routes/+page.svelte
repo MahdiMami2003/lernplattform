@@ -179,7 +179,7 @@
     }
 
     /* Dark Mode Overlay */
-    :root.darkmode .landing_grid::before {
+    /*:root.darkmode .landing_grid::before {
         content: '';
         position: absolute;
         top: 0;
@@ -189,7 +189,10 @@
         background-color: rgba(0, 0, 0, 0.7);
         pointer-events: none;
         z-index: 0;
-    }
+        background-color: #1f2430;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+    }*/
+
 
     /* ============ MAIN CONTAINER ============ */
     .main_container {
@@ -198,17 +201,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: var(--bg-card, rgba(255, 255, 255));
+        background-color: #ffffff;
         padding: clamp(1.5rem, 4vw, 3rem);
         margin: 1.5rem auto;
         width: min(95%, 600px);
         min-height: 80vh;
-        height: auto;
-        border-radius: 0.75rem;
-        font-family: Arial, Helvetica, sans-serif;
-        text-align: center;
-        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
-        transition: background-color 0.3s ease;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     /* ============ LANGUAGE SWITCH ============ */
