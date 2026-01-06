@@ -37,14 +37,14 @@
     "manage_classes_hint": "Click the classes you teach to show them below.",
     "class_overview": "Your class overview",
     "no_classes_selected": "You have not selected any classes yet. Please click on your classes above.",
-    "view_progress": "View class learning progress",
-    "view_level": "View learning level",
-    "edit_materials": "Edit teaching materials",
-    "manage_materials": "Manage materials",
-    "edit_appointments": "Edit appointments and updates",
-    "manage_appointments": "Manage appointments",
-    "edit_tests": "Edit weekly tests and interactive questions",
-    "manage_tests": "Manage weekly tests"
+    "view_progress": "View class progress",
+    "view_level": "Classroom",
+    "edit_materials": "View teaching materials",
+    "manage_materials": "Materials",
+    "edit_appointments": "View appointments and updates",
+    "manage_appointments": "Appointments and Updates",
+    "edit_tests": "View weekly tests and interactive questions",
+    "manage_tests": "Weekly tests"
   },
   "student": {
     "title": "Hello dear ",

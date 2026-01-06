@@ -172,21 +172,21 @@
 					<article class="class-card">
 						<h3>{schoolClass.name}</h3>
 						<div class="class-actions">
-							<p>📌 {$_('teacher.view_progress')}</p>
+							<p></p>
 							<a href={'/class_page_id9/' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.view_level')}</button></a
+								><button class="small-btn">📌 {$_('teacher.view_level')}</button></a
 							>
-							<p>📚 {$_('teacher.edit_materials')}</p>
+							<p></p>
 							<a href={'/material_page_id14?classId=' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.manage_materials')}</button></a
+								><button class="small-btn">📚 {$_('teacher.manage_materials')}</button></a
 							>
-							<p>📅 {$_('teacher.edit_appointments')}</p>
-							<a href={'/create_appointments_page?classId=' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.manage_appointments')}</button></a
+							<p></p>
+							<a href={'/appointments_page_id8?classId=' + schoolClass.id}
+								><button class="small-btn">📅 {$_('teacher.manage_appointments')}</button></a
 							>
-							<p>📝 {$_('teacher.edit_tests')}</p>
-							<a href={'/form_for_adding_weekly_test?classId=' + schoolClass.id}
-								><button class="small-btn">{$_('teacher.manage_tests')}</button></a
+							<p></p>
+							<a href={'/weekly_test_page_id17?classId=' + schoolClass.id}
+								><button class="small-btn">📝 {$_('teacher.manage_tests')}</button></a
 							>
 						</div>
 					</article>
