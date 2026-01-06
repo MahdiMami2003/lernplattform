@@ -96,6 +96,7 @@
     "menu_logout": "Logout",
     "menu_login": "Login",
     "menu_register": "Registrierung",
+    "menu_appointments": "Termine & Aktuelles",
     "nav_learning_content": "Lerninhalte",
     "nav_tasks": "Aufgaben",
     "nav_progress": "Fortschritt",
@@ -328,17 +329,17 @@
     "s1_li3_text": "– (geplant) Anzeige in einer anderen Sprache.",
 
     "s2_title": "Geltungsbereich der Einstellungen",
-    "s2_p1": "Die ausgewählten Einstellungen gelten für alle Seiten der Lernwelt, solange du sie nicht wieder deaktivierst. Ziel ist es, dass du nicht auf jeder Seite erneut etwas umstellen musst.",
+    "s2_intro": "Die ausgewählten Einstellungen gelten für alle Seiten der Lernwelt, solange du sie nicht wieder deaktivierst. Ziel ist es, dass du nicht auf jeder Seite erneut etwas umstellen musst.",
     "s2_note": "Hinweis: In der finalen Version können diese Einstellungen pro Benutzerkonto gespeichert werden, sodass sie auch nach einem erneuten Login erhalten bleiben.",
 
     "s3_title": "Bekannte Einschränkungen",
-    "s3_p1": "Da es sich um ein Schul- und Lernprojekt handelt, ist die Barrierefreiheit noch nicht vollständig umgesetzt. Einige Bereiche können noch verbessert werden, zum Beispiel:",
+    "s3_intro": "Da es sich um ein Schul- und Lernprojekt handelt, ist die Barrierefreiheit noch nicht vollständig umgesetzt. Einige Bereiche können noch verbessert werden, zum Beispiel:",
     "s3_li1": "Konsistente Kontraste in allen Unterseiten",
     "s3_li2": "Alternativtexte für alle Bilder und Icons",
     "s3_li3": "Tastatur-Navigation und Screenreader-Unterstützung",
 
     "s4_title": "Feedback",
-    "s4_p1": "Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast, wende dich bitte an die im Impressum genannte Kontaktadresse.",
+    "s4_intro": "Wenn dir Barrieren auffallen oder du Ideen zur Verbesserung hast, wende dich bitte an die im Impressum genannte Kontaktadresse.",
 
     "no_permission_title": "Zugriff verweigert",
     "no_permission_text": "Oh nein — du hast leider keinen Zugriff auf diese Seite. Bitte melde dich mit dem passenden Konto an (z. B. als Schüler:in oder Elternteil). Falls du noch kein Konto hast, kannst du dich registrieren.",

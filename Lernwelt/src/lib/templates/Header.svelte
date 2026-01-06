@@ -2,7 +2,6 @@
 <script lang="ts">
 	import logo from '$lib/assets/icons/Logo.png';
 	import login from '$lib/assets/icons/Login.png';
-	import q_mark from '$lib/assets/icons/fragezeichen.png';
 	import register from '$lib/assets/icons/register.png';
 	import searchIcon from '$lib/assets/icons/search.png';
 	import menu from '$lib/assets/icons/menu.png';
@@ -114,6 +113,13 @@
 			keywords: 'games, tasks, aufgaben, spiele',
 			subject: 'Seite',
 			allowedRoles: ['student', 'admin']
+		},
+		{
+			title: 'Termine & Aktuelles',
+			url: '/appointments_page_id8',
+			keywords: 'termine, aktuell, news, updates',
+			subject: 'Seite',
+			allowedRoles: null
 		}
 	];
 
@@ -186,7 +192,7 @@
 	}
     function getLandingUrl() {
         // nicht eingeloggt -> Login/Main
-        if (!data.session?.user) return '/';
+        if (!data.session?.user) return '/no_login_page_id7';
 
         const role = data.session.user.user_metadata?.role;
 
@@ -316,7 +322,7 @@
 					{:else if data.session.user.user_metadata?.role === 'parent'}
 						<a
 							id="parent"
-							href="/parents_landing_page_id4"
+						href="/parents_landing_page_id4"
 							style="color: var(--text-primary); cursor: pointer"
 							title={$_('header.dashboard_parent')}
 							aria-label={$_('header.dashboard_parent')}>{$_('header.role_parent')}</a
@@ -351,6 +357,7 @@
 							class="search-item"
 							onclick={() => goToMaterial(item)}
 							role="option"
+							aria-selected="false"
 							tabindex="0"
 							onkeydown={(e) => e.key === 'Enter' && goToMaterial(item)}
 						>
@@ -380,12 +387,13 @@
 		<div class="dd-menu-container">
 			<ul>
 				<li>
-					<a href="/" onclick={toggleMenu}><img alt="Home" src={logo} />{$_('header.menu_home')}</a>
-				</li>
-				<li>
 					<a href="/material_page_id14" onclick={toggleMenu}
 						><img alt="Material" src={searchIcon} />{$_('header.menu_materials')}</a
 					>
+				</li>
+				<li>
+					<a href="/appointments_page_id8" onclick={toggleMenu}
+						><img alt="Termine" src={classroom} />{$_('header.menu_appointments')}</a>
 				</li>
 				{#if data.session}
 					<li>
