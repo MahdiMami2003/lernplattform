@@ -1,20 +1,61 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/(parent_account)/create_appointments_page/+page.svelte-->
 <script>
     import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
+    import { getUserClasses } from '$lib/dbHelpers.js';
 
     let { data } = $props();
 
     let { supabase, session } = data;
 
-    let title = '';
-    let content = '';
-    let eventDate = '';
-    let eventTime = '';
-    let uploading = false;
-    let message = '';
+    let title = $state('');
+    let content = $state('');
+    let eventDate = $state('');
+    let eventTime = $state('');
+    let uploading = $state(false);
+    let message = $state('');
+    /** @type {{ id: number; name: string; grade_level?: number|null }[]} */
+    let availableClasses = $state([]);
+    /** @type {string[]} */
+    let classIdStrs = $state([]);
 
-    async function handleSubmit() {
+    /** @type {boolean} */
+    let modalOpen = $state(false);
+    /** @type {string[]} */
+    let modalSelectedStrs = $state([]);
+
+    // Hole classId aus Query-String, und lade verfügbare Klassen
+    onMount(async () => {
         try {
+            const url = new URL(window.location.href);
+            const cid = url.searchParams.get('classId');
+            classIdStrs = cid ? [String(cid)] : [];
+        } catch (e) {
+            classIdStrs = [];
+        }
+        try {
+            const { data: userData } = await supabase.auth.getUser();
+            const userId = userData?.user?.id;
+            if (userId) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', userId)
+                    .single();
+                const role = profile?.role || 'teacher';
+                const classes = await getUserClasses(supabase, userId, role);
+                availableClasses = Array.isArray(classes) ? classes : [];
+            }
+        } catch (e) {
+            console.error('Klassen konnten nicht geladen werden:', e);
+            availableClasses = [];
+        }
+    });
+
+    /** @param {SubmitEvent} event */
+    async function handleSubmit(event) {
+        try {
+            event?.preventDefault?.();
             uploading = true;
             message = '';
 
@@ -25,30 +66,79 @@
                 return;
             }
 
+            // Mindestens eine Klasse wählen
+            const classIds = classIdStrs.map((s) => Number(s)).filter((n) => !Number.isNaN(n));
+            if (classIds.length === 0) {
+                message = 'Bitte mindestens eine Klasse wählen!';
+                uploading = false;
+                return;
+            }
+
             // Kombiniere Datum und Uhrzeit
             const fullDateTime = `${eventDate}T${eventTime}:00`;
 
-            // Füge Eintrag in Datenbank ein
+            // Bulk-Insert: je Klasse ein Termin
+            const rows = classIds.map((cid) => ({
+                title: title,
+                content: content,
+                event_date: fullDateTime,
+                classid: cid
+            }));
+
             const { error: insertError } = await supabase
                 .from('appointments')
-                .insert({
-                    title: title,
-                    content: content,
-                    event_date: fullDateTime
-                });
+                .insert(rows);
 
-            if (insertError) throw insertError;
+            if (insertError) {
+                message = '❌ Fehler: ' + String(insertError.message || insertError);
+                uploading = false;
+                return;
+            }
 
-            message = '✅ Termin erfolgreich hinzugefügt!';
+            message = `✅ Termin(e) für ${classIds.length} Klasse(n) erfolgreich hinzugefügt!`;
 
             // Sofortige Weiterleitung zur Übersicht
             goto('/appointments_page_id8');
 
         } catch (error) {
             console.error('Fehler:', error);
-            message = `❌ Fehler: ${error.message}`;
+            message = '❌ Fehler: ' + String((/** @type {any} */(error))?.message || error);
         } finally {
             uploading = false;
+        }
+    }
+
+    function openClassModal() {
+        modalSelectedStrs = [...classIdStrs];
+        modalOpen = true;
+    }
+    function closeClassModal() {
+        modalOpen = false;
+    }
+    /** @param {string} idStr */
+    function toggleClassChecked(idStr) {
+        if (modalSelectedStrs.includes(idStr)) {
+            modalSelectedStrs = modalSelectedStrs.filter((v) => v !== idStr);
+        } else {
+            modalSelectedStrs = [...modalSelectedStrs, idStr];
+        }
+    }
+    function selectAllClasses() {
+        modalSelectedStrs = availableClasses.map((c) => String(c.id));
+    }
+    function clearAllClasses() {
+        modalSelectedStrs = [];
+    }
+    function applyClassSelection() {
+        classIdStrs = [...modalSelectedStrs];
+        modalOpen = false;
+    }
+
+    /** @param {KeyboardEvent} e */
+    function handleOverlayKeydown(e) {
+        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            closeClassModal();
         }
     }
 </script>
@@ -56,7 +146,26 @@
 <div class="container">
     <h1>📅 Neuen Termin hinzufügen</h1>
 
-    <form on:submit|preventDefault={handleSubmit}>
+    <form onsubmit={handleSubmit}>
+        <div class="form-group">
+            <label for="classPickerBtn">Klasse(n) *</label>
+            <div class="class-picker-row">
+                <button id="classPickerBtn" type="button" class="btn" onclick={openClassModal} disabled={availableClasses.length === 0}>
+                    Klasse(n) wählen
+                </button>
+                <div class="selected-chips">
+                    {#if classIdStrs.length === 0}
+                        <span class="chip chip-empty">Keine ausgewählt</span>
+                    {:else}
+                        {#each classIdStrs as idStr}
+                            {@const cls = availableClasses.find(c => String(c.id) === idStr)}
+                            <span class="chip">{cls ? cls.name : ('ID ' + idStr)}</span>
+                        {/each}
+                    {/if}
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
             <label for="title">Titel *</label>
             <input
@@ -105,7 +214,7 @@
             {#if uploading}
                 ⏳ Wird erstellt...
             {:else}
-                ✅ Termin hinzufügen
+                ✅ Termin(e) hinzufügen
             {/if}
         </button>
     </form>
@@ -117,6 +226,38 @@
     {/if}
 
     <a href="/appointments_page_id8" class="back-link">← Zurück zur Übersicht</a>
+
+    {#if modalOpen}
+        <div class="modal-overlay" role="button" tabindex="0" aria-label="Klassen-Auswahl schließen" onclick={closeClassModal} onkeydown={handleOverlayKeydown}>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="classDialogTitle" tabindex="-1" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
+                <h2 id="classDialogTitle">Klassen auswählen</h2>
+                {#if availableClasses.length === 0}
+                    <p>Keine Klassen gefunden.</p>
+                {:else}
+                    <div class="modal-actions">
+                        <button type="button" class="btn small" onclick={selectAllClasses}>Alle auswählen</button>
+                        <button type="button" class="btn small" onclick={clearAllClasses}>Keine</button>
+                    </div>
+                    <div class="checkbox-list">
+                        {#each availableClasses as c}
+                            {@const idStr = String(c.id)}
+                            <label class="checkbox-item">
+                                <input type="checkbox"
+                                       checked={modalSelectedStrs.includes(idStr)}
+                                       onchange={() => toggleClassChecked(idStr)}
+                                >
+                                <span>{c.name}{c.grade_level ? ` (Klasse ${c.grade_level})` : ''}</span>
+                            </label>
+                        {/each}
+                    </div>
+                {/if}
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick={applyClassSelection}>Übernehmen</button>
+                    <button type="button" class="btn outline" onclick={closeClassModal}>Abbrechen</button>
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -293,6 +434,24 @@
         color: #81c784;
     }
 
+    .class-picker-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .btn { background: var(--button-bg, #4CAF50); color: var(--text-primary, #fff); border: 1px solid var(--button-border, transparent); padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; }
+    .btn:hover { filter: brightness(0.95); }
+    .btn.small { padding: 0.4rem 0.75rem; font-size: 0.9rem; }
+    .btn.outline { background: transparent; color: var(--text-primary); border-color: var(--button-border, #ccc); }
+
+    .selected-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .chip { background: var(--bg-card, #eee); color: var(--text-primary, #000); border: 1px solid var(--border-color, #ddd); border-radius: 999px; padding: 0.25rem 0.6rem; font-size: 0.9rem; }
+    .chip-empty { opacity: 0.7; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: grid; place-items: center; z-index: 1000; }
+    .modal { background: var(--bg-card, #fff); color: var(--text-primary, #000); border-radius: 10px; padding: 1rem; width: min(600px, 92vw); max-height: 80vh; overflow: auto; border: 1px solid var(--border-color, #ddd); }
+    .modal h2 { margin-top: 0; }
+    .modal-actions { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .checkbox-list { display: grid; gap: 0.5rem; }
+    .checkbox-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
+    .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+
     /* ============ RESPONSIVE ============ */
     @media (max-width: 600px) {
         .form-row {
@@ -312,3 +471,6 @@
         }
     }
 </style>
+
+
+

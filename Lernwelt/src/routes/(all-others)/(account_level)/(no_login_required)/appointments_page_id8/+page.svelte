@@ -1,14 +1,18 @@
 <!--Lernwelt/src/routes/(all-others)/(account_level)/(parent_account)/appointments_page_id8/+page.svelte-->
 <script>
     import { onMount } from 'svelte';
-    import { locale } from '$lib/i18n/config.ts';
-    import { _ } from '$lib/i18n/config.ts';
+    import { locale, _ } from '$lib/i18n/config';
+    import { getUserClasses } from '$lib/dbHelpers.js';
     let { data } = $props();
 
     let { supabase, session } = data;
 
     let userRole = $state(null);
     let editingRight = $state(null);
+    /** @type {{ id: number; name: string; grade_level?: number|null }[]} */
+    let availableClasses = $state([]);
+    /** @type {'all' | string} */
+    let selectedClassStr = $state('all');
 
     onMount(async () => {
         // Hole den eingeloggten User
@@ -35,19 +39,66 @@
             editingRight = profile.editing_right;
             console.log("User Role:", userRole, "Editing Right:", editingRight);
         }
+
+        try {
+            const url = new URL(window.location.href);
+            const cid = url.searchParams.get('classId');
+            selectedClassStr = cid ? String(cid) : 'all';
+        } catch (e) {
+            selectedClassStr = 'all';
+        }
+
+        // Klassen für Filter laden (falls eingeloggt)
+        try {
+            const { data: userData2 } = await supabase.auth.getUser();
+            const userId2 = userData2?.user?.id;
+            if (userId2) {
+                // Rolle wurde oben bereits geladen in userRole
+                let classes = [];
+                if (userRole === 'admin') {
+                    const { data: allClasses } = await supabase
+                        .from('classes')
+                        .select('id, name, grade_level')
+                        .order('grade_level', { ascending: true })
+                        .order('name', { ascending: true });
+                    classes = allClasses || [];
+                } else {
+                    classes = await getUserClasses(supabase, userId2, userRole || 'student');
+                }
+                availableClasses = Array.isArray(classes) ? classes : [];
+            }
+        } catch (e) {
+            availableClasses = [];
+        }
+    });
+
+    /** @type {Promise<any[]>} */
+    let appointmentsPromise = $state(Promise.resolve([]));
+
+    $effect(() => {
+        // Trigger neu, wenn der Filter sich ändert
+        void selectedClassStr;
+        appointmentsPromise = getAppointments();
     });
 
     async function getAppointments() {
-        const { data, error } = await supabase
+        let query = supabase
             .from('appointments')
             .select('*')
             .order('event_date', { ascending: true });
-
+        // Filter per Dropdown-Auswahl
+        if (selectedClassStr !== 'all') {
+            const num = Number(selectedClassStr);
+            if (!Number.isNaN(num)) {
+                // Zeige sowohl Termine für die ausgewählte Klasse als auch global/unzugeordnete (classid IS NULL)
+                query = query.or(`classid.is.null,classid.eq.${num}`);
+            }
+        }
+        const { data, error } = await query;
         if (error) {
             console.error('Fehler:', error);
             return [];
         }
-
         return data || [];
     }
 
@@ -92,13 +143,13 @@
         return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
     }
 
-    function getTitle(item) {
+    function getTitle(/** @type {{ title_en?: string; title?: string }} */ item) {
         return $locale === 'en'
             ? item.title_en || item.title
             : item.title;
     }
 
-    function getContent(item) {
+    function getContent(/** @type {{ content_en?: string; content?: string }} */ item) {
         return $locale === 'en'
             ? item.content_en || item.content
             : item.content;
@@ -113,7 +164,18 @@
         {/if}
     </div>
 
-    {#await getAppointments()}
+    <!-- Klassen-Filter -->
+    <div class="filter-row">
+        <label for="classFilter">Filtern nach Klasse:</label>
+        <select id="classFilter" bind:value={selectedClassStr}>
+            <option value="all">Alle Klassen</option>
+            {#each availableClasses as c}
+                <option value={String(c.id)}>{c.name}{c.grade_level ? ` (Klasse ${c.grade_level})` : ''}</option>
+            {/each}
+        </select>
+    </div>
+
+    {#await appointmentsPromise}
         <p class="loading">{$_('appointment.loading')}</p>
     {:then appointments}
         {#if appointments && appointments.length > 0}
@@ -126,7 +188,7 @@
                                 <span class="date-badge">{formatDateTime(appointment.event_date)}</span>
                             </div>
                             {#if hasEditingRights()}
-                                <button class="delete-btn" on:click={() => deleteAppointment(appointment.id)}>
+                                <button class="delete-btn" onclick={() => deleteAppointment(appointment.id)}>
                                     🗑️ Löschen
                                 </button>
                             {/if}
@@ -196,6 +258,26 @@
     .add-button:focus-visible {
         outline: 2px solid var(--text-primary);
         outline-offset: 2px;
+    }
+
+    /* ============ FILTER ROW ============ */
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-row label {
+        font-weight: 600;
+    }
+
+    .filter-row select {
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
     }
 
     /* ============ APPOINTMENTS LIST ============ */
@@ -297,32 +379,6 @@
         transition: color 0.3s ease;
     }
 
-    /* ============ BOTTOM BUTTON ============ */
-    .bottom-btn {
-        display: block;
-        margin-top: 20px;
-        padding: 15px;
-        background: var(--button-bg);
-        color: var(--text-primary);
-        text-align: center;
-        text-decoration: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border: 1px solid var(--button-border);
-        min-height: 44px;
-    }
-
-    .bottom-btn:hover {
-        background: var(--button-hover);
-        transform: translateY(-2px);
-    }
-
-    .bottom-btn:focus-visible {
-        outline: 2px solid var(--text-primary);
-        outline-offset: 2px;
-    }
 
     /* ============ MESSAGES ============ */
     .loading,

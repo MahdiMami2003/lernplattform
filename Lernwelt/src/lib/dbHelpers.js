@@ -1,4 +1,3 @@
-
 /**
  * Holt die Klasse(n) eines Users basierend auf seiner Rolle
  * @param {string} userId - User ID
@@ -25,9 +24,9 @@ export async function getUserClasses(supabase, userId, role) {
     }
 
     if (role === 'teacher') {
-        // Lehrer: Über teacher_classes Tabelle
+        // Lehrer: Über teacher_role Tabelle (statt teacher_classes)
         const { data: teacherClasses } = await supabase
-            .from('teacher_classes')
+            .from('teacher_role')
             .select(`
                 classes (
                     id,
@@ -97,9 +96,9 @@ export async function getAccessibleStudents(supabase, userId, role) {
     }
 
     if (role === 'teacher') {
-        // Lehrer sieht Schüler seiner Klassen
+        // Lehrer sieht Schüler seiner Klassen über teacher_role
         const { data: teacherClasses } = await supabase
-            .from('teacher_classes')
+            .from('teacher_role')
             .select('class_id')
             .eq('teacher_id', userId);
 
@@ -173,7 +172,7 @@ export async function getAccessibleStudents(supabase, userId, role) {
  */
 export async function assignTeacherToClass(supabase, teacherId, classId) {
     const { data, error } = await supabase
-        .from('teacher_classes')
+        .from('teacher_role')
         .insert({ teacher_id: teacherId, class_id: classId })
         .select()
         .single();
@@ -188,7 +187,7 @@ export async function assignTeacherToClass(supabase, teacherId, classId) {
  */
 export async function removeTeacherFromClass(supabase, teacherId, classId) {
     const { error } = await supabase
-        .from('teacher_classes')
+        .from('teacher_role')
         .delete()
         .eq('teacher_id', teacherId)
         .eq('class_id', classId);

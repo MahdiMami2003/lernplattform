@@ -58,14 +58,21 @@
             window.location.reload();
         }
     }
+
+    /** @param {{ link_question?: string; link_answere?: string }} test */
+    function getQuestionLink(test) {
+        return test.link_question || '';
+    }
+    /** @param {{ link_question?: string; link_answere?: string }} test */
+    function getAnswerLink(test) {
+        // Feldname laut DB: link_answere (Typo)
+        return test.link_answere || '';
+    }
 </script>
 
 <div id="placeholder">
     <div class="header">
         <h1>Wöchentliche Tests</h1>
-        {#if hasEditingRights()}
-            <a href="/form_for_adding_weekly_test" class="add-button">➕ Test hinzufügen</a>
-        {/if}
     </div>
 
     {#await getTests()}
@@ -78,9 +85,14 @@
                         <a href="/weekly_tests_content_page/{test.id}" class="test-link">
                             {test.title}
                         </a>
-
+                        {#if getQuestionLink(test)}
+                            <a href={getQuestionLink(test)} target="_blank" rel="noopener" class="small-btn">Fragen-PDF</a>
+                        {/if}
+                        {#if getAnswerLink(test)}
+                            <a href={getAnswerLink(test)} target="_blank" rel="noopener" class="small-btn">Antworten-PDF</a>
+                        {/if}
                         {#if hasEditingRights()}
-                            <button class="delete-btn" on:click={() => deleteTest(test.id)}>
+                            <button class="delete-btn" onclick={() => deleteTest(test.id)}>
                                 🗑️ Löschen
                             </button>
                         {/if}
@@ -201,5 +213,20 @@
         color: #999;
         font-style: italic;
         padding: 40px;
+    }
+
+    .small-btn {
+        display: inline-block;
+        padding: 8px 12px;
+        background: #2196F3;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .small-btn:hover {
+        background: #1976D2;
     }
 </style>
