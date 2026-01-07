@@ -69,6 +69,64 @@
     async function deleteTest(id) {
         if (!confirm('Wirklich löschen?')) return;
 
+        // 1) Links aus der DB holen, um die Storage-Pfade bestimmen zu können
+        const { data: row, error: selectError } = await supabase
+            .from('weekly_tests')
+            .select('link_question, link_answere')
+            .eq('id', id)
+            .single();
+
+        if (selectError) {
+            console.warn('Konnte Links vor dem Löschen nicht laden:', selectError);
+        }
+
+        // Helper: Pfad aus öffentlicher Supabase-URL extrahieren
+        const bucket = 'weekly_tests';
+        const extractPath = (url) => {
+            if (!url) return null;
+            try {
+                const u = new URL(url);
+                // Standard-Pfadstruktur: /storage/v1/object/public/<bucket>/<pfad>
+                const marker = `/storage/v1/object/public/${bucket}/`;
+                const idx = u.pathname.indexOf(marker);
+                if (idx !== -1) {
+                    return u.pathname.substring(idx + marker.length);
+                }
+                // Fallback: generischer Marker in voller URL
+                const full = u.href;
+                const marker2 = `/object/public/${bucket}/`;
+                const idx2 = full.indexOf(marker2);
+                if (idx2 !== -1) {
+                    const rest = full.substring(idx2 + marker2.length);
+                    const q = rest.indexOf('?');
+                    return q >= 0 ? rest.substring(0, q) : rest;
+                }
+            } catch (e) {
+                // ignorieren, kein valider URL-String
+            }
+            return null;
+        };
+
+        // 2) Pfade bestimmen und aus Storage löschen (wenn vorhanden)
+        const toRemove = [];
+        if (row) {
+            const qPath = extractPath(row.link_question);
+            if (qPath) toRemove.push(qPath);
+            const aPath = extractPath(row.link_answere);
+            if (aPath) toRemove.push(aPath);
+        }
+
+        if (toRemove.length > 0) {
+            const { error: rmError } = await supabase.storage
+                .from(bucket)
+                .remove(toRemove);
+            if (rmError) {
+                console.warn('Datei-Löschung im Storage fehlgeschlagen (einzeln oder gesamt):', rmError);
+                // Wir fahren dennoch fort, um den DB-Eintrag zu löschen
+            }
+        }
+
+        // 3) DB-Eintrag löschen
         const { error } = await supabase
             .from('weekly_tests')
             .delete()
