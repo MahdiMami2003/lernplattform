@@ -12,9 +12,7 @@
     };
 
     let { data } = $props();
-
     let { supabase, session } = data;
-
 
     let title = '';
     let description = '';
@@ -40,6 +38,8 @@
             uploading = true;
             message = '';
 
+            console.log('🚀 Submit started...'); // DEBUG
+
             // Validierung
             if (!title || !description || !subject || !schoolClass) {
                 message = 'Bitte fülle alle Pflichtfelder aus!';
@@ -61,14 +61,19 @@
                 .order('id', { ascending: false })
                 .limit(1);
 
-            if (maxIdError) throw maxIdError;
+            if (maxIdError) {
+                console.error('❌ Max ID Error:', maxIdError);
+                throw maxIdError;
+            }
 
             const newId = maxIdData && maxIdData.length > 0 ? maxIdData[0].id + 1 : 1;
+            console.log('✅ New ID:', newId);
 
             let fileUrl = null;
 
             // 2. Upload PDF zu Supabase Storage (nur wenn vorhanden)
             if (pdfFile) {
+                console.log('📤 Uploading PDF...');
                 const bucketFolder = subjectToBucket[subject] || 'Other';
                 const fileName = `${bucketFolder}/${subject}_${newId}.pdf`;
 
@@ -76,7 +81,10 @@
                     .from('lehrmaterialien')
                     .upload(fileName, pdfFile);
 
-                if (uploadError) throw uploadError;
+                if (uploadError) {
+                    console.error('❌ Upload Error:', uploadError);
+                    throw uploadError;
+                }
 
                 // 3. Hole die öffentliche URL
                 const { data: urlData } = supabase.storage
@@ -84,32 +92,65 @@
                     .getPublicUrl(fileName);
 
                 fileUrl = urlData.publicUrl;
+                console.log('✅ File URL:', fileUrl);
             }
 
-            // 4. Füge Eintrag in Datenbank ein
+            // 4. WICHTIG: class_id lookup ODER NULL für "alle"
+            let classId = null;
+
+            if (schoolClass && schoolClass.trim() !== '') {
+                console.log('🔍 Looking up class_id for:', schoolClass);
+
+                const { data: classData, error: classError } = await supabase
+                    .from('classes')
+                    .select('id')
+                    .eq('name', schoolClass)
+                    .single();
+
+                if (classError) {
+                    console.warn('⚠️ Class not found:', classError);
+                    // Klasse existiert nicht - Material wird für ALLE erstellt
+                    classId = null;
+                } else {
+                    classId = classData.id;
+                    console.log('✅ Found class_id:', classId);
+                }
+            }
+
+            // 5. Füge Eintrag in Datenbank ein
+            console.log('💾 Inserting into database...');
+
+            const insertData = {
+                id: newId,
+                title: title,
+                description: description,
+                subject: subject,
+                class_id: classId,  // ← FIXED: class_id statt school_class!
+                file_url: fileUrl,
+                created_at: new Date().toISOString()
+            };
+
+            console.log('📋 Insert Data:', insertData);
+
             const { error: insertError } = await supabase
                 .from('materials')
-                .insert({
-                    id: newId,
-                    title: title,
-                    description: description,
-                    subject: subject,
-                    school_class: schoolClass,
-                    file_url: fileUrl,
-                    created_at: new Date().toISOString()
-                });
+                .insert(insertData);
 
-            if (insertError) throw insertError;
+            if (insertError) {
+                console.error('❌ Insert Error:', insertError);
+                console.error('Error details:', JSON.stringify(insertError, null, 2));
+                throw insertError;
+            }
 
+            console.log('✅ Material successfully created!');
             message = '✅ Lerninhalt erfolgreich hinzugefügt!';
 
-            // Warte kurz und leite zur Übersicht
-            setTimeout(() => {
-                goto('/material_page_id14');
-            }, 2000);
+
+            goto('/material_page_id14');
+
 
         } catch (error) {
-            console.error('Fehler:', error);
+            console.error('❌ Fatal Error:', error);
             message = `❌ Fehler: ${error.message}`;
         } finally {
             uploading = false;
@@ -155,14 +196,16 @@
         </div>
 
         <div class="form-group">
-            <label for="schoolClass">Schulklasse *</label>
+            <label for="schoolClass">Schulklasse (optional - leer lassen für ALLE Klassen)</label>
             <input
                     type="text"
                     id="schoolClass"
                     bind:value={schoolClass}
-                    placeholder="z.B. 5a, 10b"
-                    required
+                    placeholder="z.B. 5a, 10b (oder leer lassen)"
             >
+            <small style="color: var(--text-muted, #666); margin-top: 4px; display: block;">
+                💡 Tipp: Leer lassen = Material ist für alle Klassen sichtbar
+            </small>
         </div>
 
         <div class="form-group">
@@ -417,5 +460,10 @@
         button {
             font-size: 16px;
         }
+    }
+
+    small {
+        font-size: 0.85rem;
+        font-weight: normal;
     }
 </style>

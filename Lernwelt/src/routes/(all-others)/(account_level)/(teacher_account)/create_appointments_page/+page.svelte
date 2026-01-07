@@ -2,10 +2,8 @@
 <script>
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
-    import { getUserClasses } from '$lib/dbHelpers.js';
 
     let { data } = $props();
-
     let { supabase, session } = data;
 
     let title = $state('');
@@ -14,17 +12,11 @@
     let eventTime = $state('');
     let uploading = $state(false);
     let message = $state('');
-    /** @type {{ id: number; name: string; grade_level?: number|null }[]} */
     let availableClasses = $state([]);
-    /** @type {string[]} */
     let classIdStrs = $state([]);
-
-    /** @type {boolean} */
     let modalOpen = $state(false);
-    /** @type {string[]} */
     let modalSelectedStrs = $state([]);
 
-    // Hole classId aus Query-String, und lade verfügbare Klassen
     onMount(async () => {
         try {
             const url = new URL(window.location.href);
@@ -33,40 +25,65 @@
         } catch (e) {
             classIdStrs = [];
         }
+
         try {
             const { data: userData } = await supabase.auth.getUser();
             const userId = userData?.user?.id;
-            if (userId) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', userId)
-                    .single();
-                const role = profile?.role || 'teacher';
-                const classes = await getUserClasses(supabase, userId, role);
-                availableClasses = Array.isArray(classes) ? classes : [];
+            if (!userId) return;
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single();
+
+            const role = profile?.role || 'teacher';
+            let classes = [];
+
+            if (role === 'admin') {
+                const { data } = await supabase
+                    .from('classes')
+                    .select('id, name, grade_level')
+                    .order('grade_level', { ascending: true });
+                classes = data || [];
+            } else if (role === 'teacher') {
+                const { data } = await supabase
+                    .from('teacher_role')
+                    .select('class_id, classes(id, name, grade_level)')
+                    .eq('teacher_id', userId);
+                classes = (data || []).map(tc => tc.classes).filter(c => c !== null);
+            } else if (role === 'parent') {
+                const { data } = await supabase
+                    .from('parent_children')
+                    .select('profiles!parent_children_child_id_fkey(class_id, classes(id, name, grade_level))')
+                    .eq('parent_id', userId);
+                const classMap = new Map();
+                (data || []).forEach(pc => {
+                    const cls = pc.profiles?.classes;
+                    if (cls?.id) classMap.set(cls.id, cls);
+                });
+                classes = Array.from(classMap.values());
             }
+
+            availableClasses = classes;
         } catch (e) {
             console.error('Klassen konnten nicht geladen werden:', e);
             availableClasses = [];
         }
     });
 
-    /** @param {SubmitEvent} event */
     async function handleSubmit(event) {
         try {
             event?.preventDefault?.();
             uploading = true;
             message = '';
 
-            // Validierung
             if (!title || !content || !eventDate || !eventTime) {
                 message = 'Bitte fülle alle Pflichtfelder aus!';
                 uploading = false;
                 return;
             }
 
-            // Mindestens eine Klasse wählen
             const classIds = classIdStrs.map((s) => Number(s)).filter((n) => !Number.isNaN(n));
             if (classIds.length === 0) {
                 message = 'Bitte mindestens eine Klasse wählen!';
@@ -74,10 +91,8 @@
                 return;
             }
 
-            // Kombiniere Datum und Uhrzeit
             const fullDateTime = `${eventDate}T${eventTime}:00`;
 
-            // Bulk-Insert: je Klasse ein Termin
             const rows = classIds.map((cid) => ({
                 title: title,
                 content: content,
@@ -96,13 +111,11 @@
             }
 
             message = `✅ Termin(e) für ${classIds.length} Klasse(n) erfolgreich hinzugefügt!`;
-
-            // Sofortige Weiterleitung zur Übersicht
             goto('/appointments_page_id8');
 
         } catch (error) {
             console.error('Fehler:', error);
-            message = '❌ Fehler: ' + String((/** @type {any} */(error))?.message || error);
+            message = '❌ Fehler: ' + String((error)?.message || error);
         } finally {
             uploading = false;
         }
@@ -115,7 +128,6 @@
     function closeClassModal() {
         modalOpen = false;
     }
-    /** @param {string} idStr */
     function toggleClassChecked(idStr) {
         if (modalSelectedStrs.includes(idStr)) {
             modalSelectedStrs = modalSelectedStrs.filter((v) => v !== idStr);
@@ -133,8 +145,6 @@
         classIdStrs = [...modalSelectedStrs];
         modalOpen = false;
     }
-
-    /** @param {KeyboardEvent} e */
     function handleOverlayKeydown(e) {
         if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -261,7 +271,6 @@
 </div>
 
 <style>
-    /* ============ DARK MODE SUPPORT ============ */
     .container {
         max-width: 700px;
         margin: 0 auto;
@@ -333,7 +342,6 @@
         font-family: inherit;
     }
 
-    /* Date/Time Input Dark Mode spezifisch */
     input[type="date"]::-webkit-calendar-picker-indicator,
     input[type="time"]::-webkit-calendar-picker-indicator {
         filter: var(--calendar-icon-filter, none);
@@ -452,7 +460,6 @@
     .checkbox-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
     .modal-footer { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
 
-    /* ============ RESPONSIVE ============ */
     @media (max-width: 600px) {
         .form-row {
             grid-template-columns: 1fr;
@@ -471,6 +478,3 @@
         }
     }
 </style>
-
-
-
