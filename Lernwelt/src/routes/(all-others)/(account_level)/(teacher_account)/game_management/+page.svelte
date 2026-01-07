@@ -252,7 +252,7 @@
                 a2: draft.type === 'mc' ? draft.a2 : null,
                 a3: draft.type === 'mc' ? draft.a3 : null,
                 a4: draft.type === 'mc' ? draft.a4 : null,
-                correct_index: draft.type === 'mc' ? draft.correct_index : 0
+                correct_index: draft.type === 'mc' ? (draft.correct_index + 1) : 0
             };
 
             if (isEditing) {
