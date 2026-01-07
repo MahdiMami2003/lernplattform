@@ -719,7 +719,10 @@
     .table-responsive {
         width: 100%;
     }
+    .table-responsive h3{
+        color: var(--text-secondary, #64748b);
 
+    }
     table {
         width: 100%;
         border-collapse: collapse;
