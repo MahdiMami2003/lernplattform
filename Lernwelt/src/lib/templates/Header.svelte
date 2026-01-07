@@ -388,7 +388,7 @@
 			<ul>
 				<li>
 					<a href="/material_page_id14" onclick={toggleMenu}
-						><img alt="Material" src={searchIcon} />{$_('header.menu_materials')}</a
+						><img alt="Material" src={subject} />{$_('header.menu_materials')}</a
 					>
 				</li>
 				<li>
