@@ -31,9 +31,33 @@
         return (userRole === 'admin' || userRole === 'teacher') && editingRight === true;
     }
 
+    // Hilfsfunktion: Tests mit Klassen-Namen anreichern
+    async function enrichWithClassNames(tests) {
+        if (!tests || tests.length === 0) return tests || [];
+        try {
+            const ids = Array.from(new Set(tests.map(t => t.class_id).filter((id) => id !== null && id !== undefined)));
+            if (ids.length === 0) return tests;
+
+            const { data: classes, error: clsError } = await supabase
+                .from('classes')
+                .select('id, name')
+                .in('id', ids);
+
+            if (clsError) {
+                console.warn('Konnte Klassennamen nicht laden:', clsError);
+                return tests;
+            }
+            const nameById = new Map((classes || []).map(c => [c.id, c.name]));
+            return tests.map(t => ({ ...t, class_name: nameById.get(t.class_id) || null }));
+        } catch (e) {
+            console.warn('Fehler beim Anreichern der Klassennamen:', e);
+            return tests;
+        }
+    }
+
     async function getTests() {
         // Wenn Schüler: filtere nach eigener Klasse + NULL-Fallback
-        if (userRole === 'student') {
+        if (!(userRole === 'admin' || userRole === 'teacher')) {
             const classId = studentClassId;
             const orFilter = classId == null
                 ? 'class_id.is.null'
@@ -49,7 +73,7 @@
                 return [];
             }
 
-            return data || [];
+            return await enrichWithClassNames(data || []);
         }
         // Lehrer/Admin: sehen alle
         const { data, error } = await supabase
@@ -62,7 +86,7 @@
             return [];
         }
 
-        return data || [];
+        return await enrichWithClassNames(data || []);
     }
 
     /** @param {number} id */
@@ -149,9 +173,9 @@
         // Feldname laut DB: link_answere (Typo)
         return test.link_answere || '';
     }
-    /** @param {{ class_id?: number|null }} test */
+    /** @param {{ class_id?: number|null, class_name?: string|null }} test */
     function getClassLabel(test) {
-        return test.class_id ? `Klasse ${test.class_id}` : 'Allgemein';
+        return test.class_name ? test.class_name : 'Allgemein';
     }
 </script>
 

@@ -65,7 +65,7 @@
     {/if}
 
     <div style="margin-top: 1.5rem; display:flex; gap: .5rem; justify-content:center; flex-wrap:wrap;">
-        <a href={requestedPath ? `/login_page_id2?redirectTo=${encodeURIComponent(requestedPath)}` : '/login_page_id2'}>
+        <a href={requestedPath ? `/?redirectTo=${encodeURIComponent(requestedPath)}` : '/'}>
             <button class="small-btn">{$_('access.link_to_login')}</button>
         </a>
 
