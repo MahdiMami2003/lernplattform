@@ -18,7 +18,9 @@
 
 	onMount(async () => {
 		// 1. Authentifizierten Benutzer sicher holen (statt getSession())
-		const { data: { user } } = await supabase.auth.getUser();
+		const {
+			data: { user }
+		} = await supabase.auth.getUser();
 		if (!user) {
 			goto('/login_page_id2');
 			return;
@@ -125,7 +127,9 @@
 			// B. Missionen laden
 			const { data: mData, error: mError } = await supabase
 				.from('missions_progress')
-				.select(`id, mission_id, progress, completed, missions (title, description, xp_reward)`)
+				.select(
+					`id, mission_id, progress, completed, missions (title, description, xp_reward, goal)`
+				)
 				.eq('user_id', targetId)
 				.order('completed', { ascending: true });
 
@@ -156,7 +160,7 @@
 						const { data: reData } = await supabase
 							.from('missions_progress')
 							.select(
-								`id, mission_id, progress, completed, missions (title, description, xp_reward)`
+								`id, mission_id, progress, completed, missions (title, description, xp_reward, goal)`
 							)
 							.eq('user_id', targetId)
 							.order('completed', { ascending: true });
@@ -187,7 +191,9 @@
 		return c ? '#4caf50' : p > 0 ? '#f3be6a' : '#ddd';
 	}
 
-	function childrenList(): any[] { return Array.isArray(myChildren) ? myChildren : []; }
+	function childrenList(): any[] {
+		return Array.isArray(myChildren) ? myChildren : [];
+	}
 </script>
 
 <div class="page-container main_container">
@@ -207,10 +213,7 @@
 			<div class="child-grid">
 				{#each childrenList() as child}
 					<button class="child-card" onclick={() => selectChild(child?.id)}>
-						<img
-							src={child?.avatar_url}
-							alt={child?.full_name}
-						/>
+						<img src={child?.avatar_url} alt={child?.full_name} />
 						<span>{child?.full_name}</span>
 					</button>
 				{/each}
@@ -241,16 +244,14 @@
 		{#if viewerRole === 'teacher'}
 			<div class="info-banner teacher">
 				<span>👨‍🏫 {$_('progress.teacher_view')} <strong>{profile?.full_name}</strong></span>
-				<button class="back-btn" onclick={() => history.back()}>{$_('progress.back_to_list')}</button>
+				<button class="back-btn" onclick={() => history.back()}
+					>{$_('progress.back_to_list')}</button
+				>
 			</div>
 		{/if}
 
 		<header class="profile-header">
-			<img
-				src={profile?.avatar_url}
-				alt={$_('progress.avatar_alt')}
-				class="avatar"
-			/>
+			<img src={profile?.avatar_url} alt={$_('progress.avatar_alt')} class="avatar" />
 			<div class="info">
 				<h1>{profile?.full_name}</h1>
 				<div class="stats">
@@ -282,13 +283,17 @@
 								<div class="track">
 									<div
 										class="fill"
-										style="width: {item.progress}%; background: {getBarColor(
-											item.progress,
-											item.completed
-										)}"
+										style="width: {Math.min(
+											100,
+											Math.max(0, (item.progress / (item.missions.goal || 1)) * 100)
+										)}%; background: {getBarColor(item.progress, item.completed)}"
 									></div>
 								</div>
-								<small>{item.completed ? $_('progress.done') : `${item.progress}%`}</small>
+								<small
+									>{item.completed
+										? $_('progress.done')
+										: `${Math.round((item.progress / (item.missions.goal || 1)) * 100)}%`}</small
+								>
 							</div>
 						{/if}
 					{/each}

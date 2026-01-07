@@ -12,9 +12,14 @@
 	/* ========== TYPES ========== */
 	type Question = {
 		id?: number;
+		type: 'mc' | 'cloze';
 		question: string;
-		answers: (string | null)[];
-		correctIndex: number;
+		// MC Specific
+		answers?: (string | null)[];
+		correctIndex?: number;
+		// Cloze Specific
+		textParts?: string[];
+		clozeAnswers?: string[];
 		xpReward: number;
 	};
 
@@ -49,7 +54,14 @@
 
 	let questions = $state<Question[]>([]);
 	let currentIndex = $state(0);
+
+	// MC State
 	let selectedIndex = $state<number | null>(null);
+
+	// Cloze State
+	let inputs = $state<string[]>([]);
+	let checkResult = $state<'correct' | 'wrong' | null>(null);
+
 	let locked = $state(false);
 	let correctCount = $state(0);
 
@@ -69,6 +81,58 @@
 	/* ========= HELPER ========= */
 	function shuffle<T>(array: T[]): T[] {
 		return [...array].sort(() => Math.random() - 0.5);
+	}
+
+	function renderMath(text: string) {
+		if (typeof window !== 'undefined' && (window as any).katex) {
+			return text.replace(/\$(.*?)\$/g, (_, math) => {
+				try {
+					return (window as any).katex.renderToString(math, { throwOnError: false });
+				} catch (e) {
+					console.error('Katex error:', e);
+					return math;
+				}
+			});
+		}
+		return text.replace(/\$/g, '');
+	}
+
+	function parseQuestion(q: any): Question {
+		// Check if it's a Cloze question (contains brackets [...])
+		if (q.question && q.question.includes('[') && q.question.includes(']')) {
+			const cleanText = q.question;
+			const regex = /\[(.*?)\]/g;
+			let match;
+			const answers: string[] = [];
+			const textParts: string[] = [];
+			let lastIndex = 0;
+
+			while ((match = regex.exec(cleanText)) !== null) {
+				textParts.push(cleanText.substring(lastIndex, match.index));
+				answers.push(match[1]);
+				lastIndex = regex.lastIndex;
+			}
+			textParts.push(cleanText.substring(lastIndex));
+
+			return {
+				id: q.id,
+				type: 'cloze',
+				question: q.question,
+				textParts,
+				clozeAnswers: answers,
+				xpReward: q.xp_reward ?? 15
+			};
+		} else {
+			// Assume Multiple Choice
+			return {
+				id: q.id,
+				type: 'mc',
+				question: q.question,
+				answers: [q.a1, q.a2, q.a3, q.a4],
+				correctIndex: q.correct_index,
+				xpReward: q.xp_reward ?? 10
+			};
+		}
 	}
 
 	async function updateProfile(update: Partial<Profile>) {
@@ -119,7 +183,14 @@
 
 			/* 2️⃣ PHYSIK-FRAGEN LADEN */
 			// Basis-Abfrage für Physik
-			let query = supabase.from('questions').select('*').ilike('subject', 'Physik%'); // Nur Physik Fragen
+			let query = supabase.from('questions').select('*').ilike('subject', 'Physik%');
+
+			// Check for question type filter (from URL)
+			const typeFilter = $page.url.searchParams.get('type');
+			if (typeFilter === 'mc') {
+				// Exclude questions that look like Cloze (contain brackets)
+				query = query.not('question', 'ilike', '%[%]%');
+			}
 
 			// Wenn eine Kategorie gewählt wurde, zusätzlich filtern
 			if (category) {
@@ -137,6 +208,7 @@
 				// Dummy Frage, damit das Spiel nicht leer ist
 				questions = [
 					{
+						type: 'mc',
 						question: 'Was ist die Einheit der Kraft?',
 						answers: ['Newton', 'Meter', 'Sekunde', 'Joule'],
 						correctIndex: 0,
@@ -147,13 +219,12 @@
 				// Mischen und die ersten 5 nehmen
 				const mixedData = shuffle(data).slice(0, 5);
 
-				questions = mixedData.map((q) => ({
-					id: q.id,
-					question: q.question,
-					answers: [q.a1, q.a2, q.a3, q.a4],
-					correctIndex: q.correct_index,
-					xpReward: q.xp_reward ?? 10
-				}));
+				questions = mixedData.map((q) => parseQuestion(q));
+
+				// Init inputs if first question is cloze
+				if (questions.length > 0 && questions[0].type === 'cloze' && questions[0].clozeAnswers) {
+					inputs = new Array(questions[0].clozeAnswers.length).fill('');
+				}
 			}
 		} catch (err) {
 			console.error(err);
@@ -166,17 +237,65 @@
 			correctCount = 0;
 			showSummary = false;
 			outOfHearts = false;
+			checkResult = null;
+			inputs = [];
 		}
 	}
 
 	function goNextOrFinish() {
 		if (currentIndex < questions.length - 1) {
 			currentIndex++;
+			currentIndex++;
 			selectedIndex = null;
+			checkResult = null;
 			locked = false;
+
+			// Reset Cloze inputs if next is cloze
+			if (questions[currentIndex].type === 'cloze' && questions[currentIndex].clozeAnswers) {
+				inputs = new Array(questions[currentIndex].clozeAnswers.length).fill('');
+			}
 		} else {
 			showSummary = true;
 			saveBossResult();
+		}
+	}
+
+	/* ========= CLOZE LOGIC ========== */
+	async function checkClozeAnswer() {
+		if (locked) return;
+
+		const current = questions[currentIndex];
+		if (current.type !== 'cloze' || !current.clozeAnswers) return;
+
+		const isCorrect = inputs.every(
+			(val, i) => val.trim().toLowerCase() === current.clozeAnswers![i].trim().toLowerCase()
+		);
+
+		locked = true;
+
+		if (isCorrect) {
+			checkResult = 'correct';
+			correctCount++;
+			rewardXP(current.xpReward);
+			await updateMissionProgress();
+		} else {
+			checkResult = 'wrong';
+			loseHeart();
+		}
+
+		setTimeout(() => {
+			if (!outOfHearts) goNextOrFinish();
+		}, 2000);
+	}
+
+	async function updateMissionProgress() {
+		if (profile?.id) {
+			const { error } = await supabase.rpc('increment_mission_progress', {
+				p_user_id: profile.id,
+				p_subject_name: 'Physik',
+				p_category: category || null
+			});
+			if (error) console.error('Fehler beim Missions-Update:', error);
 		}
 	}
 
@@ -198,19 +317,11 @@
 			// -----------------------------------------------------------
 			// 🚀 NEU: Mission Progress Update für 'Physik'
 			// -----------------------------------------------------------
-			if (profile?.id) {
-				const { error } = await supabase.rpc('increment_mission_progress', {
-					p_user_id: profile.id,
-					p_subject_name: 'Physik', // Zählt Physik-Missionen hoch
-					p_category: category || null
-				});
-
-				if (error) {
-					console.error('Fehler beim Missions-Update:', error);
-				} else {
-					console.log('Mission Progress erfolgreich erhöht!');
-				}
-			}
+			// -----------------------------------------------------------
+			// 🚀 NEU: Mission Progress Update für 'Physik'
+			// -----------------------------------------------------------
+			await updateMissionProgress();
+			// -----------------------------------------------------------
 			// -----------------------------------------------------------
 		} else {
 			loseHeart();
@@ -271,6 +382,21 @@
 	onMount(loadProfileAndQuestions);
 </script>
 
+<svelte:head>
+	<link
+		rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+		integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+		crossorigin="anonymous"
+	/>
+	<script
+		defer
+		src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+		integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnuzemU38X+039"
+		crossorigin="anonymous"
+	></script>
+</svelte:head>
+
 {#if loading}
 	<div class="loading"><p>{$_('game.loading')}</p></div>
 {:else if loadError}
@@ -302,7 +428,7 @@
 		{/each}
 
 		<header class="hud">
-			<button class="back-btn" on:click={() => goto('/student_landing_page_id5')}>←</button>
+			<button class="back-btn" on:click={() => goto('/game_page_id12')}>←</button>
 
 			<div class="hud-center">
 				<div class="progress-top">
@@ -336,30 +462,83 @@
 
 		{#if !showSummary && !outOfHearts}
 			<main class="card">
-				<h2 class="question">{questions[currentIndex].question}</h2>
-				<div class="answers">
-					{#each questions[currentIndex].answers as ans, i}
-						{#if ans}
-							<button
-								class="answer-btn {locked && i === questions[currentIndex].correctIndex
-									? 'correct'
-									: ''} {locked &&
-								selectedIndex === i &&
-								selectedIndex !== questions[currentIndex].correctIndex
-									? 'wrong'
-									: ''}"
-								on:click={() => handleAnswerClick(i)}
-								disabled={locked}
-							>
-								{ans}
-							</button>
+				{#if questions[currentIndex].type === 'mc'}
+					<!-- ============ MULTIPLE CHOICE ============ -->
+					<h2 class="question">{questions[currentIndex].question}</h2>
+					<div class="answers">
+						{#each questions[currentIndex].answers || [] as ans, i}
+							{#if ans}
+								<button
+									class="answer-btn {locked && i === questions[currentIndex].correctIndex
+										? 'correct'
+										: ''} {locked &&
+									selectedIndex === i &&
+									selectedIndex !== questions[currentIndex].correctIndex
+										? 'wrong'
+										: ''}"
+									on:click={() => handleAnswerClick(i)}
+									disabled={locked}
+								>
+									{ans}
+								</button>
+							{/if}
+						{/each}
+					</div>
+				{:else if questions[currentIndex].type === 'cloze'}
+					<!-- ============ CLOZE / LÜCKENTEXT ============ -->
+					<div class="cloze-container">
+						<div class="cloze-text">
+							{#each questions[currentIndex].textParts || [] as part, i}
+								<span>{@html renderMath(part)}</span>
+								{#if i < (questions[currentIndex].clozeAnswers?.length || 0)}
+									<input
+										type="text"
+										bind:value={inputs[i]}
+										disabled={locked}
+										class:correct={locked &&
+											inputs[i].trim().toLowerCase() ===
+												questions[currentIndex].clozeAnswers![i].trim().toLowerCase()}
+										class:wrong={locked &&
+											inputs[i].trim().toLowerCase() !==
+												questions[currentIndex].clozeAnswers![i].trim().toLowerCase()}
+										placeholder="?"
+									/>
+									{#if locked && inputs[i].trim().toLowerCase() !== questions[currentIndex]
+												.clozeAnswers![i].trim()
+												.toLowerCase()}
+										<span class="correction">({questions[currentIndex].clozeAnswers![i]})</span>
+									{/if}
+								{/if}
+							{/each}
+						</div>
+
+						{#if checkResult}
+							<div class="feedback {checkResult}">
+								{checkResult === 'correct' ? 'Richtig! 🎉' : 'Leider falsch 😕'}
+							</div>
 						{/if}
-					{/each}
-				</div>
+
+						<div class="actions">
+							<button
+								class="check-btn"
+								on:click={checkClozeAnswer}
+								disabled={locked || inputs.some((v) => !v)}
+							>
+								Überprüfen
+							</button>
+						</div>
+					</div>
+				{/if}
 			</main>
 		{:else}
 			<section class="summary">
-				<h1>{outOfHearts ? '😥 Keine Herzen mehr' : '🎉 Super gemacht!'}</h1>
+				<h1>
+					{outOfHearts
+						? '😥 Keine Herzen mehr'
+						: correctCount === 0
+							? 'Viel Glück beim nächsten Mal'
+							: '🎉 Super gemacht!'}
+				</h1>
 
 				<div class="xp-chest">
 					<div class="chest-glow"></div>
@@ -407,464 +586,442 @@
 {/if}
 
 <style>
-    /* ============ DARK MODE SUPPORT ============ */
-    :global(body) {
-        margin: 0;
-        font-family:
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                'Segoe UI',
-                sans-serif;
-        background: var(--bg-main, #e7f4fa);
-        transition: background-color 0.3s ease;
-    }
+	:global(body) {
+		margin: 0;
+		font-family:
+			system-ui,
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			sans-serif;
+		background: #e7f4fa;
+	}
 
-    .game-root {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 1.5rem 1rem 3rem;
-        position: relative;
-    }
+	.game-root {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 1.5rem 1rem 3rem;
+		position: relative;
+	}
 
-    .loading,
-    .error {
-        text-align: center;
-        padding: 4rem 1rem;
-        color: var(--text-primary, #000);
-    }
+	.loading,
+	.error {
+		text-align: center;
+		padding: 4rem 1rem;
+		color: #1d5e84;
+	}
 
-    .error button {
-        margin-top: 1rem;
-        padding: 0.6rem 1.4rem;
-        border-radius: 12px;
-        border: none;
-        background: #236c93;
-        color: white;
-        cursor: pointer;
-        min-height: 44px;
-    }
+	.error button {
+		margin-top: 1rem;
+		padding: 0.6rem 1.4rem;
+		border-radius: 12px;
+		border: none;
+		background: #236c93;
+		color: white;
+		cursor: pointer;
+		min-height: 44px;
+	}
 
-    .error button:focus-visible {
-        outline: 2px solid var(--text-primary, #000);
-        outline-offset: 2px;
-    }
+	.error button:focus-visible {
+		outline: 2px solid #1d5e84;
+		outline-offset: 2px;
+	}
 
-    /* ============ HUD ============ */
-    .hud {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.2rem;
-        gap: 0.6rem;
-    }
+	/* ============ HUD ============ */
+	.hud {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1.2rem;
+		gap: 0.6rem;
+	}
 
-    .back-btn {
-        border: none;
-        background: var(--bg-card, white);
-        border-radius: 999px;
-        width: 40px;
-        height: 40px;
-        font-size: 1.4rem;
-        cursor: pointer;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        color: #236c93;
-        transition: all 0.2s ease;
-        min-height: 44px;
-        min-width: 44px;
-    }
+	.back-btn {
+		border: none;
+		background: white;
+		border-radius: 999px;
+		width: 40px;
+		height: 40px;
+		font-size: 1.4rem;
+		cursor: pointer;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+		color: #236c93;
+		transition: transform 0.2s ease;
+		min-height: 44px;
+		min-width: 44px;
+	}
 
-    .back-btn:hover {
-        transform: scale(1.05);
-    }
+	.back-btn:hover {
+		transform: scale(1.05);
+	}
 
-    .back-btn:focus-visible {
-        outline: 2px solid var(--text-primary, #000);
-        outline-offset: 2px;
-    }
+	.back-btn:focus-visible {
+		outline: 2px solid #1d5e84;
+		outline-offset: 2px;
+	}
 
-    .hud-center {
-        flex: 1;
-        text-align: center;
-    }
+	.hud-center {
+		flex: 1;
+		text-align: center;
+	}
 
-    .progress-top {
-        height: 10px;
-        background: var(--bg-hover, #d9e5f0);
-        border-radius: 999px;
-        overflow: hidden;
-        margin-bottom: 0.2rem;
-        transition: background-color 0.3s ease;
-    }
+	.progress-top {
+		height: 10px;
+		background: #d9e5f0;
+		border-radius: 999px;
+		overflow: hidden;
+		margin-bottom: 0.2rem;
+	}
 
-    .progress-inner {
-        height: 100%;
-        background: linear-gradient(90deg, #3ba776, #65d492);
-        transition: width 0.2s;
-    }
+	.progress-inner {
+		height: 100%;
+		background: linear-gradient(90deg, #3ba776, #65d492);
+		transition: width 0.2s;
+	}
 
-    .question-count {
-        font-size: 0.85rem;
-        color: var(--text-secondary, #4a6175);
-        margin: 0;
-        transition: color 0.3s ease;
-    }
+	.question-count {
+		font-size: 0.85rem;
+		color: #4a6175;
+		margin: 0;
+	}
 
-    .hud-right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 0.3rem;
-        font-size: 0.9rem;
-    }
+	.hud-right {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.3rem;
+		font-size: 0.9rem;
+	}
 
-    .hearts span {
-        font-size: 1.2rem;
-        margin-left: 0.1rem;
-    }
+	.hearts span {
+		font-size: 1.2rem;
+		margin-left: 0.1rem;
+	}
 
-    .hearts span.lost {
-        opacity: 0.25;
-    }
+	.hearts span.lost {
+		opacity: 0.25;
+	}
 
-    .xp-display {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 0.15rem;
-    }
+	.xp-display {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.15rem;
+	}
 
-    .xp-display span {
-        font-size: 0.8rem;
-        color: var(--text-secondary, #1d5e84);
-        font-weight: 600;
-        transition: color 0.3s ease;
-    }
+	.xp-display span {
+		font-size: 0.8rem;
+		color: #1d5e84;
+		font-weight: 600;
+	}
 
-    .xp-bar {
-        width: 110px;
-        height: 6px;
-        border-radius: 999px;
-        background: var(--bg-hover, #d9e5f0);
-        overflow: hidden;
-        transition: background-color 0.3s ease;
-    }
+	.xp-bar {
+		width: 110px;
+		height: 6px;
+		border-radius: 999px;
+		background: #d9e5f0;
+		overflow: hidden;
+	}
 
-    .xp-inner {
-        height: 100%;
-        background: linear-gradient(90deg, #f6ad55, #f56565);
-        transition: width 0.2s;
-    }
+	.xp-inner {
+		height: 100%;
+		background: linear-gradient(90deg, #f6ad55, #f56565);
+		transition: width 0.2s;
+	}
 
-    .streak {
-        display: flex;
-        align-items: center;
-        gap: 0.2rem;
-        background: var(--bg-card, white);
-        color: var(--text-primary, #000);
-        padding: 0.1rem 0.5rem;
-        border-radius: 999px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
+	.streak {
+		display: flex;
+		align-items: center;
+		gap: 0.2rem;
+		background: white;
+		color: #000;
+		padding: 0.1rem 0.5rem;
+		border-radius: 999px;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+	}
 
-    .streak span:first-child {
-        font-size: 1.1rem;
-    }
+	.streak span:first-child {
+		font-size: 1.1rem;
+	}
 
-    /* ============ LEVEL UP POPUP ============ */
-    .levelup-popup {
-        position: fixed;
-        top: 15%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #3ba776;
-        color: white;
-        padding: 0.8rem 1.6rem;
-        border-radius: 14px;
-        font-weight: bold;
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
-        animation:
-                popup 0.6s ease-out forwards,
-                fadeOut 2s ease forwards;
-        z-index: 50;
-    }
+	/* ============ LEVEL UP POPUP ============ */
+	.levelup-popup {
+		position: fixed;
+		top: 15%;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #3ba776;
+		color: white;
+		padding: 0.8rem 1.6rem;
+		border-radius: 14px;
+		font-weight: bold;
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+		animation:
+			popup 0.6s ease-out forwards,
+			fadeOut 2s ease forwards;
+		z-index: 50;
+	}
 
-    @keyframes popup {
-        0% {
-            transform: translate(-50%, -50%) scale(0.8);
-            opacity: 0;
-        }
-        50% {
-            transform: translate(-50%, -50%) scale(1.08);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-        }
-    }
+	@keyframes popup {
+		0% {
+			transform: translate(-50%, -50%) scale(0.8);
+			opacity: 0;
+		}
+		50% {
+			transform: translate(-50%, -50%) scale(1.08);
+			opacity: 1;
+		}
+		100% {
+			transform: translate(-50%, -50%) scale(1);
+			opacity: 1;
+		}
+	}
 
-    @keyframes fadeOut {
-        0%,
-        60% {
-            opacity: 1;
-        }
-        100% {
-            opacity: 0;
-        }
-    }
+	@keyframes fadeOut {
+		0%,
+		60% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
 
-    /* ============ CARD ============ */
-    .card {
-        background: var(--bg-card, white);
-        padding: 2rem 1.5rem;
-        border-radius: 18px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-        animation: slideUp 0.25s ease-out;
-        transition: background-color 0.3s ease;
-    }
+	/* ============ CARD ============ */
+	.card {
+		background: white;
+		padding: 2rem 1.5rem;
+		border-radius: 18px;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+		animation: slideUp 0.25s ease-out;
+	}
 
-    .question {
-        font-size: 1.5rem;
-        color: var(--text-primary, #1d5e84);
-        margin-bottom: 1.5rem;
-        text-align: center;
-        transition: color 0.3s ease;
-    }
+	.question {
+		font-size: 1.5rem;
+		color: #1d5e84; /* Restored Blue */
+		margin-bottom: 1.5rem;
+		text-align: center;
+	}
 
-    .answers {
-        display: grid;
-        gap: 0.9rem;
-    }
+	.answers {
+		display: grid;
+		gap: 0.9rem;
+	}
 
-    .answer-btn {
-        width: 100%;
-        text-align: left;
-        padding: 0.9rem 1rem;
-        border-radius: 14px;
-        border: 2px solid var(--border-color, #d7e4ef);
-        background: var(--bg-hover, #f8fbff);
-        color: var(--text-primary, #000);
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        min-height: 44px;
-    }
+	.answer-btn {
+		width: 100%;
+		text-align: left;
+		padding: 0.9rem 1rem;
+		border-radius: 14px;
+		border: 2px solid #d7e4ef;
+		background: #f8fbff;
+		color: #1d5e84; /* Restored Blue */
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		min-height: 44px;
+	}
 
-    .answer-btn:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+	.answer-btn:hover:not(:disabled) {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+	}
 
-    .answer-btn:focus-visible {
-        outline: 2px solid var(--text-primary, #000);
-        outline-offset: 2px;
-    }
+	.answer-btn:focus-visible {
+		outline: 2px solid #1d5e84;
+		outline-offset: 2px;
+	}
 
-    .answer-btn.correct {
-        background: #c6f6d5;
-        border-color: #3ba776;
-    }
+	.answer-btn.correct {
+		background: #c6f6d5;
+		border-color: #3ba776;
+		color: #065f46;
+	}
 
-    .answer-btn.wrong {
-        background: #ffd1d1;
-        border-color: #ff6b6b;
-    }
+	.answer-btn.wrong {
+		background: #ffd1d1;
+		border-color: #ff6b6b;
+		color: #991b1b;
+	}
 
-    /* ============ SUMMARY ============ */
-    .summary {
-        background: var(--bg-card, white);
-        padding: 2rem 1.5rem;
-        border-radius: 18px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-        text-align: center;
-        animation: slideUp 0.25s ease-out;
-        transition: background-color 0.3s ease;
-    }
+	/* ============ SUMMARY ============ */
+	.summary {
+		background: white;
+		padding: 2rem 1.5rem;
+		border-radius: 18px;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+		text-align: center;
+		animation: slideUp 0.25s ease-out;
+	}
 
-    .summary h1 {
-        margin-bottom: 0.5rem;
-        color: var(--text-primary, #1d5e84);
-        transition: color 0.3s ease;
-    }
+	.summary h1 {
+		margin-bottom: 0.5rem;
+		color: #1d5e84;
+	}
 
-    .summary p {
-        margin: 0.2rem 0;
-        color: var(--text-secondary, #4a6175);
-        transition: color 0.3s ease;
-    }
+	.summary p {
+		margin: 0.2rem 0;
+		color: #4a6175;
+	}
 
-    .xp-earned {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #3ba776;
-        margin-top: 0.6rem;
-    }
+	.xp-earned {
+		font-size: 1.3rem;
+		font-weight: bold;
+		color: #3ba776;
+		margin-top: 0.6rem;
+	}
 
-    /* XP Chest - bleibt golden! */
-    .xp-chest {
-        position: relative;
-        width: 130px;
-        height: 100px;
-        margin: 1.3rem auto 1rem;
-    }
+	/* XP Chest - bleibt golden! */
+	.xp-chest {
+		position: relative;
+		width: 130px;
+		height: 100px;
+		margin: 1.3rem auto 1rem;
+	}
 
-    .chest-box {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        width: 130px;
-        height: 70px;
-        background: linear-gradient(180deg, #d69e2e, #b7791f);
-        border-radius: 10px;
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-    }
+	.chest-box {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		margin: auto;
+		width: 130px;
+		height: 70px;
+		background: linear-gradient(180deg, #d69e2e, #b7791f);
+		border-radius: 10px;
+		box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+	}
 
-    .chest-lid {
-        position: absolute;
-        bottom: 55px;
-        left: 10px;
-        right: 10px;
-        height: 30px;
-        background: linear-gradient(180deg, #faf089, #ecc94b);
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+	.chest-lid {
+		position: absolute;
+		bottom: 55px;
+		left: 10px;
+		right: 10px;
+		height: 30px;
+		background: linear-gradient(180deg, #faf089, #ecc94b);
+		border-radius: 10px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
 
-    .chest-glow {
-        position: absolute;
-        bottom: 60px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90px;
-        height: 40px;
-        background: radial-gradient(circle, rgba(250, 240, 137, 0.9), transparent);
-        opacity: 0.8;
-        animation: glow 1.4s ease-in-out infinite;
-    }
+	.chest-glow {
+		position: absolute;
+		bottom: 60px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 90px;
+		height: 40px;
+		background: radial-gradient(circle, rgba(250, 240, 137, 0.9), transparent);
+		opacity: 0.8;
+		animation: glow 1.4s ease-in-out infinite;
+	}
 
-    @keyframes glow {
-        0% {
-            transform: translateX(-50%) scale(0.9);
-            opacity: 0.7;
-        }
-        50% {
-            transform: translateX(-50%) scale(1.05);
-            opacity: 1;
-        }
-        100% {
-            transform: translateX(-50%) scale(0.9);
-            opacity: 0.7;
-        }
-    }
+	@keyframes glow {
+		0% {
+			transform: translateX(-50%) scale(0.9);
+			opacity: 0.7;
+		}
+		50% {
+			transform: translateX(-50%) scale(1.05);
+			opacity: 1;
+		}
+		100% {
+			transform: translateX(-50%) scale(0.9);
+			opacity: 0.7;
+		}
+	}
 
-    .summary-stats {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        margin: 1rem 0;
-    }
+	.summary-stats {
+		display: flex;
+		justify-content: center;
+		gap: 1.5rem;
+		margin: 1rem 0;
+	}
 
-    .summary-stats span {
-        display: block;
-        font-size: 0.85rem;
-        color: var(--text-secondary, #6e8191);
-        transition: color 0.3s ease;
-    }
+	.summary-stats span {
+		display: block;
+		font-size: 0.85rem;
+		color: #6e8191;
+	}
 
-    .summary-stats strong {
-        font-size: 1.2rem;
-        color: var(--text-primary, #1d5e84);
-        transition: color 0.3s ease;
-    }
+	.summary-stats strong {
+		font-size: 1.2rem;
+		color: #1d5e84;
+	}
 
-    .achievements {
-        margin: 0.8rem 0;
-    }
+	.achievements {
+		margin: 0.8rem 0;
+	}
 
-    .badge-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-        justify-content: center;
-        margin-top: 0.3rem;
-    }
+	.badge-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		justify-content: center;
+		margin-top: 0.3rem;
+	}
 
-    .badge {
-        background: var(--bg-hover, #e7f4fa);
-        border-radius: 999px;
-        padding: 0.3rem 0.8rem;
-        border: 1px solid #236c93;
-        font-size: 0.85rem;
-        color: #236c93;
-        transition: background-color 0.3s ease;
-    }
+	.badge {
+		background: #e7f4fa;
+		border-radius: 999px;
+		padding: 0.3rem 0.8rem;
+		font-size: 0.85rem;
+		color: #236c93;
+		font-weight: 600;
+	}
 
-    .summary-actions {
-        margin-top: 1.2rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        justify-content: center;
-    }
+	.summary-actions {
+		display: flex;
+		justify-content: center;
+		gap: 0.8rem;
+		margin-top: 1.5rem;
+	}
 
-    .summary-actions button {
-        padding: 0.7rem 1.5rem;
-        border-radius: 14px;
-        border: none;
-        background: linear-gradient(90deg, #236c93, #3ba776);
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-        min-height: 44px;
-        transition: transform 0.2s;
-    }
+	.summary-actions button {
+		transition: transform 0.2s;
+	}
 
-    .summary-actions button:hover {
-        transform: translateY(-2px);
-    }
+	.summary-actions button:hover {
+		transform: translateY(-2px);
+	}
 
-    .summary-actions button:focus-visible {
-        outline: 2px solid white;
-        outline-offset: 2px;
-    }
+	.summary-actions button:focus-visible {
+		outline: 2px solid white;
+		outline-offset: 2px;
+	}
 
-    .summary-actions button:nth-child(2) {
-        background: var(--bg-hover, #e2e8f0);
-        color: var(--text-primary, #1d5e84);
-    }
+	.summary-actions button:nth-child(2) {
+		background: var(--bg-hover, #e2e8f0);
+		color: var(--text-primary, #1d5e84);
+	}
 
-    /* ============ CONFETTI ============ */
-    .confetti {
-        position: fixed;
-        top: -20px;
-        width: 10px;
-        height: 16px;
-        border-radius: 2px;
-        animation-name: confetti-fall;
-        animation-timing-function: linear;
-        animation-iteration-count: 1;
-        z-index: 100;
-    }
+	/* ============ CONFETTI ============ */
+	.confetti {
+		position: fixed;
+		top: -20px;
+		width: 10px;
+		height: 16px;
+		border-radius: 2px;
+		animation-name: confetti-fall;
+		animation-timing-function: linear;
+		animation-iteration-count: 1;
+		z-index: 100;
+	}
 
-    @keyframes confetti-fall {
-        from {
-            transform: translateY(-20px) rotate(0deg);
-            opacity: 1;
-        }
-        to {
-            transform: translateY(110vh) rotate(360deg);
-            opacity: 0;
-        }
-    }
+	@keyframes confetti-fall {
+		from {
+			transform: translateY(-20px) rotate(0deg);
+			opacity: 1;
+		}
+		to {
+			transform: translateY(110vh) rotate(360deg);
+			opacity: 0;
+		}
+	}
 
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(16px);
-        }
-    }
+	@keyframes slideUp {
+		from {
+			opacity: 0;
+			transform: translateY(16px);
+		}
+	}
 </style>
