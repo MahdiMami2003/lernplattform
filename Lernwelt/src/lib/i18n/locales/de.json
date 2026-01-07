@@ -534,9 +534,17 @@
   "gm": {
     "subject": {
       "Mathe": "Mathe",
+      "Deutsch": "Deutsch",
+      "Englisch": "Englisch",
+      "Physik": "Physik",
+      "Mathe_EASY": "Mathe · Leicht",
+      "Mathe_MEDIUM": "Mathe · Mittel",
+      "Mathe_HARD": "Mathe · Schwer",
+      "Mathe_BOSS": "Mathe · Experte",
       "Englisch_EASY": "Englisch · Leicht",
       "Englisch_MEDIUM": "Englisch · Mittel",
       "Englisch_HARD": "Englisch · Schwer",
+      "Englisch_BOSS": "Englisch · Experte",
       "Deutsch_EASY": "Deutsch · Leicht",
       "Deutsch_MEDIUM": "Deutsch · Mittel",
       "Deutsch_HARD": "Deutsch · Schwer",
