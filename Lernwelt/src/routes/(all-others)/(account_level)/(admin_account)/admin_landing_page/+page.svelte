@@ -284,9 +284,9 @@
         <h1>{$_('admin_page.title')}</h1>
         <p>{$_('admin_page.subtitle')}</p> <br>
         <div style="display:flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="/teacher_landing_page_id6" style="color: var(--text-primary)">{$_('admin_page.link_teacher')}</a>
-            <a href="/parents_landing_page_id4" style="color: var(--text-primary)">{$_('admin_page.link_parent')}</a>
-            <a href="/student_landing_page_id5" style="color: var(--text-primary)">{$_('admin_page.link_student')}</a>
+            <a href="/teacher_landing_page_id6">{$_('admin_page.link_teacher')}</a>
+            <a href="/parents_landing_page_id4">{$_('admin_page.link_parent')}</a>
+            <a href="/student_landing_page_id5">{$_('admin_page.link_student')}</a>
         </div>
     </header>
 
@@ -396,11 +396,11 @@
 
         <div class="section-card">
             <div
-                class="section-header"
-                role="button"
-                tabindex="0"
-                onclick={() => toggleSection('admins')}
-                onkeydown={(e) => handleKeydown(e, 'admins')}
+                    class="section-header"
+                    role="button"
+                    tabindex="0"
+                    onclick={() => toggleSection('admins')}
+                    onkeydown={(e) => handleKeydown(e, 'admins')}
             >
                 <div class="title-group">
                     <span class="icon">🛡️</span>
@@ -418,11 +418,11 @@
 
         <div class="section-card">
             <div
-                class="section-header"
-                role="button"
-                tabindex="0"
-                onclick={() => toggleSection('students')}
-                onkeydown={(e) => handleKeydown(e, 'students')}
+                    class="section-header"
+                    role="button"
+                    tabindex="0"
+                    onclick={() => toggleSection('students')}
+                    onkeydown={(e) => handleKeydown(e, 'students')}
             >
                 <div class="title-group">
                     <span class="icon">👥</span>
@@ -434,7 +434,7 @@
             {#if isOpen.students}
                 <div class="section-content" transition:slide>
                     <!-- sorting line using the class table header "Klassenname" / "Class name" -->
-                    <div style="padding: 0.75rem 1rem; color: #64748b;">{$_('admin_page.students_sorted_by')}</div>
+                    <div style="padding: 0.75rem 1rem; color: var(--text-secondary, #64748b); transition: color 0.3s ease;">{$_('admin_page.students_sorted_by')}</div>
                     {#if Object.keys(studentsByClass).length === 0}
                         <div class="empty">{$_('admin_page.students_empty')}</div>
                     {:else}
@@ -443,27 +443,27 @@
                                 <h3 style="margin: 1rem;">{c.name}</h3>
                                 <table>
                                     <thead>
-                                        <tr>
-                                            <th>{$_('admin_page.students_table_name')}</th>
-                                            <th style="text-align: right;">{$_('admin_page.students_table_details')}</th>
-                                        </tr>
+                                    <tr>
+                                        <th>{$_('admin_page.students_table_name')}</th>
+                                        <th style="text-align: right;">{$_('admin_page.students_table_details')}</th>
+                                    </tr>
                                     </thead>
                                     <tbody>
-                                        {#each (studentsByClass[c.id] || []) as s}
-                                            <tr>
-                                                <td>
-                                                    <div>
-                                                        <strong>{s.full_name}</strong>
-                                                        <span class="id-sub">{s.id.slice(0,8)}…</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="actions">
-                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>{$_('admin_page.students_edit')}</button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {/each}
+                                    {#each (studentsByClass[c.id] || []) as s}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{s.full_name}</strong>
+                                                    <span class="id-sub">{s.id.slice(0,8)}…</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button class="btn-small" onclick={() => openEditStudent(s)}>{$_('admin_page.students_edit')}</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {/each}
                                     </tbody>
                                 </table>
                             {/each}
@@ -472,27 +472,27 @@
                                 <h3 style="margin: 1rem;">{$_('admin_page.students_no_class')}</h3>
                                 <table>
                                     <thead>
-                                        <tr>
-                                            <th>{$_('admin_page.students_table_name')}</th>
-                                            <th style="text-align: right;">{$_('admin_page.students_table_details')}</th>
-                                        </tr>
+                                    <tr>
+                                        <th>{$_('admin_page.students_table_name')}</th>
+                                        <th style="text-align: right;">{$_('admin_page.students_table_details')}</th>
+                                    </tr>
                                     </thead>
                                     <tbody>
-                                        {#each studentsByClass[-1] as s}
-                                            <tr>
-                                                <td>
-                                                    <div>
-                                                        <strong>{s.full_name}</strong>
-                                                        <span class="id-sub">{s.id.slice(0,8)}…</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="actions">
-                                                        <button class="btn-small" onclick={() => openEditStudent(s)}>{$_('admin_page.students_edit')}</button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {/each}
+                                    {#each studentsByClass[-1] as s}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{s.full_name}</strong>
+                                                    <span class="id-sub">{s.id.slice(0,8)}…</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="actions">
+                                                    <button class="btn-small" onclick={() => openEditStudent(s)}>{$_('admin_page.students_edit')}</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {/each}
                                     </tbody>
                                 </table>
                             {/if}
@@ -594,22 +594,60 @@
 </div>
 
 <style>
-    :global(body) { background: #f8fafc; font-family: system-ui, sans-serif; }
+    /* ============ DARK MODE SUPPORT ============ */
+    :global(body) {
+        background: var(--bg-main, #f8fafc);
+        font-family: system-ui, sans-serif;
+        transition: background-color 0.3s ease;
+    }
 
-    .admin-layout { max-width: 1000px; margin: 0 auto; padding: 2rem 1rem; }
+    .admin-layout {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
 
-    header { text-align: center; margin-bottom: 2rem; }
-    h1 { color: #1e293b; margin: 0; }
-    p { color: #64748b; margin-top: 0.5rem; }
+    header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-    /* SEKTION CARDS */
+    h1 {
+        color: var(--text-primary, #1e293b);
+        margin: 0;
+        transition: color 0.3s ease;
+    }
+
+    p {
+        color: var(--text-secondary, #64748b);
+        margin-top: 0.5rem;
+        transition: color 0.3s ease;
+    }
+
+    header a {
+        color: var(--text-primary, #1e293b);
+        text-decoration: underline;
+        transition: color 0.2s ease;
+    }
+
+    header a:hover {
+        opacity: 0.8;
+    }
+
+    header a:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
+
+    /* ============ SEKTION CARDS ============ */
     .section-card {
-        background: white;
+        background: var(--bg-card, white);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color, #e2e8f0);
         margin-bottom: 1.5rem;
         overflow: visible;
+        transition: all 0.3s ease;
     }
 
     /* HEADER als DIV gestylt wie ein Button */
@@ -619,39 +657,106 @@
         justify-content: space-between;
         align-items: center;
         padding: 1.2rem;
-        background: white;
+        background: var(--bg-card, white);
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s ease;
         text-align: left;
         border-radius: 12px;
-        /* Verhindert Textauswahl beim Doppelklick */
         user-select: none;
     }
-    .section-header:hover { background: #f8fafc; }
-    .section-header:focus { outline: 2px solid #3b82f6; outline-offset: -2px; }
 
-    .title-group { display: flex; align-items: center; gap: 0.8rem; }
-    .icon { font-size: 1.5rem; }
-    .section-header h2 { margin: 0; font-size: 1.1rem; color: #334155; }
-
-    .chevron { font-size: 0.8rem; color: #94a3b8; transition: transform 0.3s; }
-    .chevron.rotated { transform: rotate(180deg); }
-
-    .section-content {
-        border-top: 1px solid #f1f5f9;
-        overflow: visible;
+    .section-header:hover {
+        background: var(--bg-hover, #f8fafc);
     }
 
-    /* TABELLE */
-    .table-responsive { width: 100%; }
+    .section-header:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: -2px;
+    }
 
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 1rem; background: #f8fafc; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
-    td { padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .title-group {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
 
-    /* row-specific and user table styles moved to UserTable.svelte */
+    .icon {
+        font-size: 1.5rem;
+    }
 
-    .badge.gray { background: #f1f5f9; color: #475569; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-primary, #334155);
+        transition: color 0.3s ease;
+    }
+
+    .chevron {
+        font-size: 0.8rem;
+        color: var(--text-muted, #94a3b8);
+        transition: all 0.3s ease;
+    }
+
+    .chevron.rotated {
+        transform: rotate(180deg);
+    }
+
+    .section-content {
+        border-top: 1px solid var(--border-color, #f1f5f9);
+        overflow: visible;
+        transition: border-color 0.3s ease;
+    }
+
+    .section-content h3 {
+        margin: 1rem;
+        color: var(--text-primary, #1e293b);
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    /* ============ TABELLE ============ */
+    .table-responsive {
+        width: 100%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        text-align: left;
+        padding: 1rem;
+        background: var(--bg-hover, #f8fafc);
+        color: var(--text-secondary, #64748b);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color, #f1f5f9);
+        vertical-align: middle;
+        color: var(--text-primary, #000);
+        transition: all 0.3s ease;
+    }
+
+    td strong {
+        color: var(--text-primary, #000);
+        transition: color 0.3s ease;
+    }
+
+    .badge.gray {
+        background: var(--bg-hover, #f1f5f9);
+        color: var(--text-secondary, #475569);
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
 
     .actions {
         display: flex;
@@ -661,54 +766,263 @@
         position: relative;
     }
 
-    /* BUTTONS */
-    .btn-small { border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: 0.2s; white-space: nowrap;}
-    .btn-small.grant { background: #22c55e; color: white; }
-    .btn-small.secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-    .btn-small.danger { background: #fee2e2; color: #dc2626; }
-    .btn-small:hover { opacity: 0.9; }
+    /* ============ BUTTONS ============ */
+    .btn-small {
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        min-height: 44px;
+    }
+
+    .btn-small.grant {
+        background: #22c55e;
+        color: white;
+    }
+
+    .btn-small.secondary {
+        background: var(--bg-hover, #f1f5f9);
+        color: var(--text-secondary, #475569);
+        border: 1px solid var(--border-color, #cbd5e1);
+    }
+
+    .btn-small.danger {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .btn-small:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    .btn-small:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
 
     .btn-add {
-        background: #3b82f6; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 0.85rem;
+        min-height: 44px;
+        transition: all 0.2s ease;
     }
-    .btn-add:hover { background: #2563eb; }
 
-    .loading, .empty { padding: 2rem; text-align: center; color: #94a3b8; font-style: italic;}
+    .btn-add:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
 
+    .btn-add:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 2px;
+    }
 
-    /* MODAL */
+    .loading, .empty {
+        padding: 2rem;
+        text-align: center;
+        color: var(--text-muted, #94a3b8);
+        font-style: italic;
+        transition: color 0.3s ease;
+    }
+
+    /* ============ MODAL ============ */
     .modal-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
     }
-    .modal {
-        background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    .modal h2 { margin-top: 0; color: #1e293b; text-align: center; margin-bottom: 1.5rem; }
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.5rem; color: #475569; font-weight: 500; font-size: 0.9rem; }
-    .form-group input { width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
-    .form-group select { width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem; }
 
-    /* Role radio visual improvements */
-    .role-fieldset { border: 1px solid #e6edf8; padding: 0.75rem; border-radius: 8px; margin: 0; }
-    .role-fieldset legend { padding: 0 0.5rem; font-weight: 600; color: #334155; }
-    .role-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
-    .role-option { display: block; }
-    /* make the actual radio cover the whole option so clicking anywhere toggles it */
-    .role-option { position: relative; }
-    .role-option .role-radio { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; }
-    .role-option .role-box {
-        display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid transparent; background: #fff; cursor: pointer; transition: all 0.15s ease-in-out;
-        position: relative; z-index: 1;
+    .modal {
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
     }
-    .role-option .role-icon { font-size: 1.15rem; }
-    .role-option .role-name { font-weight: 600; color: #0f172a; }
+
+    .modal h2 {
+        margin-top: 0;
+        color: var(--text-primary, #1e293b);
+        text-align: center;
+        margin-bottom: 1.5rem;
+        transition: color 0.3s ease;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary, #475569);
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border-color, #cbd5e1);
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input::placeholder {
+        color: var(--text-muted, #94a3b8);
+    }
+
+    .form-group input:focus {
+        outline: 2px solid #3b82f6;
+        border-color: transparent;
+    }
+
+    .form-group input:disabled {
+        background: var(--bg-hover, #f8fafc);
+        color: var(--text-muted, #94a3b8);
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border-color, #cbd5e1);
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
+
+    :root.darkmode .form-group select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e6edf3' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    }
+
+    .form-group select:focus {
+        outline: 2px solid #3b82f6;
+        border-color: transparent;
+    }
+
+    .form-group select option {
+        background: var(--bg-card, white);
+        color: var(--text-primary, #000);
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.8rem;
+        margin-top: 1.5rem;
+    }
+
+    /* ============ ROLE RADIO ============ */
+    .role-fieldset {
+        border: 1px solid var(--border-color, #e6edf8);
+        background: var(--bg-card, white);
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin: 0;
+        transition: all 0.3s ease;
+    }
+
+    .role-fieldset legend {
+        padding: 0 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary, #334155);
+        transition: color 0.3s ease;
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .role-option {
+        display: block;
+        position: relative;
+    }
+
+    .role-option .role-radio {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .role-option .role-box {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        background: var(--bg-card, #fff);
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+        position: relative;
+        z-index: 1;
+    }
+
+    .role-option .role-icon {
+        font-size: 1.15rem;
+    }
+
+    .role-option .role-name {
+        font-weight: 600;
+        color: var(--text-primary, #0f172a);
+        transition: color 0.3s ease;
+    }
 
     /* Hover/focus/checked states */
-    .role-option:hover .role-box { background: #f8fbff; border-color: #e6eefc; }
-    .role-option:focus-within .role-box { box-shadow: 0 0 0 3px rgba(59,130,246,0.12); border-color: #3b82f6; }
-    .role-option .role-radio:checked + .role-box { background: #eef2ff; border-color: #c7d2fe; box-shadow: inset 0 0 0 2px rgba(59,130,246,0.06); }
+    .role-option:hover .role-box {
+        background: var(--bg-hover, #f8fbff);
+        border-color: var(--border-color, #e6eefc);
+    }
+
+    .role-option:focus-within .role-box {
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        border-color: #3b82f6;
+    }
+
+    .role-option .role-radio:checked + .role-box {
+        background: var(--bg-hover, #eef2ff);
+        border-color: #c7d2fe;
+        box-shadow: inset 0 0 0 2px rgba(59,130,246,0.06);
+    }
+
     .role-option .role-radio:checked + .role-box::after {
         content: '✓';
         position: absolute;
@@ -721,25 +1035,62 @@
         z-index: 2;
     }
 
-    /* Make the whole .role-box clickable (label handles it) */
-    /* .role-option already position: relative above */
-
-    /* For small screens stack options */
-    @media (max-width: 520px) {
-        .role-options { grid-template-columns: 1fr; }
-    }
-
-    /* end role styles */
-
-    /* Make class names clickable without visual regressions */
+    /* ============ STUDENT SECTION EXTRAS ============ */
     .class-link {
-        color: inherit;
+        color: var(--text-primary, inherit);
         text-decoration: none;
         display: inline-block;
-    }
-    .class-link:hover {
-        text-decoration: underline;
+        transition: color 0.2s ease;
     }
 
-    .id-sub { display: block; color: #94a3b8; font-weight: 500; font-size: 0.8rem; margin-top: 0.15rem; }
+    .class-link:hover {
+        text-decoration: underline;
+        color: #3b82f6;
+    }
+
+    :root.darkmode .class-link:hover {
+        color: #60a5fa;
+    }
+
+    .class-link:focus-visible {
+        outline: 2px solid var(--text-primary, #000);
+        outline-offset: 2px;
+    }
+
+    .id-sub {
+        display: block;
+        color: var(--text-muted, #94a3b8);
+        font-weight: 500;
+        font-size: 0.8rem;
+        margin-top: 0.15rem;
+        font-family: 'Courier New', monospace;
+        transition: color 0.3s ease;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 520px) {
+        .role-options {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-layout {
+            padding: 1rem 0.5rem;
+        }
+
+        .section-card {
+            border-radius: 8px;
+        }
+
+        .section-header {
+            padding: 1rem;
+        }
+
+        table {
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+        }
+    }
 </style>
