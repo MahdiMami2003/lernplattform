@@ -83,18 +83,26 @@
 <style>
   .table-responsive { width: 100%; }
   table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 1rem; background: #f8fafc; color: #64748b; font-size: 0.85rem; text-transform: uppercase; }
-  td { padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-  .pending { background-color: #fff7ed; }
+  th { text-align: left; padding: 1rem; background: var(--bg-hover); color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; }
+  td { padding: 1rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; color: var(--text-primary); }
+  .pending { background-color: var(--bg-card-alt); }
   .user-info { display: flex; flex-direction: column; }
-  .uuid { color: #94a3b8; font-family: monospace; font-size: 0.8rem; }
-  .status-ok { color: #16a34a; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 99px; }
-  .status-no { color: #dc2626; background: #fee2e2; padding: 0.2rem 0.6rem; border-radius: 99px; }
+  .user-info strong { color: var(--text-primary); }
+  .uuid { color: var(--text-muted); font-family: monospace; font-size: 0.8rem; }
+  
+  /* Status Badges - customized with variables but keeping colors distinct */
+  .status-ok { color: var(--success-color); border: 1px solid var(--success-color); padding: 0.2rem 0.6rem; border-radius: 99px; background: transparent; }
+  .status-no { color: var(--error-color); border: 1px solid var(--error-color); padding: 0.2rem 0.6rem; border-radius: 99px; background: transparent; }
+  
   .actions { display:flex; gap:0.5rem; justify-content:flex-end; align-items:center; }
-  .btn-small { border: none; padding: 0.4rem 0.8rem; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem; }
-  .btn-small.grant { background:#22c55e; color:white; }
-
-  .btn-small.revoke { background:#f59e0b; color:white; }
-  .btn-small.secondary { background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; }
-  .me-badge { color: #94a3b8; font-style: italic; font-size: 0.85rem; }
+  
+  .btn-small { border: 1px solid transparent; padding: 0.4rem 0.8rem; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem; transition: all 0.2s ease; }
+  .btn-small:hover { opacity: 0.9; transform: translateY(-1px); }
+  
+  .btn-small.grant { background: var(--success-color); color: white; }
+  .btn-small.revoke { background: var(--warning-color); color: white; }
+  
+  .btn-small.secondary { background: var(--bg-hover); color: var(--text-secondary); border: 1px solid var(--border-color); }
+  
+  .me-badge { color: var(--text-muted); font-style: italic; font-size: 0.85rem; }
 </style>
