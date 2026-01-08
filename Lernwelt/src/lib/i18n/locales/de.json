@@ -149,7 +149,15 @@
     "classroom_generic": "Klassenzimmer",
     "page_generic": "Seite",
     "detail_prefix": "Detail",
-    "access_denied": "Zugriff verweigert"
+    "access_denied": "Zugriff verweigert",
+    "admin_dashboard": "Admin-Dashboard",
+    "no_permission": "Kein Zugriff",
+    "agb": "AGB",
+    "cloze_test": "Lückentext-Test",
+    "missions": "Missionen",
+    "mission_generic": "Mission",
+    "game_management": "Spielverwaltung",
+    "mission_management": "Missionen verwalten"
   },
   "progress": {
     "loading": "Lade Daten...",
@@ -316,8 +324,15 @@
   },
   "access": {
     "title": "Barrierefreiheit",
-    "intro": "Die HSGG-Lernwelt soll für alle nutzbar sein – unabhängig von individuellen Einschränkungen. Auf dieser Seite erklären wir, welche Einstellungen zur Barrierefreiheit es gibt und wie du sie verwenden kannst.",
-
+    "intro": "Die HSGG-Lernwelt soll für alle nutzbar sein – unabhängig von individuellen Einschränkungen.",
+    "appearance": "Visuelle Einstellungen",
+    "mode_light": "Heller Modus",
+    "mode_dark": "Dunkler Modus",
+    "switch_dark": "Wechsel zum dunklen Modus",
+    "switch_light": "Wechsel zum hellen Modus",
+    "language": "Spracheinstellungen",
+    "select_language": "Sprache auswählen",
+    "back": "Zurück zur vorherigen Seite",
     "s1_title": "Darstellungs-Einstellungen",
     "s1_intro_a": "Über das Menü",
     "s1_intro_b": "\"Barrierefrei\"",

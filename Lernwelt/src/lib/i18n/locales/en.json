@@ -147,7 +147,15 @@
     "classroom_generic": "Classroom",
     "page_generic": "Page",
     "detail_prefix": "Detail",
-    "access_denied": "Access denied"
+    "access_denied": "Access denied",
+    "admin_dashboard": "Admin Dashboard",
+    "no_permission": "No permission",
+    "agb": "Terms and Conditions",
+    "cloze_test": "Cloze Test",
+    "missions": "Missions",
+    "mission_generic": "Mission",
+    "game_management": "Game Management",
+    "mission_management": "Mission Management"
   },
   "progress": {
     "loading": "Loading data...",
@@ -310,7 +318,7 @@
   },
   "access": {
     "title": "Accessibility",
-    "intro": "The HSGG learning world should be usable for everyone—regardless of individual limitations. On this page we explain which accessibility settings are available and how to use them.",
+    "intro": "The HSGG learning world should be usable for everyone—regardless of individual limitations.",
 
     "s1_title": "Display settings",
     "s1_intro_a": "Via the menu",
@@ -342,7 +350,16 @@
     "link_to_register": "Register",
     "back_to_home": "Back to Home",
     "go_to_appointments": "View appointments",
-    "go_to_materials": "View materials"
+    "go_to_materials": "View materials",
+    "subtitle": "Adjust appearance and language to your needs",
+    "appearance": "Appearance",
+    "mode_dark": "Dark mode",
+    "mode_light": "Light mode",
+    "switch_dark": "Switch to dark mode",
+    "switch_light": "Switch to light mode",
+    "language": "Language",
+    "select_language": "Select language",
+    "back": "Back"
   },
   "register": {
     "page_title": "Welcome to HSG-Lernwelt",

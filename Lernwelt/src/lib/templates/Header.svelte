@@ -504,8 +504,7 @@
 
 					<li class="nav__items" id="access">
 						<a
-							onclick={toggle_slide_left}
-							href="#"
+							href="/accessibility"
 							aria-label={$_('header.aria_accessibility_open')}
 						>
 							<img alt="Barrierefreiheit" src={access} />
@@ -556,7 +555,7 @@
 						{/if}
 					</li>
 					<li class="nav__items" id="access">
-						<a onclick={toggle_slide_left} href="#" aria-label={$_('header.aria_back_nav')}>
+						<a onclick={() => history.back()} href="#" aria-label={$_('header.aria_back_nav')}>
 							<span class="nav-text">{$_('header.nav_back')}</span>
 						</a>
 					</li>
