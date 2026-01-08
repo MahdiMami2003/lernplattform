@@ -157,7 +157,8 @@
     "missions": "Missionen",
     "mission_generic": "Mission",
     "game_management": "Spielverwaltung",
-    "mission_management": "Missionen verwalten"
+    "mission_management": "Missionen verwalten",
+    "ai_learning_adventure": "Lernabenteuer mit KI"
   },
   "progress": {
     "loading": "Lade Daten...",
@@ -570,5 +571,30 @@
       "Physik_HARD": "Physik · Schwer",
       "Physik_BOSS": "Physik · Experte"
     }
+  },
+  "ai_page": {
+    "lang": "de",
+    "title": "Lernabenteuer mit KI-Robo",
+    "subtitle": "Starte dein Abenteuer mit dem Lern‑Robo: Wähle Fach, Thema, Klasse und Schwierigkeit – der Robo stellt dir passende Missionen und Quizfragen zusammen!",
+    "labels": {
+      "subject": "Fach",
+      "topic": "Thema",
+      "grade": "Klasse",
+      "difficulty": "Schwierigkeit"
+    },
+    "difficulty": {
+      "easy": "leicht",
+      "medium": "mittel",
+      "hard": "schwer"
+    },
+    "generate": "Generieren",
+    "generating": "Robo generiert...",
+    "solution": {
+      "show": "Lösung anzeigen",
+      "hide": "Lösung verbergen"
+    },
+    "error_generic": "Ups, der Robo hat sich verheddert. Bitte noch einmal versuchen.",
+    "questions_title": "Deine Fragen",
+    "disclaimer": "Hinweis: Unsere Robo-KI kann auch mal Fehler machen. Wenn dir etwas komisch vorkommt oder nicht stimmt, sag bitte einer Lehrperson Bescheid. Gemeinsam prüfen wir die Lösung."
   }
 }

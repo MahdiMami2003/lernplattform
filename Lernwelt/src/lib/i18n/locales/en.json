@@ -155,7 +155,8 @@
     "missions": "Missions",
     "mission_generic": "Mission",
     "game_management": "Game Management",
-    "mission_management": "Mission Management"
+    "mission_management": "Mission Management",
+    "ai_learning_adventure": "AI Learning Adventure"
   },
   "progress": {
     "loading": "Loading data...",
@@ -560,5 +561,30 @@
       "Physik_HARD": "Physics · Hard",
       "Physik_BOSS": "Physics · Expert"
     }
+  },
+  "ai_page": {
+    "lang": "en",
+    "title": "Learning Adventure with AI Robo",
+    "subtitle": "Start your adventure with the Learning Robo: pick subject, topic, grade and difficulty – the Robo will create missions and quiz questions for you!",
+    "labels": {
+      "subject": "Subject",
+      "topic": "Topic",
+      "grade": "Grade",
+      "difficulty": "Difficulty"
+    },
+    "difficulty": {
+      "easy": "easy",
+      "medium": "medium",
+      "hard": "hard"
+    },
+    "generate": "Generate",
+    "generating": "Robo is generating...",
+    "solution": {
+      "show": "Show solution",
+      "hide": "Hide solution"
+    },
+    "error_generic": "Oops, Robo got tangled. Please try again.",
+    "questions_title": "Your questions",
+    "disclaimer": "Note: Our Robo-AI can sometimes make mistakes. If something seems strange or wrong, please tell a teacher. We’ll check the solution together."
   }
 }

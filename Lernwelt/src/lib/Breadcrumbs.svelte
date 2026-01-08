@@ -3,7 +3,6 @@
     import { breadService } from '$lib/breadService.svelte';
     import { afterNavigate } from '$app/navigation'; // Wichtig: Wir holen afterNavigate zurück
     import { _ } from '$lib/i18n/config';
-
     // ---------------------------------------------------------
     // 1. LOGIK FÜR NAVIGATIONS-STRUKTUR (Pfad aufbauen)
     // ---------------------------------------------------------
@@ -88,7 +87,7 @@
             '/progress_page_id11': $_('breadcrumbs.progress'),
             '/student_landing_page_id5': $_('breadcrumbs.dashboard_student'),
             '/cloze_game': $_('breadcrumbs.cloze_test'),
-
+            '/AI_page': $_('breadcrumbs.ai_learning_adventure'),
             //teacher_account
             '/weekly_test_page': $_('breadcrumbs.weekly_tests'),
             '/form_for_adding_content': $_('breadcrumbs.add_content'),

@@ -63,6 +63,13 @@
             </a>
             <div class="link_description">{$_('student.materials_desc')}</div>
         </li>
+
+        <li class="landing_list">
+            <a href="/AI_page">
+                <h3>{$_('ai_page.title')}</h3>
+            </a>
+            <div class="link_description">{$_('ai_page.subtitle')}</div>
+        </li>
     </ul>
 
 
