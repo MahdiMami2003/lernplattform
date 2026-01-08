@@ -386,6 +386,12 @@
 	{#if isMenuOpen}
 		<div class="dd-menu-container">
 			<ul>
+				<!-- Accessibility Page Link -->
+				<li>
+					<a href="/accessibility" onclick={toggleMenu}
+					><img alt="Barrierefreiheit" src={access} />{$_('breadcrumbs.accessibility')}</a
+					>
+				</li>
 				<li>
 					<a href="/material_page_id14" onclick={toggleMenu}
 						><img alt="Material" src={subject} />{$_('header.menu_materials')}</a
@@ -404,17 +410,14 @@
 				{/if}
 				{#if !data.session}
 					<li>
-						<a href="/" onclick={goToLogin}
-							><img alt="login" src={login} />{$_('header.menu_login')}</a
-						>
-					</li>
-					<li>
 						<a href="/register_page_id3" onclick={toggleMenu}
 							><img alt="Register" src={register} />{$_('header.menu_register')}</a
 						>
 					</li>
 				{/if}
+
 			</ul>
+
 		</div>
 	{/if}
 
