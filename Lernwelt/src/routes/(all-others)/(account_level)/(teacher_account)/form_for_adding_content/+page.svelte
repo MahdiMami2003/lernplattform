@@ -41,7 +41,7 @@
             console.log('🚀 Submit started...'); // DEBUG
 
             // Validierung
-            if (!title || !description || !subject || !schoolClass) {
+            if (!title || !description || !subject) {
                 message = 'Bitte fülle alle Pflichtfelder aus!';
                 uploading = false;
                 return;
@@ -145,9 +145,10 @@
             console.log('✅ Material successfully created!');
             message = '✅ Lerninhalt erfolgreich hinzugefügt!';
 
-
-            goto('/material_page_id14');
-
+            // Warte kurz und leite zur Übersicht
+            setTimeout(() => {
+                goto('/material_page_id14');
+            }, 2000);
 
         } catch (error) {
             console.error('❌ Fatal Error:', error);
