@@ -1,0 +1,22 @@
+installatinsanleitung pdf: Versionen von den jeweiligen genutzeten sachen
+supabase entwickleranleitung  also was wir gemacht haben die compakte Fassung im wiki hochladen
+supabase Anleitung ins wiki
+
+
+Video (haupsachen)
+abschlussprojekt als zip
+abschlusspräsent ation (Notiz nicht ggezeigt)
+wiki als eine pdf abgeben mit "Rotem faden"
+finalen teammitglieder stunden
+Benutzeranleitung
+
+
+!!!Roter faden!!
+
+
+mitte ende Februar api keys deaktivieren
+gemini api key nicht mit abgeben in Anleitung schreiben wo er hin soll
+
+
+
+ 
