@@ -1,6 +1,6 @@
 <!--Lernwelt/src/lib/templates/Footer.svelte-->
 <script>
-    import { locale, _ } from '$lib/i18n/config';
+    import { _ } from '$lib/i18n/config';
 </script>
 <footer>
     <div class="footer-content">
