@@ -1,6 +1,6 @@
 <!--Lernwelt/src/lib/templates/Footer.svelte-->
 <script>
-    import { locale, _ } from '$lib/i18n/config';
+    import { _ } from '$lib/i18n/config';
 </script>
 <footer>
     <div class="footer-content">
@@ -8,7 +8,7 @@
         <nav class="footer-nav">
             <a href="/impressum">{$_('imprint.title')}</a>
             <a href="/datenschutz">{$_('privacy.title')}</a>
-            <a href="/barrierefreiheit">{$_('access.title')}</a>
+            <a href="/accessibility">{$_('access.title')}</a>
         </nav>
     </div>
 </footer>

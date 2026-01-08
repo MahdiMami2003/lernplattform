@@ -133,7 +133,8 @@
 				type: 'mc',
 				question: q.question,
 				answers: [q.a1, q.a2, q.a3, q.a4],
-				correctIndex: q.correct_index,
+				// DB speichert 1..4, UI erwartet 0..3
+				correctIndex: Math.max(0, Math.min(3, ((q.correct_index ?? 1) - 1))),
 				xpReward: q.xp_reward ?? 10
 			};
 		}

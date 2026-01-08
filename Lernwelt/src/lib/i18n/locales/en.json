@@ -30,6 +30,7 @@
     "nametag_appointments": "Appointments & news",
     "nametag_missions": "Missions",
     "nametag_classes": "My classes",
+    "nametag_games": "Minigames",
     "content_creation": "Create new content",
     "minigames_desc": "Create and manage questions for the mini games.",
     "manage_questions": "Manage questions",
@@ -97,7 +98,7 @@
     "menu_register": "Registration",
     "menu_appointments": "Appointments & News",
     "nav_learning_content": "Materials",
-    "nav_tasks": "Tasks",
+    "nav_tasks": "Games",
     "nav_progress": "Progress",
     "nav_class": "Class",
     "nav_accessibility": "Accessibility",
@@ -146,7 +147,16 @@
     "classroom_generic": "Classroom",
     "page_generic": "Page",
     "detail_prefix": "Detail",
-    "access_denied": "Access denied"
+    "access_denied": "Access denied",
+    "admin_dashboard": "Admin Dashboard",
+    "no_permission": "No permission",
+    "agb": "Terms and Conditions",
+    "cloze_test": "Cloze Test",
+    "missions": "Missions",
+    "mission_generic": "Mission",
+    "game_management": "Game Management",
+    "mission_management": "Mission Management",
+    "ai_learning_adventure": "AI Learning Adventure"
   },
   "progress": {
     "loading": "Loading data...",
@@ -309,7 +319,7 @@
   },
   "access": {
     "title": "Accessibility",
-    "intro": "The HSGG learning world should be usable for everyone—regardless of individual limitations. On this page we explain which accessibility settings are available and how to use them.",
+    "intro": "The HSGG learning world should be usable for everyone—regardless of individual limitations.",
 
     "s1_title": "Display settings",
     "s1_intro_a": "Via the menu",
@@ -341,7 +351,16 @@
     "link_to_register": "Register",
     "back_to_home": "Back to Home",
     "go_to_appointments": "View appointments",
-    "go_to_materials": "View materials"
+    "go_to_materials": "View materials",
+    "subtitle": "Adjust appearance and language to your needs",
+    "appearance": "Appearance",
+    "mode_dark": "Dark mode",
+    "mode_light": "Light mode",
+    "switch_dark": "Switch to dark mode",
+    "switch_light": "Switch to light mode",
+    "language": "Language",
+    "select_language": "Select language",
+    "back": "Back"
   },
   "register": {
     "page_title": "Welcome to HSG-Lernwelt",
@@ -523,9 +542,16 @@
   "gm": {
     "subject": {
       "Mathe": "Math",
+      "Englisch": "English",
+      "Deutsch": "German",
+      "Physik": "Physics",
+      "Mathe_EASY": "Math · Easy",
+      "Mathe_MEDIUM": "Math · Medium",
+      "Mathe_HARD": "Math · Hard",
       "Englisch_EASY": "English · Easy",
       "Englisch_MEDIUM": "English · Medium",
       "Englisch_HARD": "English · Hard",
+      "Englisch_BOSS": "English · Expert",
       "Deutsch_EASY": "German · Easy",
       "Deutsch_MEDIUM": "German · Medium",
       "Deutsch_HARD": "German · Hard",
@@ -535,5 +561,30 @@
       "Physik_HARD": "Physics · Hard",
       "Physik_BOSS": "Physics · Expert"
     }
+  },
+  "ai_page": {
+    "lang": "en",
+    "title": "Learning Adventure with AI Robo",
+    "subtitle": "Start your adventure with the Learning Robo: pick subject, topic, grade and difficulty – the Robo will create missions and quiz questions for you!",
+    "labels": {
+      "subject": "Subject",
+      "topic": "Topic",
+      "grade": "Grade",
+      "difficulty": "Difficulty"
+    },
+    "difficulty": {
+      "easy": "easy",
+      "medium": "medium",
+      "hard": "hard"
+    },
+    "generate": "Generate",
+    "generating": "Robo is generating...",
+    "solution": {
+      "show": "Show solution",
+      "hide": "Hide solution"
+    },
+    "error_generic": "Oops, Robo got tangled. Please try again.",
+    "questions_title": "Your questions",
+    "disclaimer": "Note: Our Robo-AI can sometimes make mistakes. If something seems strange or wrong, please tell a teacher. We’ll check the solution together."
   }
 }

@@ -3,7 +3,6 @@
     import { breadService } from '$lib/breadService.svelte';
     import { afterNavigate } from '$app/navigation'; // Wichtig: Wir holen afterNavigate zurück
     import { _ } from '$lib/i18n/config';
-
     // ---------------------------------------------------------
     // 1. LOGIK FÜR NAVIGATIONS-STRUKTUR (Pfad aufbauen)
     // ---------------------------------------------------------
@@ -13,7 +12,7 @@
         if (!to) return;
 
         // Wir holen den Namen in der *aktuellen* Sprache
-        const label = getReadableName(to.url.pathname, $_);
+        const label = getReadableName(to.url.pathname);
 
         // Wir übergeben 'from', damit der Service weiß, ob er anhängen oder abschneiden muss
         breadService.update(label, to.url, from?.url);
@@ -26,7 +25,6 @@
     // Er repariert die Labels aller vorhandenen Breadcrumbs.
     $effect(() => {
         // Wir abonnieren die Sprachänderung
-        const translate = $_;
 
         // Wir gehen durch ALLE existierenden Crumbs und übersetzen sie neu.
         // Wir ändern NICHT die Struktur (Länge des Arrays), nur die Labels.
@@ -36,14 +34,14 @@
             const pathForName = crumb.path || new URL(crumb.href).pathname;
 
             // Label aktualisieren
-            breadService.crumbs[index].label = getReadableName(pathForName, translate);
+            breadService.crumbs[index].label = getReadableName(pathForName);
         });
     });
 
     // ---------------------------------------------------------
     // 3. NAMENS-FINDUNG (Bleibt fast gleich)
     // ---------------------------------------------------------
-    function getReadableName(path: string, $t: any): string {
+    function getReadableName(path: string): string {
         let cleanPath = path.split('?')[0];
         if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
             cleanPath = cleanPath.slice(0, -1);
@@ -51,59 +49,70 @@
 
         // Map wird bei Aufruf frisch generiert
         const routeMap: Record<string, string> = {
-            '/': $t('breadcrumbs.home'),
-            '/login_page_id2': $t('breadcrumbs.login'),
-            '/register_page_id3': $t('breadcrumbs.register'),
-            '/imprint_page_id15': $t('breadcrumbs.imprint'),
-            '/datenschutz': $t('breadcrumbs.privacy'),
-            '/barrierefreiheit': $t('breadcrumbs.accessibility'),
-            '/impressum': $t('breadcrumbs.imprint'),
+            '/': $_('breadcrumbs.home'),
+            '/login_page_id2': $_('breadcrumbs.login'),
+            '/register_page_id3': $_('breadcrumbs.register'),
+            '/imprint_page_id15': $_('breadcrumbs.imprint'),
+            '/datenschutz': $_('breadcrumbs.privacy'),
+            '/accessibility': $_('breadcrumbs.accessibility'),
+            '/impressum': $_('breadcrumbs.imprint'),
+            '/agb': $_('breadcrumbs.agb'),
+
+
 
             // no_login_required
-            '/material_page_id14': $t('breadcrumbs.learning_materials'),
-            '/no_login_page_id7': $t('breadcrumbs.guest_access'),
+            '/material_page_id14': $_('breadcrumbs.learning_materials'),
+            '/no_login_page_id7': $_('breadcrumbs.guest_access'),
+            '/no_permission_page_id18': $_('breadcrumbs.access_denied'),
+
+            //admin_account
+            '/admin_dashboard_page_id13': $_('breadcrumbs.admin_dashboard'),
+
 
             //parent_account
-            '/pedagogic_content': $t('breadcrumbs.tip_single'),
-            '/pedagogic_form': $t('breadcrumbs.tip_create'),
-            '/pedagogy_page_id10': $t('breadcrumbs.tips_pedagogic'),
-            '/appointments_page_id8': $t('breadcrumbs.appointments'),
-            '/create_appointments_page': $t('breadcrumbs.appointments_create'),
-            '/parents_landing_page_id4': $t('breadcrumbs.dashboard_parents'),
+            '/pedagogic_content': $_('breadcrumbs.tip_single'),
+            '/pedagogic_form': $_('breadcrumbs.tip_create'),
+            '/pedagogy_page_id10': $_('breadcrumbs.tips_pedagogic'),
+            '/appointments_page_id8': $_('breadcrumbs.appointments'),
+            '/create_appointments_page': $_('breadcrumbs.appointments_create'),
+            '/parents_landing_page_id4': $_('breadcrumbs.dashboard_parents'),
 
             //student_account
-            '/game_page_id12': $t('breadcrumbs.games'),
-            '/deutsch_game' : $t('breadcrumbs.game_german'),
-            '/mathe_game' : $t('breadcrumbs.game_math'),
-            '/englisch_game' : $t('breadcrumbs.game_english'),
-            '/physik_game' : $t('breadcrumbs.game_physics'),
-            '/weekly_test_page_id17' : $t('breadcrumbs.weekly_tests'),
-            '/progress_page_id11': $t('breadcrumbs.progress'),
-            '/student_landing_page_id5': $t('breadcrumbs.dashboard_student'),
-
+            '/game_page_id12': $_('breadcrumbs.games'),
+            '/deutsch_game' : $_('breadcrumbs.game_german'),
+            '/mathe_game' : $_('breadcrumbs.game_math'),
+            '/englisch_game' : $_('breadcrumbs.game_english'),
+            '/physik_game' : $_('breadcrumbs.game_physics'),
+            '/weekly_test_page_id17' : $_('breadcrumbs.weekly_tests'),
+            '/progress_page_id11': $_('breadcrumbs.progress'),
+            '/student_landing_page_id5': $_('breadcrumbs.dashboard_student'),
+            '/cloze_game': $_('breadcrumbs.cloze_test'),
+            '/AI_page': $_('breadcrumbs.ai_learning_adventure'),
             //teacher_account
-            '/weekly_test_page': $t('breadcrumbs.weekly_tests'),
-            '/form_for_adding_content': $t('breadcrumbs.add_content'),
-            '/form_for_adding_weekly_test': $t('breadcrumbs.create_weekly_test'),
-            '/game_management': $t('breadcrumbs.manage_games'),
-            '/teacher_landing_page_id6': $t('breadcrumbs.dashboard_teacher'),
-            '/no_permission_page_id18': $t('breadcrumbs.access_denied'),
+            '/weekly_test_page': $_('breadcrumbs.weekly_tests'),
+            '/form_for_adding_content': $_('breadcrumbs.add_content'),
+            '/form_for_adding_weekly_test': $_('breadcrumbs.create_weekly_test'),
+            '/game_management': $_('breadcrumbs.game_management'),
+            '/mission_management': $_('breadcrumbs.mission_management'),
+            '/teacher_landing_page_id6': $_('breadcrumbs.dashboard_teacher'),
+            '/class_page_id9': $_('breadcrumbs.classroom_generic'),
+            '/class_progress': $_('breadcrumbs.progress'),
         };
 
         if (routeMap[cleanPath]) return routeMap[cleanPath];
 
-        if (path.includes('materials_content_page_16')) return $t('breadcrumbs.material_generic');
-        if (path.includes('weekly_test_content_page')) return $t('breadcrumbs.weekly_test_generic');
-        if (path.includes('class_page_id9')) return $t('breadcrumbs.classroom_generic');
+        if (path.includes('materials_content_page_16')) return $_('breadcrumbs.material_generic');
+        if (path.includes('weekly_test_content_page')) return $_('breadcrumbs.weekly_test_generic');
+        if (path.includes('class_page_id9')) return $_('breadcrumbs.classroom_generic');
 
         const segments = path.split('/').filter(Boolean);
         const lastSegment = segments.pop();
 
-        if (!lastSegment) return $t('breadcrumbs.page_generic');
+        if (!lastSegment) return $_('breadcrumbs.page_generic');
 
         if (!isNaN(Number(lastSegment)) && segments.length > 0) {
             const parentSegment = segments.pop();
-            return `${$t('breadcrumbs.detail_prefix')} (${cleanName(parentSegment || '')})`;
+            return `${$_('breadcrumbs.detail_prefix')} (${cleanName(parentSegment || '')})`;
         }
 
         return cleanName(lastSegment);

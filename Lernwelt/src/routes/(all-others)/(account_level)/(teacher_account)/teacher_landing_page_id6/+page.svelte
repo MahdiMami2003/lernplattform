@@ -116,6 +116,9 @@
 				<p>
 					<a href="/mission_management"><button class="small-btn">🎯 {$_('teacher.nametag_missions')}</button></a>
 				</p>
+				<p>
+					<a href="/game_management"><button class="small-btn">🎮 {$_('teacher.nametag_games')}</button></a>
+				</p>
             </div>
         </div>
     </div>
@@ -128,7 +131,7 @@
 				<form action={edit_content}>
 					<!--<label for="content">Ich möchte eine:n </label>-->
 					<select id="content" bind:value={edit_content}>
-						<option value="/game_management"> {$_('create.type.quiz')} </option>
+						<option value="/game_management?showModal=true"> {$_('create.type.quiz')} </option>
 						<option value="/form_for_adding_content"> {$_('create.type.material')} </option>
 						<option value="/form_for_adding_weekly_test"> {$_('create.type.weekly_test')} </option>
 						<option value="/create_appointments_page"> {$_('create.type.appointment')} </option>

@@ -1,28 +1,45 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { fade, scale } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
-	import { _ } from '$lib/i18n/config';
+    import { onMount } from 'svelte';
+    import { fade, scale } from 'svelte/transition';
+    import { quintOut } from 'svelte/easing';
+    import { _ } from '$lib/i18n/config';
 
-	let { data } = $props();
-	let { supabase } = data;
+    let { data } = $props();
+    let { supabase } = data;
+
+    // Types
+    type Question = {
+        id: number;
+        subject: string;
+        category: string | null;
+        question: string;
+        a1: string | null;
+        a2: string | null;
+        a3: string | null;
+        a4: string | null;
+        correct_index: number;
+        xp_reward: number;
+        answers?: string[];
+        displaySubject?: string;
+        type?: string;
+    };
 
     // --- STATE ---
     // Filters & Data
-    let subjectFilter = $state('Alle');
-    let questions = $state([]);
-    let loading = $state(true);
-    let errorMessage = $state('');
-    let successMessage = $state('');
+    let subjectFilter: string = $state('Alle');
+    let questions: Question[] = $state([] as Question[]);
+    let loading: boolean = $state(true);
+    let errorMessage: string = $state('');
+    let successMessage: string = $state('');
 
     // Modal State
-    let showModal = $state(false);
-    let isEditing = $state(false);
-    let saving = $state(false);
+    let showModal: boolean = $state(false);
+    let isEditing: boolean = $state(false);
+    let saving: boolean = $state(false);
 
     // Form Data (Draft)
-    let draft = $state({
-        id: null,
+    let draft: Question = $state({
+        id: null as unknown as number,
         subject: 'Mathe',
         category: '',
         type: 'mc',
@@ -33,27 +50,27 @@
         a4: '',
         correct_index: 0,
         xp_reward: 10
-    });
+    } as unknown as Question);
 
     // Kategorie Logik
-    let availableCategories = $state([]);
+    let availableCategories: string[] = $state([] as string[]);
     let isNewCategoryMode = $state(false);
     let newCategoryInput = $state('');
 
     // Valid Subjects
     const SUBJECTS = [
-        $_('gm.subject.Mathe'),
-        $_('gm.subject.Englisch_EASY'),
-        $_('gm.subject.Englisch_MEDIUM'),
-        $_('gm.subject.Englisch_HARD'),
-        $_('gm.subject.Deutsch_EASY'),
-        $_('gm.subject.Deutsch_MEDIUM'),
-        $_('gm.subject.Deutsch_HARD'),
-        $_('gm.subject.Deutsch_BOSS'),
-        $_('gm.subject.Physik_EASY'),
-        $_('gm.subject.Physik_MEDIUM'),
-        $_('gm.subject.Physik_HARD'),
-        $_('gm.subject.Physik_BOSS')
+        'Mathe',
+        'Englisch_EASY',
+        'Englisch_MEDIUM',
+        'Englisch_HARD',
+        'Deutsch_EASY',
+        'Deutsch_MEDIUM',
+        'Deutsch_HARD',
+        'Deutsch_BOSS',
+        'Physik_EASY',
+        'Physik_MEDIUM',
+        'Physik_HARD',
+        'Physik_BOSS'
     ];
 
     // --- LIFECYCLE ---
@@ -78,19 +95,40 @@
             }
 
             const { data, error } = await query;
-            if (error) throw error;
+            if (error) {
+                throw error;
+            }
 
-            questions = data || [];
-        } catch (err) {
+            // Anzeige: subject über i18n-Workaround mappen
+            const mapDisplaySubject = (s: string): string => {
+                if (!s) return s;
+                if(s.includes('English')) {
+                    s = s.replace('English', 'Englisch');
+                }
+
+                const key = `gm.subject.${s}`;
+                try {
+                    const label = $_(key);
+                    return (label as string) || s;
+                } catch (e) {
+                    return s;
+                }
+            };
+
+            questions = ((data || []) as Question[]).map((q: Question) => ({
+                ...q,
+                displaySubject: mapDisplaySubject(q.subject)
+            }));
+        } catch (err: any) {
             console.error(err);
-            errorMessage = 'Fehler beim Laden der Fragen: ' + err.message;
+            errorMessage = 'Fehler beim Laden der Fragen: ' + (err?.message || String(err));
         } finally {
             loading = false;
         }
     }
 
     // --- CATEGORY LOGIC ---
-    async function fetchCategoriesForSubject(subject) {
+    async function fetchCategoriesForSubject(subject: string) {
         if (!subject) return;
         const searchTerm = subject.split('_')[0];
 
@@ -101,7 +139,7 @@
             .not('category', 'is', null);
 
         if (!error && data) {
-            availableCategories = [...new Set(data.map((d) => d.category))].sort();
+            availableCategories = [...new Set((data as any[]).map((d: any) => d.category as string))].sort();
         } else {
             availableCategories = [];
         }
@@ -115,8 +153,9 @@
         }
     }
 
-    function handleCategorySelect(event) {
-        const val = event.target.value;
+    function handleCategorySelect(event: Event) {
+        const target = event.target as HTMLSelectElement;
+        const val = target.value;
         if (val === '___NEW___') {
             isNewCategoryMode = true;
             newCategoryInput = '';
@@ -135,9 +174,10 @@
         newCategoryInput = '';
 
         draft = {
-            id: null,
+            id: 0,
             subject: 'Mathe',
             category: '',
+            type: 'mc',
             question: '',
             a1: '',
             a2: '',
@@ -145,19 +185,19 @@
             a4: '',
             correct_index: 0,
             xp_reward: 10
-        };
+        } as unknown as Question;
 
         await fetchCategoriesForSubject(draft.subject);
         showModal = true;
         successMessage = '';
     }
 
-    async function openEditModal(q) {
+    async function openEditModal(q: Question) {
         isEditing = true;
         isNewCategoryMode = false;
         newCategoryInput = '';
 
-        draft = { ...q };
+        draft = { ...q } as Question;
 
         await fetchCategoriesForSubject(draft.subject);
 
@@ -165,6 +205,11 @@
         draft.type = q.type || (isCloze ? 'cloze' : 'mc');
 
         if (!draft.category) draft.category = '';
+
+        // Rückübersetzung: DB correct_index (1..4) -> UI correct_index (0..3)
+        if (draft.type === 'mc') {
+             draft.correct_index = Math.max(0, Math.min(3, q.correct_index - 1));
+        }
 
         showModal = true;
         successMessage = '';
@@ -214,31 +259,36 @@
                 a2: draft.type === 'mc' ? draft.a2 : null,
                 a3: draft.type === 'mc' ? draft.a3 : null,
                 a4: draft.type === 'mc' ? draft.a4 : null,
-                correct_index: draft.type === 'mc' ? draft.correct_index : 0
+                // Rückkonvertierung: UI (0..3) -> DB (1..4)
+                correct_index: draft.type === 'mc' ? (Math.min(3, Math.max(0, draft.correct_index)) + 1) : 0
             };
 
             if (isEditing) {
                 const { error } = await supabase.from('questions').update(payload).eq('id', draft.id);
-                if (error) throw error;
+                if (error) {
+                    throw new Error(error.message);
+                }
                 successMessage = 'Frage erfolgreich aktualisiert!';
             } else {
                 const { error } = await supabase.from('questions').insert(payload);
-                if (error) throw error;
+                if (error) {
+                    throw new Error(error.message);
+                }
                 successMessage = 'Neue Frage hinzugefügt!';
             }
 
             closeModal();
             await loadQuestions();
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            errorMessage = 'Fehler beim Speichern: ' + err.message;
+            errorMessage = 'Fehler beim Speichern: ' + (err?.message || String(err));
         } finally {
             saving = false;
             setTimeout(() => { successMessage = ''; }, 3000);
         }
     }
 
-    async function deleteQuestion(id) {
+    async function deleteQuestion(id: number) {
         if (!confirm('Bist du sicher, dass du diese Frage löschen willst?')) return;
 
         try {
@@ -248,18 +298,29 @@
                 console.error('Delete Error:', error);
                 alert('Fehler beim Löschen: ' + error.message);
             } else {
-                questions = questions.filter((q) => q.id !== id);
+                questions = questions.filter((q: Question) => q.id !== id);
                 successMessage = 'Frage erfolgreich gelöscht.';
                 setTimeout(() => { successMessage = ''; }, 3000);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Unexpected Error:', err);
-            alert('Unerwarteter Fehler: ' + err.message);
+            alert('Unerwarteter Fehler: ' + (err?.message || String(err)));
         }
     }
 
     function onFilterChange() {
         loadQuestions();
+    }
+
+    // Helpers für Antwortfelder (MC): Lesen/Schreiben ohne TS-Casts im Template
+    function getAnswerValue(idx: number): string {
+        const key = `a${idx + 1}` as keyof Question;
+        const val = (draft as any)[key];
+        return (val as string) || '';
+    }
+    function setAnswerValue(idx: number, value: string) {
+        const key = `a${idx + 1}` as keyof Question;
+        (draft as any)[key] = value;
     }
 </script>
 
@@ -301,9 +362,18 @@
                         <option value="Deutsch">Deutsch (Alle)</option>
                         <option value="Physik">Physik (Alle)</option>
                         <option disabled>──────────</option>
-                        {#each SUBJECTS as sub}
-                            <option value={sub}>{sub}</option>
-                        {/each}
+                        <option value="Mathe">{$_('gm.subject.Mathe')}</option>
+                        <option value="Englisch_EASY">{$_('gm.subject.Englisch_EASY')}</option>
+                        <option value="Englisch_MEDIUM">{$_('gm.subject.Englisch_MEDIUM')}</option>
+                        <option value="Englisch_HARD">{$_('gm.subject.Englisch_HARD')}</option>
+                        <option value="Deutsch_EASY">{$_('gm.subject.Deutsch_EASY')}</option>
+                        <option value="Deutsch_MEDIUM">{$_('gm.subject.Deutsch_MEDIUM')}</option>
+                        <option value="Deutsch_HARD">{$_('gm.subject.Deutsch_HARD')}</option>
+                        <option value="Deutsch_BOSS">{$_('gm.subject.Deutsch_BOSS')}</option>
+                        <option value="Physik_EASY">{$_('gm.subject.Physik_EASY')}</option>
+                        <option value="Physik_MEDIUM">{$_('gm.subject.Physik_MEDIUM')}</option>
+                        <option value="Physik_HARD">{$_('gm.subject.Physik_HARD')}</option>
+                        <option value="Physik_BOSS">{$_('gm.subject.Physik_BOSS')}</option>
                     </select>
                 </div>
             </div>
@@ -335,7 +405,7 @@
                     {#each questions as q (q.id)}
                         <tr>
                             <td><small style="color: #94a3b8;">#{q.id}</small></td>
-                            <td><span class="badge">{q.subject}</span></td>
+                            <td><span class="badge">{q.displaySubject || q.subject}</span></td>
                             <td>
                                 {#if q.category}
                                     <span class="cat-badge">{q.category}</span>
@@ -376,17 +446,26 @@
                 <div class="form-body">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Fach</label>
-                            <select bind:value={draft.subject} onchange={handleSubjectChange}>
-                                {#each SUBJECTS as sub}
-                                    <option value={sub}>{sub}</option>
-                                {/each}
+                            <label for="subjectSelect">Fach</label>
+                            <select id="subjectSelect" bind:value={draft.subject} onchange={handleSubjectChange}>
+                                <option value="Mathe">{$_('gm.subject.Mathe')}</option>
+                                <option value="Englisch_EASY">{$_('gm.subject.Englisch_EASY')}</option>
+                                <option value="Englisch_MEDIUM">{$_('gm.subject.Englisch_MEDIUM')}</option>
+                                <option value="Englisch_HARD">{$_('gm.subject.Englisch_HARD')}</option>
+                                <option value="Deutsch_EASY">{$_('gm.subject.Deutsch_EASY')}</option>
+                                <option value="Deutsch_MEDIUM">{$_('gm.subject.Deutsch_MEDIUM')}</option>
+                                <option value="Deutsch_HARD">{$_('gm.subject.Deutsch_HARD')}</option>
+                                <option value="Deutsch_BOSS">{$_('gm.subject.Deutsch_BOSS')}</option>
+                                <option value="Physik_EASY">{$_('gm.subject.Physik_EASY')}</option>
+                                <option value="Physik_MEDIUM">{$_('gm.subject.Physik_MEDIUM')}</option>
+                                <option value="Physik_HARD">{$_('gm.subject.Physik_HARD')}</option>
+                                <option value="Physik_BOSS">{$_('gm.subject.Physik_BOSS')}</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Kategorie</label>
+                            <label for="categorySelect">Kategorie</label>
                             {#if !isNewCategoryMode}
-                                <select value={draft.category || ''} onchange={handleCategorySelect}>
+                                <select id="categorySelect" bind:value={draft.category} onchange={handleCategorySelect}>
                                     <option value="">-- Keine / Wählen --</option>
                                     {#each availableCategories as cat}
                                         <option value={cat}>{cat}</option>
@@ -396,38 +475,41 @@
                                 </select>
                             {:else}
                                 <div class="input-group">
-                                    <input type="text" bind:value={newCategoryInput} placeholder="Neue Kategorie" autofocus />
+                                    <input type="text" bind:value={newCategoryInput} placeholder="Neue Kategorie" />
                                     <button class="btn-small" onclick={() => (isNewCategoryMode = false)}>✕</button>
                                 </div>
                             {/if}
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Fragetyp</label>
-                        <select bind:value={draft.type}>
+                        <label for="typeSelect">Fragetyp</label>
+                        <select id="typeSelect" bind:value={draft.type}>
                             <option value="mc">Multiple Choice</option>
                             <option value="cloze">Lückentext</option>
                         </select>
                     </div>
                     <div class="form-group" style="max-width: 150px;">
-                        <label>XP Belohnung</label>
-                        <input type="number" bind:value={draft.xp_reward} min="1" max="100" />
+                        <label for="xpInput">XP Belohnung</label>
+                        <input id="xpInput" type="number" bind:value={draft.xp_reward} min="1" max="100" />
                     </div>
                     <div class="form-group">
-                        <label>Fragestellung</label>
-                        <textarea rows="3" bind:value={draft.question}></textarea>
+                        <label for="questionTextarea">Fragestellung</label>
+                        <textarea id="questionTextarea" rows="3" bind:value={draft.question}></textarea>
                     </div>
                     {#if draft.type === 'mc'}
                         <div class="form-group">
-                            <label>Antwortmöglichkeiten (Markiere die Richtige)</label>
-                            <div class="answers-grid">
+                            <label for="answersGrid">Antwortmöglichkeiten (Markiere die Richtige)</label>
+                            <div id="answersGrid" class="answers-grid">
                                 {#each [0, 1, 2, 3] as idx}
                                     <div class="answer-row">
                                         <label class="radio-label">
                                             <input type="radio" name="correct" checked={draft.correct_index === idx} onchange={() => (draft.correct_index = idx)} />
                                             <span>{idx + 1}.</span>
                                         </label>
-                                        <input type="text" bind:value={draft[`a${idx + 1}`]} />
+                                        <input type="text"
+                                            value={getAnswerValue(idx)}
+                                            oninput={(e) => setAnswerValue(idx, (e.target as any).value)}
+                                        />
                                     </div>
                                 {/each}
                             </div>
@@ -469,6 +551,7 @@
         font-size: 2.5rem;
         font-weight: 800;
         background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        background-clip: text; /* Standard-Eigenschaft für Kompatibilität */
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
@@ -698,7 +781,8 @@
         backdrop-filter: blur(4px);
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start; /* zuvor center: mehr Abstand nach oben */
+        padding-top: 4.5rem; /* zusätzlicher Abstand zum Seitenkopf */
         z-index: 50;
     }
     .modal {
