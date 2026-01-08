@@ -95,7 +95,9 @@
             }
 
             const { data, error } = await query;
-            if (error) throw error;
+            if (error) {
+                throw error;
+            }
 
             // Anzeige: subject über i18n-Workaround mappen
             const mapDisplaySubject = (s: string): string => {
@@ -204,6 +206,11 @@
 
         if (!draft.category) draft.category = '';
 
+        // Rückübersetzung: DB correct_index (1..4) -> UI correct_index (0..3)
+        if (draft.type === 'mc') {
+             draft.correct_index = Math.max(0, Math.min(3, q.correct_index - 1));
+        }
+
         showModal = true;
         successMessage = '';
     }
@@ -252,16 +259,21 @@
                 a2: draft.type === 'mc' ? draft.a2 : null,
                 a3: draft.type === 'mc' ? draft.a3 : null,
                 a4: draft.type === 'mc' ? draft.a4 : null,
-                correct_index: draft.type === 'mc' ? (draft.correct_index + 1) : 0
+                // Rückkonvertierung: UI (0..3) -> DB (1..4)
+                correct_index: draft.type === 'mc' ? (Math.min(3, Math.max(0, draft.correct_index)) + 1) : 0
             };
 
             if (isEditing) {
                 const { error } = await supabase.from('questions').update(payload).eq('id', draft.id);
-                if (error) throw error;
+                if (error) {
+                    throw new Error(error.message);
+                }
                 successMessage = 'Frage erfolgreich aktualisiert!';
             } else {
                 const { error } = await supabase.from('questions').insert(payload);
-                if (error) throw error;
+                if (error) {
+                    throw new Error(error.message);
+                }
                 successMessage = 'Neue Frage hinzugefügt!';
             }
 
